@@ -10,7 +10,7 @@ author: "Marcus W. Beck, beck.marcus@epa.gov"
 
 **_data/_** Supporting RData files, usually from data in ignore folder 
 
-* `dwr_wq.RData` time series data of stations in the SF delta from DWR-IEP, processed by E. Novick, all stations, analytes from 1975 to present
+* `dwr_wq.RData` time series data of stations in the SF delta from California DWR-EMP (Department of Water Resources, Environmental Monitoring Program) , processed by E. Novick, all stations, analytes from 1975 to present
 
 **_R/_** Supporting R scripts
 
