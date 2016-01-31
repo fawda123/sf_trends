@@ -1,9 +1,12 @@
+######
+# data processing for discrete delta stations
+
 library(dplyr)
 library(tidyr)
 library(readxl)
 library(ggplot2)
 
-load(file = 'data/dwr_wq.RData')
+load(file = 'ignore/dwr_wq.RData')
 
 statmeta <- read_excel('ignore/Discrete_Stations.xls')
 curr <- filter(statmeta, Historic_or_Current == 'Current') %>% 
@@ -14,7 +17,7 @@ hist <- filter(statmeta, Historic_or_Current == 'Historic') %>%
   unique
 
 ### Combine C10 with C10A, C3 with C3A, P12 with P12A, P10 with P10A, MD10 with MD10A, MD7 with MD7A
-# the following three have to be added manually to curr because they combined in original processing script
+# the following three have to be added manually to curr because they were combined in original processing script from Novick
 curr <- c('C10', 'C3', 'MD10')  
 
 # add lat/long from meta
@@ -29,8 +32,26 @@ dat <- select(statmeta, Site_Code, Latitude, Longitude) %>%
   filter(!Site_Code %in% c('EZ2', 'EZ6', 'NZ002', 'NZ004', 'NZ032', 'NZ325', 'NZS42')) %>% 
   select(Site_Code, Date, Latitude, Longitude, nh, no23, din, tn, sal)
 
-toplo <- gather(dat, 'var', 'val', -Site_Code, -Date, -Latitude, -Longitude)
-  
-ggplot(toplo, aes(x = Date, y = val)) +
-  geom_line() +
-  facet_grid(var~Site_Code, scales = 'free_y')
+delt_dat <- dat
+save(delt_dat, file = 'data/delt_dat.RData')
+
+######
+# flow records
+
+# inputs and outputs for different locations, cubic feet per second
+flow_dat <- read.csv('ignore/DAYFLOW_1975_2015.csv') %>% 
+  select(DATE, SAC, YOLO, CSMR, MOKE, MISC, SJR, EAST, TOT, XGEO, WEST, PREC, SJR) %>% 
+  mutate(
+    DATE = as.character(DATE), 
+    DATE = as.Date(DATE, format = '%m/%d/%y')
+  ) %>% 
+  gather('var', 'val', -DATE) %>% 
+  mutate(
+    val = val * 0.028316847,
+    var = tolower(var)
+    )
+
+save(flow_dat, file = 'data/flow_dat.RData')
+
+
+
