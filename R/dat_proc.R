@@ -6,6 +6,9 @@ library(tidyr)
 library(readxl)
 library(ggplot2)
 
+######
+# wq data
+
 load(file = 'ignore/dwr_wq.RData')
 
 statmeta <- read_excel('ignore/Discrete_Stations.xls')
@@ -16,9 +19,9 @@ hist <- filter(statmeta, Historic_or_Current == 'Historic') %>%
   .$Site_Code %>% 
   unique
 
-### Combine C10 with C10A, C3 with C3A, P12 with P12A, P10 with P10A, MD10 with MD10A, MD7 with MD7A
+## Combine C10 with C10A, C3 with C3A, P12 with P12A, P10 with P10A, MD10 with MD10A, MD7 with MD7A
 # the following three have to be added manually to curr because they were combined in original processing script from Novick
-curr <- c('C10', 'C3', 'MD10')  
+curr <- c(curr, 'C10', 'C3', 'MD10')  
 
 # add lat/long from meta
 # only get current stations
@@ -39,6 +42,7 @@ save(delt_dat, file = 'data/delt_dat.RData')
 # flow records
 
 # inputs and outputs for different locations, cubic feet per second
+# input stations retained, converted to m3/s
 flow_dat <- read.csv('ignore/DAYFLOW_1975_2015.csv') %>% 
   select(DATE, SAC, YOLO, CSMR, MOKE, MISC, SJR, EAST, TOT, XGEO, WEST, PREC, SJR) %>% 
   mutate(
@@ -49,7 +53,8 @@ flow_dat <- read.csv('ignore/DAYFLOW_1975_2015.csv') %>%
   mutate(
     val = val * 0.028316847,
     var = tolower(var)
-    )
+    ) %>% 
+  rename(Date = DATE)
 
 save(flow_dat, file = 'data/flow_dat.RData')
 

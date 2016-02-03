@@ -70,9 +70,17 @@ img {
 <h3>Files</h3>
 <p><strong><em>data/</em></strong> Supporting RData files, usually from data in ignore folder</p>
 <ul>
-<li><code>dwr_wq.RData</code> time series data of stations in the SF delta from DWR-IEP, processed by E. Novick, all stations, analytes from 1975 to present</li>
+<li><p><code>dwr_wq.RData</code> time series data of stations in the SF delta from California DWR-EMP (Department of Water Resources, Environmental Monitoring Program) , processed by E. Novick, all stations, analytes from 1975 to present. Most analytes are measured as concentration, see original spreadsheet for values.</p></li>
+<li><p><code>flow_dat.RData</code> time series of daily flow estimates for the delta</p></li>
 </ul>
 <p><strong><em>R/</em></strong> Supporting R scripts</p>
+</div>
+<div id="to-do" class="section level3">
+<h3>To do</h3>
+<ul>
+<li>Check different moving window averages on flow, which fit best to data</li>
+<li>Check which flow stations (or salinity) are best correlated to response vars</li>
+</ul>
 </div>
 
 

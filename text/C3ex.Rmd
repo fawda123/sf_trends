@@ -1,0 +1,151 @@
+---
+title: "Example results for C3 station"
+author: "Marcus Beck"
+date: "February 1, 2016"
+output: pdf_document
+---
+
+```{r echo = F, message = F, results = 'hide'}
+library(ggplot2)
+library(dplyr)
+library(WRTDStidal)
+library(tidyr)
+library(lubridate)
+
+load(file = 'M:/docs/sf_trends/data/delt_dat.RData')
+load(file = 'M:/docs/sf_trends/data/flow_dat.RData')
+load(file = 'M:/docs/sf_trends/data/res.RData')
+```
+
+```{r eval = F, echo = F}
+# left five-day moving window average for flow
+flow_dat <- group_by(flow_dat, var) %>% 
+  mutate(val = stats::filter(val, sides = 1, filter = rep(1, 5)/5, method = 'convolution')) %>% 
+  spread(var, val)
+
+# combine flow w/ wq dat
+# select C3 station, sac river flow, and TN
+# use only complete years (1976 - 2014)
+dat <- left_join(delt_dat, flow_dat, by = 'Date') %>% 
+  filter(Site_Code %in% 'C3') %>% 
+  select(Date, tn, sac) %>% 
+  mutate(
+    sac = log(sac),
+    tn = log(tn),
+    lim = -Inf
+    ) %>% 
+  rename(
+    date = Date, 
+    res = tn, 
+    flo = sac
+  ) %>% 
+  filter(year(date) < 2014 & year(date) > 1975) %>% 
+  as.data.frame %>% 
+  na.omit
+
+plot(res ~ date, data = dat)
+
+# fit wrtds model
+res <- modfit(dat, 
+  tau = c(0.1, 0.5, 0.9), 
+  wins = list(0.4700152, 9.137279, 0.1),
+  reslab = expression(paste('ln - Total Nitrogen (mg ', L^-1, ')')), 
+  flolab = expression(paste('Sac. R. Flow (standardized)')), 
+  minobs = 200
+)
+save(res, file = 'data/res.RData')
+```
+
+```{r echo = F, fig.width = 9, fig.height = 5}
+obsplot(res)
+fitplot(res)
+sliceplot(res)
+prdnrmplot(res)
+```
+\clearpage
+```{r, fig.width = 10, fig.height = 6, echo = F}
+fitmoplot(res, predicted = F)
+dynaplot(res)
+```
+
+Results from winsrch_optim 
+```{r eval = F}
+
+library(ggplot2)
+library(dplyr)
+library(WRTDStidal)
+library(tidyr)
+library(lubridate)
+
+load(file = 'data/delt_dat.RData')
+load(file = 'data/flow_dat.RData')
+
+# left five-day moving window average for flow
+flow_dat <- group_by(flow_dat, var) %>% 
+  mutate(val = stats::filter(val, sides = 1, filter = rep(1, 5)/5, method = 'convolution')) %>% 
+  spread(var, val)
+
+# combine flow w/ wq dat
+# select C3 station, sac river flow, and TN
+# use only complete years (1976 - 2014)
+dat <- left_join(delt_dat, flow_dat, by = 'Date') %>% 
+  filter(Site_Code %in% 'C3') %>% 
+  select(Date, tn, sac) %>% 
+  mutate(
+    sac = log(sac),
+    tn = log(tn),
+    lim = -Inf
+    ) %>% 
+  rename(
+    date = Date, 
+    res = tn, 
+    flo = sac
+  ) %>% 
+  filter(year(date) < 2014 & year(date) > 1975) %>% 
+  as.data.frame %>% 
+  na.omit
+
+plot(res ~ date, data = dat)
+
+# fit wrtds model
+res <- modfit(dat, 
+  tau = c(0.1, 0.5, 0.9), 
+  reslab = expression(paste('ln - Total Nitrogen (mg ', L^-1, ')')), 
+  flolab = expression(paste('Sac. R. Flow (', m^3, s^-1, ')')), 
+  min_obs = 150
+)
+
+
+
+
+library(doParallel)  
+ncores <- detectCores() - 1
+registerDoParallel(cores = ncores)
+
+# run search function - takes a while
+datin <- tidal(dat,   
+  reslab = expression(paste('ln - Total Nitrogen (mg ', L^-1, ')')), 
+  flolab = expression(paste('Sac. R. Flow')) 
+  )
+
+res <- winsrch_optim(datin)
+
+
+Trying 0.4700152 9.137279 0.1 
+
+ Fold  1 0.0955 
+ Fold  2 0.0565 
+ Fold  3 0.0599 
+ Fold  4 0.0740 
+ Fold  5 0.0818 
+ Fold  6 0.0588 
+ Fold  7 0.0782 
+ Fold  8 0.0504 
+ Fold  9 0.0715 
+ Fold  10 0.0806 
+
+Overall error 0.07072478 
+Time difference of 2.479217 mins
+
+```
+
