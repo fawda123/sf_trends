@@ -35,6 +35,9 @@ dat <- select(statmeta, Site_Code, Latitude, Longitude) %>%
   filter(!Site_Code %in% c('EZ2', 'EZ6', 'NZ002', 'NZ004', 'NZ032', 'NZ325', 'NZS42')) %>% 
   select(Site_Code, Date, Latitude, Longitude, nh, no23, din, tn, sal)
 
+# finally, subset dat for active stations in Novick et al. report
+dat <- filter(dat, Site_Code %in% c('C3', 'C10', 'P8', 'MD10', 'D19', 'D26', 'D28A', 'D4', 'D8', 'D7', 'D6'))
+ 
 delt_dat <- dat
 save(delt_dat, file = 'data/delt_dat.RData')
 
@@ -55,6 +58,17 @@ flow_dat <- read.csv('ignore/DAYFLOW_1975_2015.csv') %>%
     var = tolower(var)
     ) %>% 
   rename(Date = DATE)
+
+# pull out input stations from Novick et al, combine based on fig 2
+flow_dat <- filter(flow_dat, var %in% c('sjr', 'sac', 'yolo', 'csmr', 'moke', 'misc')) %>% 
+  spread(var, val) %>% 
+  mutate(
+    east = csmr + moke + misc,
+    sacyolo = sac + yolo
+  ) %>% 
+  select(Date, sacyolo, east, sjr) %>% 
+  gather('station', 'q', sacyolo:sjr)
+  
 
 save(flow_dat, file = 'data/flow_dat.RData')
 
