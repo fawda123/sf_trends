@@ -10,11 +10,13 @@ author: "Marcus W. Beck, beck.marcus@epa.gov"
 
 **_data/_** Supporting RData files, usually from data in ignore folder 
 
-* `delt_dat.RData` Processed wq time series data `dwr_wq.RData`, includes all nitrogen analytes and current/active stations in the delta, processed in `dat_proc.R`
+* `delt_dat.RData` Processed wq time series data `dwr_wq.RData`, includes all nitrogen analytes and current/active stations in the delta, also includes matched and smoothed flow records from `flocor.RData` results, processed in `dat_proc.R`
 
 * `dwr_wq.RData` time series data of stations in the SF delta from California DWR-EMP (Department of Water Resources, Environmental Monitoring Program) , processed by E. Novick, all stations, analytes from 1975 to present.  Most analytes are measured as concentration, see original spreadsheet for values. 
 
-* `flow_dat.RData` time series of daily flow estimates for the delta
+* `flocor.RData` data.frame of each wq station in `delt_dat.RData` compared with each flow time series in `flow_dat.RData`, lags and correlations for each are shown starting with zero lag back to the previous twelve months, only negative lags are evaluated, i.e, how far back (in months) are the flow time series correlated with nuts, created in `dat_proc.R`
+
+* `flow_dat.RData` time series of daily flow estimates for the delta, input stations from Novick et al (Fig 2) were used, created in `dat_proc.R` 
 
 * `res.RData` sample results for the delta
 
@@ -22,8 +24,51 @@ author: "Marcus W. Beck, beck.marcus@epa.gov"
 
 **_text/_** Summary text of analyses
 
-### To do
+### Matching flow data with nutrient time series
 
-* Check different moving window averages on flow, which fit best to data
-* Check which flow stations (or salinity) are best correlated to response vars
+```{r echo = F, message = F}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+```
+
+Monthly nutrient samples at each of the active stations in the Delta were compared with daily flow data to identify the most relevant flow estimates for modelling.  Time series were compared using cross-correlation analysis to identify the minimum negative correlation between flow and nutrient concentration and the corresponding lag at which the minimum correlation was observed.  The time series comparisons were based on observed nitrite/nitrate and seasonal means of flow (monthly means of daily records by year).  Flow estimates in Novick et al. were used: Sacramento River plus Yolo bypass (`sacyolo = sac + yolo`), eastern tributaries (`east = csmr + moke + misc`), and San Joaquin River (`sjr`). 
+
+```{r fig.height = 8, fig.width = 12, fig.cap='Cross-correlation analysis of flow records with nitrite/nitrate time series active Delta stations', echo = F}
+data(flocor)
+
+ggplot(flocor, aes(x = lag, y = acf, colour = flo, group = flo)) +
+  geom_line() + 
+  geom_point() + 
+  theme_bw() +
+  facet_wrap(~site)
+```
+
+```{r, echo = F}
+# get the station, lag, and min cor for each site
+bests <- group_by(flocor, by = site) %>% 
+  filter(acf == min(acf)) %>%
+  ungroup %>% 
+  select(-by) %>% 
+  data.frame
+
+knitr::kable(bests, format = 'markdown', caption = 'Minimum correlations and lags of each nutrient station that corresponded to the flow estimates')
+```
+
+The flow record that had the minimum correlation with each nutrient station was then smoothed using a left-centered moving window average that had a window equal in length to the corresponding lag in the above table.  The smoothed flow records were then matched with the monthly nutrient records for the corresponding station.  
+
+```{r fig.height = 8, fig.width = 12, fig.cap='Nitrogen time series versus matched flow records before and after averaging by the maximum lag.', echo = F, message = F, warning = F}
+data(delt_dat)
+
+toplo <- select(delt_dat, Site_Code, logq, logqavg, no23) %>% 
+  gather('var', 'val', logq:logqavg)
+
+ggplot(toplo, aes(x = val, y = log(1 + no23), group = var, colour = var)) +
+  geom_point(size = 0.5, alpha = 0.5) + 
+  geom_smooth(method = 'lm', se = F) + 
+  scale_x_continuous('log(1 + discharge)') + 
+  facet_wrap(~Site_Code, scales = 'free') + 
+  theme_bw()
+
+```
 
