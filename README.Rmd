@@ -72,3 +72,16 @@ ggplot(toplo, aes(x = val, y = log(1 + no23), group = var, colour = var)) +
 
 ```
 
+Some example models...
+
+```{r}
+data(mods)
+
+prdnrmplot(mods[[4]])
+```
+
+### To do 
+
+* get detection limits
+* run optim for each station
+
