@@ -25,7 +25,7 @@ Marcus W. Beck, beck.marcus@epa.gov
 
 Monthly nutrient samples at each of the active stations in the Delta were compared with daily flow data to identify the most relevant flow estimates for modelling.  Time series were compared using cross-correlation analysis to identify the minimum negative correlation between flow and nutrient concentration and the corresponding lag at which the minimum correlation was observed.  The time series comparisons were based on observed nitrite/nitrate and seasonal means of flow (monthly means of daily records by year).  Flow estimates in Novick et al. were used: Sacramento River plus Yolo bypass (`sacyolo = sac + yolo`), eastern tributaries (`east = csmr + moke + misc`), and San Joaquin River (`sjr`). 
 
-![Cross-correlation analysis of flow records with nitrite/nitrate time series active Delta stations](README_files/figure-html/unnamed-chunk-2-1.png) 
+![Cross-correlation analysis of flow records with nitrite/nitrate time series active Delta stations](README_files/figure-html/unnamed-chunk-2-1.png)
 
 
 |site |flo     |lag |        acf|
@@ -44,5 +44,21 @@ Monthly nutrient samples at each of the active stations in the Delta were compar
 
 The flow record that had the minimum correlation with each nutrient station was then smoothed using a left-centered moving window average that had a window equal in length to the corresponding lag in the above table.  The smoothed flow records were then matched with the monthly nutrient records for the corresponding station.  
 
-![Nitrogen time series versus matched flow records before and after averaging by the maximum lag.](README_files/figure-html/unnamed-chunk-4-1.png) 
+![Nitrogen time series versus matched flow records before and after averaging by the maximum lag.](README_files/figure-html/unnamed-chunk-4-1.png)
+
+Some example models...
+
+
+```r
+data(mods)
+
+prdnrmplot(mods[[4]])
+```
+
+![](README_files/figure-html/unnamed-chunk-5-1.png)
+
+### To do 
+
+* get detection limits
+* run optim for each station
 
