@@ -203,3 +203,48 @@ delt_dat <- left_join(delt_dat, siteflo, by = c('Site_Code', 'Date'))
 
 # save new delt_dat
 save(delt_dat, file = 'data/delt_dat.RData')
+
+######
+# run winsrch_optim on matched nutrient, flow data
+# this ids 'optimal' half-window widths for each station
+# this takes several days
+
+library(WRTDStidal)
+library(dplyr)
+
+data(delt_dat)
+
+library(doParallel)
+ncores <- detectCores() - 2  
+registerDoParallel(cores = ncores)
+
+sites <- unique(delt_dat$Site_Code)
+mods_opt <- vector('list', length = length(sites))
+names(mods_opt) <- sites
+for(site in sites){
+  
+  cat(site, '\n')
+  
+  # data prep
+  tomod <- filter(delt_dat, Site_Code == site) %>% 
+    select(Date, no23, logqavg) %>% 
+    mutate(
+      lim = -1e6,
+      no23 = log(1 + no23)
+      ) %>% 
+    data.frame %>% 
+    tidal(., 
+      reslab = expression(paste('ln-nitrite/nitrate (mg ', L^-1, ')')), 
+      flolab = expression(paste('ln-flow (standardized)'))
+    )
+  
+  mod <- winsrch_optim(tomod, tau = 0.5)
+  
+  mods_opt[[site]] <- mod
+
+  save(mods_opt, file = 'data/mods_opt.RData')
+  
+}
+
+    
+
