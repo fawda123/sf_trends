@@ -31,6 +31,7 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(WRTDStidal)
+library(gridExtra)
 ```
 
 Monthly nutrient samples at each of the active stations in the Delta were compared with daily flow data to identify the most relevant flow estimates for modelling.  Time series were compared using cross-correlation analysis to identify the minimum negative correlation between flow and nutrient concentration and the corresponding lag at which the minimum correlation was observed.  The time series comparisons were based on observed nitrite/nitrate and seasonal means of flow (monthly means of daily records by year).  Flow estimates in Novick et al. were used: Sacramento River plus Yolo bypass (`sacyolo = sac + yolo`), eastern tributaries (`east = csmr + moke + misc`), and San Joaquin River (`sjr`). 
@@ -73,16 +74,46 @@ ggplot(toplo, aes(x = val, y = log(1 + no23), group = var, colour = var)) +
 
 ```
 
-Some example models...
+Using the combined flow and nutrient time series, the optimal window widths for each station were identified using functions in the [WRTDStidal](https://github.com/fawda123/WRTDStidal) package.  The `winsrch_optim` function uses model cross-validation to iteratively evaluate multiple half-window widths.  The optimal parameter set is identified based on a minimization of error on a test dataset for multiple subsets of the data.  This method attempts to minimize the tradeoff between over- and under-fitting a model with window widths that are too narrow or too wide, respecively.  The following shows the optimal half-window width combinations identified for each location.  
 
-```{r}
+```{r echo = F}
+# get the station, lag, and min cor for each site
+data(mods_opt)
+totab <- lapply(mods_opt, function(x) x$par) %>% 
+  do.call('rbind', .) %>% 
+  data.frame(site = row.names(.), .)
+names(totab) <- c('site', 'days', 'years', 'flow')
+
+knitr::kable(totab, format = 'markdown', caption = 'Optimal half-window width combinations for each station.  The columns refer to optimal widths for days, years, and flow.  The window width for flow is a propoortion of the total range.', row.names = F, digits = 2)
+```
+
+The model predictions and flow-normalized results as annual means are shown below for each of the sites.  The optimal half-window width combinations shown above were used to create each model.  Each color represents a different conditional quantile model fit to the observed time series, i.e., the tenth, fiftieth, and ninetieth percentile distributions.  Note changes in scale, different trends between quantiles, and differences between prediction and flow-normalized results.
+
+```{r, fig.height=8, fig.width = 13, message = F, echo = F, warning = F}
 data(mods)
 
-prdnrmplot(mods[[4]])
+for(i in 1:length(mods)){
+  
+  lab <- names(mods)[i]
+  p <- prdnrmplot(mods[[i]]) +
+    ggtitle(lab) + 
+    theme_minimal() +
+    theme(legend.position = 'none', axis.title = element_blank()) +
+    scale_y_continuous(limits = c(0, 1.3))
+  assign(paste0('p', i), p)
+  
+}
+
+ylab <- attr(mods[[1]], 'reslab')
+
+grid.arrange(ncol = 2, widths = c(0.02, 1),
+  grid::textGrob(ylab, rot = 90), 
+  arrangeGrob(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, ncol = 4)
+  )
+
 ```
 
 ### To do 
 
 * get detection limits
-* run optim for each station
 

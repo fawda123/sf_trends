@@ -46,19 +46,28 @@ The flow record that had the minimum correlation with each nutrient station was 
 
 ![Nitrogen time series versus matched flow records before and after averaging by the maximum lag.](README_files/figure-html/unnamed-chunk-4-1.png)
 
-Some example models...
+Using the combined flow and nutrient time series, the optimal window widths for each station were identified using functions in the [WRTDStidal](https://github.com/fawda123/WRTDStidal) package.  The `winsrch_optim` function uses model cross-validation to iteratively evaluate multiple half-window widths.  The optimal parameter set is identified based on a minimization of error on a test dataset for multiple subsets of the data.  This method attempts to minimize the tradeoff between over- and under-fitting a model with window widths that are too narrow or too wide, respecively.  The following shows the optimal half-window width combinations identified for each location.  
 
 
-```r
-data(mods)
+|site | days| years| flow|
+|:----|----:|-----:|----:|
+|D19  | 0.49|  9.96| 0.50|
+|D26  | 0.42|  8.74| 0.50|
+|D4   | 0.44|  8.80| 0.25|
+|D6   | 0.50| 10.01| 0.50|
+|D7   | 0.50| 10.00| 0.50|
+|D8   | 0.37| 10.04| 0.10|
+|C10  | 0.34|  7.13| 0.43|
+|MD10 | 0.12| 10.00| 0.51|
+|C3   | 0.50| 10.00| 0.50|
+|D28A | 0.47|  4.84| 0.72|
+|P8   | 0.26|  9.57| 0.49|
 
-prdnrmplot(mods[[4]])
-```
+The model predictions and flow-normalized results as annual means are shown below for each of the sites.  The optimal half-window width combinations shown above were used to create each model.  Each color represents a different conditional quantile model fit to the observed time series, i.e., the tenth, fiftieth, and ninetieth percentile distributions.  Note changes in scale, different trends between quantiles, and differences between prediction and flow-normalized results.
 
-![](README_files/figure-html/unnamed-chunk-5-1.png)
+![](README_files/figure-html/unnamed-chunk-6-1.png)
 
 ### To do 
 
 * get detection limits
-* run optim for each station
 

@@ -1,42 +1,26 @@
 library(WRTDStidal)
 library(dplyr)
-library(foreach)
-library(doParallel)
-     
-#setup parallel backend to use 8 processors
-cl<-makeCluster(8)
-registerDoParallel(cl)
+library(ggplot2) 
+library(gridExtra)
+data(mods)
 
-data(delt_dat)
-data(mods_opt)
-
-# iterate through each site to get optimal window values and create mod
-sites <- unique(delt_dat$Site_Code)
-mods <- vector('list', length = length(sites))
-names(mods) <- sites
-mods <- foreach(site = sites, .packages = c('dplyr', 'WRTDStidal')) %dopar% {
+for(i in 1:length(mods)){
   
-  cat(site, '\n')
-  
-  
-  # data prep
-  tomod <- filter(delt_dat, Site_Code == site) %>% 
-    select(Date, no23, logqavg) %>% 
-    mutate(
-      lim = -1e6,
-      no23 = log(1 + no23)
-      ) %>% 
-    data.frame %>% 
-    tidal(., 
-      reslab = expression(paste('ln-nitrite/nitrate (mg ', L^-1, ')')), 
-      flolab = expression(paste('ln-flow (standardized)'))
-    )
-  
-  # get optimal window half-widhs, create mod
-  wins_in <- as.list(mods_opt[[site]]$par)
-  mod <- modfit(tomod, tau = c(0.1, 0.5, 0.9), wins = wins_in)
-
-  # output
-  mod
+  lab <- names(mods)[i]
+  p <- prdnrmplot(mods[[i]]) +
+    ggtitle(lab) + 
+    theme_minimal() +
+    theme(legend.position = 'none', axis.title = element_blank()) +
+    scale_y_continuous(limits = c(0, 1.3))
+  assign(paste0('p', i), p)
   
 }
+
+ylab <- attr(mods[[1]], 'reslab')
+
+pdf('C:/Users/mbeck/Desktop/sf_res.pdf', height = 8, width = 13, family = 'serif')
+grid.arrange(ncol = 2, widths = c(0.02, 1),
+  grid::textGrob(ylab, rot = 90), 
+  arrangeGrob(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, ncol = 4)
+  )
+dev.off()
