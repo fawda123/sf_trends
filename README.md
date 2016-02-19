@@ -5,15 +5,17 @@ Marcus W. Beck, beck.marcus@epa.gov
 
 **_data/_** Supporting RData files, usually from data in ignore folder 
 
-* `delt_dat.RData` Processed wq time series data `dwr_wq.RData`, includes all nitrogen analytes and current/active stations in the delta, also includes matched and smoothed flow records from `flocor.RData` results, processed in `dat_proc.R`
+* `delt_dat.RData` Processed wq time series data `dwr_wq.RData`, includes all nitrogen analytes and current/active stations in the delta, also includes matched and smoothed flow records from `flocor.RData` results, processed in `R/dat_proc.R`
 
-* `dwr_wq.RData` time series data of stations in the SF delta from California DWR-EMP (Department of Water Resources, Environmental Monitoring Program) , processed by E. Novick, all stations, analytes from 1975 to present.  Most analytes are measured as concentration, see original spreadsheet for values. 
+* `dwr_wq.RData` time series data of stations in the SF delta from California DWR-EMP (Department of Water Resources, Environmental Monitoring Program) , processed by E. Novick, all stations, analytes from 1975 to present.  Most analytes are measured as concentration, see original spreadsheet for values.  Unavailable in GitHub repo.
 
-* `flocor.RData` data.frame of each wq station in `delt_dat.RData` compared with each flow time series in `flow_dat.RData`, lags and correlations for each are shown starting with zero lag back to the previous twelve months, only negative lags are evaluated, i.e, how far back (in months) are the flow time series correlated with nuts, created in `dat_proc.R`
+* `flocor.RData` data.frame of each wq station in `delt_dat.RData` compared with each flow time series in `flow_dat.RData`, lags and correlations for each are shown starting with zero lag back to the previous twelve months, only negative lags are evaluated, i.e, how far back (in months) are the flow time series correlated with nuts, created in `R/dat_proc.R`
 
-* `flow_dat.RData` time series of daily flow estimates for the delta, input stations from Novick et al (Fig 2) were used, created in `dat_proc.R` 
+* `flow_dat.RData` time series of daily flow estimates for the delta, input stations from Novick et al (Fig 2) were used, created in `R/dat_proc.R` 
 
-* `res.RData` sample results for the delta
+* `mods.RData` weighted regression models for 11 delta stations, created in `R/dat_proc.R` 
+
+* `mods_opt.RData` results from `winsrch_optim` that identifies optimal half-window widths for weighted regression models,  created in `R/dat_proc.R`
 
 **_R/_** Supporting R scripts
 
@@ -46,7 +48,7 @@ The flow record that had the minimum correlation with each nutrient station was 
 
 ![Nitrogen time series versus matched flow records before and after averaging by the maximum lag.](README_files/figure-html/unnamed-chunk-4-1.png)
 
-Using the combined flow and nutrient time series, the optimal window widths for each station were identified using functions in the [WRTDStidal](https://github.com/fawda123/WRTDStidal) package.  The `winsrch_optim` function uses model cross-validation to iteratively evaluate multiple half-window widths.  The optimal parameter set is identified based on a minimization of error on a test dataset for multiple subsets of the data.  This method attempts to minimize the tradeoff between over- and under-fitting a model with window widths that are too narrow or too wide, respecively.  The following shows the optimal half-window width combinations identified for each location.  
+Using the combined flow and nutrient time series, the optimal window widths for each station were identified using functions in the [WRTDStidal](https://github.com/fawda123/WRTDStidal) package.  The `winsrch_optim` function uses model cross-validation to iteratively evaluate multiple half-window widths.  The optimal parameter set is identified based on a minimization of error on a test dataset for multiple subsets of the data.  This method attempts to minimize the tradeoff between over- and under-fitting a model with window widths that are too narrow or too wide, respectively.  The following shows the optimal half-window width combinations identified for each location.  
 
 
 |site | days| years| flow|

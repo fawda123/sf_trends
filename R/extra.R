@@ -5,15 +5,17 @@ library(gridExtra)
 source('R/funcs.R')
 
 data(mods)
+pdf('C:/Users/mbeck/Desktop/sf_dyna.pdf', height = 8, width = 13, family = 'serif')
+for(mo in 1:12){
 
 for(i in 1:length(mods)){
   
   lab <- names(mods)[i]
-  p <- seasplot(mods[[i]], alpha = 0.5, size = 1) +
+  p <- dynaplot(mods[[i]], month = mo) +
     ggtitle(lab) + 
     theme_minimal() +
-    theme(axis.title = element_blank()) #+
-    scale_y_continuous(limits = c(0, 1.3))
+    theme(axis.title = element_blank()) +
+    scale_y_continuous(limits = c(0, 1.4))
     
   # get legend
   if(i == 1) pleg <- g_legend(p)
@@ -25,7 +27,7 @@ for(i in 1:length(mods)){
 
 ylab <- attr(mods[[1]], 'reslab')
 
-pdf('C:/Users/mbeck/Desktop/sf_seas.pdf', height = 8, width = 13, family = 'serif')
+
 grid.arrange(
   ncol = 1, 
   arrangeGrob(
@@ -36,4 +38,6 @@ grid.arrange(
   grid::textGrob('Day of year'), 
   heights = c(1, 0.025)
 )
+
+}
 dev.off()
