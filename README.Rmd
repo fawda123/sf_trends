@@ -32,6 +32,7 @@ library(dplyr)
 library(tidyr)
 library(WRTDStidal)
 library(gridExtra)
+source('R/funcs.R')
 ```
 
 Monthly nutrient samples at each of the active stations in the Delta were compared with daily flow data to identify the most relevant flow estimates for modelling.  Time series were compared using cross-correlation analysis to identify the minimum negative correlation between flow and nutrient concentration and the corresponding lag at which the minimum correlation was observed.  The time series comparisons were based on observed nitrite/nitrate and seasonal means of flow (monthly means of daily records by year).  Flow estimates in Novick et al. were used: Sacramento River plus Yolo bypass (`sacyolo = sac + yolo`), eastern tributaries (`east = csmr + moke + misc`), and San Joaquin River (`sjr`). 
@@ -42,7 +43,7 @@ data(flocor)
 ggplot(flocor, aes(x = lag, y = acf, colour = flo, group = flo)) +
   geom_line() + 
   geom_point() + 
-  theme_bw() +
+  theme_minimal() +
   facet_wrap(~site)
 ```
 
@@ -70,7 +71,7 @@ ggplot(toplo, aes(x = val, y = log(1 + no23), group = var, colour = var)) +
   geom_smooth(method = 'lm', se = F) + 
   scale_x_continuous('log(1 + discharge)') + 
   facet_wrap(~Site_Code, scales = 'free') + 
-  theme_bw()
+  theme_minimal()
 
 ```
 
@@ -98,8 +99,13 @@ for(i in 1:length(mods)){
   p <- prdnrmplot(mods[[i]]) +
     ggtitle(lab) + 
     theme_minimal() +
-    theme(legend.position = 'none', axis.title = element_blank()) +
+    theme(axis.title = element_blank()) +
     scale_y_continuous(limits = c(0, 1.3))
+  
+  # get legend
+  if(i == 1) pleg <- g_legend(p)
+  p <- p + theme(legend.position = 'none')
+  
   assign(paste0('p', i), p)
   
 }
@@ -108,8 +114,45 @@ ylab <- attr(mods[[1]], 'reslab')
 
 grid.arrange(ncol = 2, widths = c(0.02, 1),
   grid::textGrob(ylab, rot = 90), 
-  arrangeGrob(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, ncol = 4)
+  arrangeGrob(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, pleg, ncol = 4)
   )
+
+```
+
+Seasonal variation across all years is viewed using a simple loess (locally estimated) polynomial fit through the model results for the observed data. The points show the observed data at each station, whereas the fit is smoothed through the model predictions (not shown on the plot).
+
+```{r, fig.height = 8, fig.width = 13, message = F, echo = F, warning = F}
+data(mods)
+
+for(i in 1:length(mods)){
+  
+  lab <- names(mods)[i]
+  p <- seasplot(mods[[i]], alpha = 0.5, size = 1, lwd = 2) +
+    ggtitle(lab) + 
+    theme_minimal() +
+    theme(axis.title = element_blank()) +
+    scale_y_continuous(limits = c(0, 1.6))
+    
+  # get legend
+  if(i == 1) pleg <- g_legend(p)
+  p <- p + theme(legend.position = 'none')
+  
+  assign(paste0('p', i), p)
+  
+}
+
+ylab <- attr(mods[[1]], 'reslab')
+
+grid.arrange(
+  ncol = 1, 
+  arrangeGrob(
+    ncol = 2, widths = c(0.02, 1),
+    grid::textGrob(ylab, rot = 90), 
+    arrangeGrob(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, pleg, ncol = 4)
+  ), 
+  grid::textGrob('Day of year'), 
+  heights = c(1, 0.025)
+)
 
 ```
 

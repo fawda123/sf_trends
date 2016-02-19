@@ -67,6 +67,10 @@ The model predictions and flow-normalized results as annual means are shown belo
 
 ![](README_files/figure-html/unnamed-chunk-6-1.png)
 
+Seasonal variation across all years is viewed using a simple loess (locally estimated) polynomial fit through the model results for the observed data. The points show the observed data at each station, whereas the fit is smoothed through the model predictions (not shown on the plot).
+
+![](README_files/figure-html/unnamed-chunk-7-1.png)
+
 ### To do 
 
 * get detection limits
