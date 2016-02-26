@@ -6,6 +6,7 @@ library(tidyr)
 library(readxl)
 library(ggplot2)
 library(lubridate)
+library(purrr)
 
 ######
 # wq data
@@ -36,9 +37,26 @@ dat <- select(statmeta, Site_Code, Latitude, Longitude) %>%
   filter(!Site_Code %in% c('EZ2', 'EZ6', 'NZ002', 'NZ004', 'NZ032', 'NZ325', 'NZS42')) %>% 
   select(Site_Code, Date, Latitude, Longitude, nh, no23, din, tn, sal)
 
-# finally, subset dat for active stations in Novick et al. report
-dat <- filter(dat, Site_Code %in% c('C3', 'C10', 'P8', 'MD10', 'D19', 'D26', 'D28A', 'D4', 'D8', 'D7', 'D6'))
- 
+# finally, subset by selected delta and suisun stations
+# make sure each date is unique
+dat <- filter(dat, Site_Code %in% c('C3', 'C10', 'P8', 'D4', 'D7', 'D6')) %>% 
+  mutate(
+    year = year(Date), 
+    month = month(Date), 
+    day = day(Date)
+  ) %>% 
+  gather('var', 'val', Latitude:sal) %>% 
+  group_by(Site_Code, year, month, day, var) %>% 
+  summarize(val = mean(val, na.rm = TRUE)) %>% 
+  spread(var, val) %>% 
+  ungroup %>% 
+  mutate(
+    Date = as.Date(paste(year, month, day, sep = '-'), format = '%Y-%m-%d'),
+    Location = 'Delta'
+    ) %>% 
+  select(Site_Code, Location, Date, Latitude, Longitude, din, nh, no23, tn, sal)
+dat$Location[dat$Site_Code %in%  c('D4', 'D7', 'D6')] <- 'Suisun'
+
 delt_dat <- dat
 save(delt_dat, file = 'data/delt_dat.RData')
 
@@ -69,230 +87,141 @@ flow_dat <- filter(flow_dat, var %in% c('sjr', 'sac', 'yolo', 'csmr', 'moke', 'm
   ) %>% 
   select(Date, sacyolo, east, sjr) %>% 
   gather('station', 'q', sacyolo:sjr)
-  
 
 save(flow_dat, file = 'data/flow_dat.RData')
 
 ######
-# matching flow to nutrient time series
-# result is a data.frame of each wq station compared with each flow time series
-# lags and correlations for each are shown starting with zero lag back to the previous twelve months
-# only negative lags are evaluated, i.e, how far back (in months) are the flow time series correlated with nuts
-# correlations are based on log-log
+# ccf comparison of nitrogen data to flow data for selected delta and suisun stations
+# all data are matched by corresponding days in the record
+# multiple measures per month were averaged after matching by day
+# nitrogen data are nh4, no23, din
+# stations are C10, C3, P8, D4, D6, D7
 
-rm(list = ls())
-
-load(file = 'data/delt_dat.RData')
-load(file = 'data/flow_dat.RData')
-
-# get sites and flow stations to compare
-sites <- unique(delt_dat$Site_Code)
-flos <- unique(flow_dat$station) 
-grd <- expand.grid(sites, flos)
-names(grd) <- c('site', 'flos')
-
-# go through each combo and get cross-correlation ests
-# requires some grouping by monthly averages
-outests <- vector('list', length = nrow(grd))
-names(outests) <- paste(grd[, 1], grd[, 2], sep = '_')
-for(i in 1:nrow(grd)){
-  
-  # select grd values to eval
-  site <- grd[i, 'site']
-  flo <- grd[i, 'flos']
-  
-  # subset ts and flo data by sites in grd
-  sit_sel <- filter(delt_dat, Site_Code == site)
-  flo_sel <- filter(flow_dat, station == flo)
-  
-  # join the flo and wq datasets
-  # create complete dataset by year, month, day variables
-  # take annual, monthly averages of each parameter
-  toeval <- filter(flo_sel, Date >= min(sit_sel$Date) & Date <= max(sit_sel$Date)) %>% 
-    full_join(., sit_sel, by = 'Date') %>% 
-    select(Date, q, nh, no23) %>% 
-    mutate(
-      Year = year(Date), 
-      Month = month(Date), 
-      Day = day(Date),
-      q = log(1 + q), 
-      nh = log(1 + nh), 
-      no23 = log(1 + no23)
-    ) %>% 
-    select(-Date) %>% 
-    complete(Year, Month, Day) %>% 
-    group_by(Year, Month) %>% 
-    summarize(
-      q = mean(q, na.rm = TRUE),
-      nh = mean(nh, na.rm = TRUE),
-      no23 = mean(no23, na.rm = TRUE)
-    ) %>% 
-    data.frame
-    
-  # get ccf
-  outnm <- paste(site, flo, sep = '_')
-  corest <- ccf(toeval$q, toeval$no23, na.action = na.exclude, lag.max = 12, plot = F)
-  corest <- data.frame(nm = outnm, lag = corest$lag, acf = corest$acf, stringsAsFactors = F)
-  corest <- corest[corest$lag <= 0, ]
-  
-  # counter
-  percdon <- round(100 * i/nrow(grd), 2)
-  cat(outnm, '\t')
-  cat(percdon, '%\n')
-  outests[[outnm]] <- corest
-     
-}
-
-# combine the results
-flocor <- do.call('rbind', outests) %>% 
-  separate(nm, c('site', 'flo'), sep = '_') %>% 
-  mutate(lag = factor(lag))
-row.names(flocor) <- 1:nrow(flocor)
-
-save(flocor, file = 'data/flocor.RData')
-
-######
-# combine flow data with nut data based on matching stations and smoothing 
-
-rm(list = ls())
-
-data(flocor)
-data(flow_dat)
 data(delt_dat)
+data(flow_dat)
 
-# find flow record with min cor for each station
-bests <- group_by(flocor, by = site) %>% 
-  filter(acf == min(acf)) %>%
-  ungroup %>% 
-  select(-by) %>% 
+# prep data for ccf by unique site, nut, flow  variables
+# data must be in long format
+toeval <- tidyr::spread(flow_dat, station, q) %>% 
+  select(-east) %>% 
+  left_join(delt_dat, ., by = 'Date') %>% 
+  select(-Latitude, -Longitude, -tn) %>% 
+  tidyr::gather('resvar', 'resval', din:no23) %>% 
+  tidyr::gather('flovar', 'floval', sal:sjr) %>% 
+  mutate(flovar = factor(flovar, levels = c('sacyolo', 'sal', 'sjr'), labels = c('Sacramento', 'Salinity', 'San Joaquin'))) %>% 
+  group_by(Site_Code, Location, resvar, flovar)
+
+# get ccf by nesting by grouping variable
+corests <- nest(toeval) %>% 
+  mutate(corest = map(
+    data, function(x){
+    
+      # standardize data as monthly obs for ccf
+      dattmp <- mutate(x, 
+        resval = log(1 + resval), 
+        floval = log(1 + floval), 
+        Year = year(Date), 
+        Month = month(Date)
+        ) %>% 
+        select(-Date) %>% 
+        complete(Year, Month) %>% 
+        group_by(Year, Month) %>% 
+        summarize(
+          resval = mean(resval, na.rm = TRUE),
+          floval = mean(floval, na.rm = TRUE)
+        ) %>% 
+        data.frame
+        
+      # get ccf
+      corest <- with(dattmp, ccf(floval, resval,na.action = na.exclude, lag.max = 12, plot = F))
+      corest <- data.frame(lag = corest$lag, acf = corest$acf, stringsAsFactors = F)
+      
+      # exit
+      return(corest)
+
+    })
+  )
+
+# unnest by corest
+corests <- unnest(corests, corest) %>% 
   data.frame
 
-# for each site, grab the flow record, lag
-# average by left window for the lag
-sites <- bests$site
-siteflo <- vector('list', length = length(sites))
-names(siteflo) <- sites
-for(st in sites){
-  
-  # select the flo station and lag (in months)
-  flos <- filter(bests, site == st)
-  lag <- abs(as.numeric(as.character(flos$lag))) * 31
-  flos <- flos$flo
- 
-  # filter the flow data by the relevation station, take log of Q, do left mwa foir flow
-  floavg <- filter(flow_dat, station == flos) %>% 
-    mutate(
-      logq = log(1 + q), 
-      logqavg = stats::filter(logq, sides = 1, filter = rep(1, lag)/lag, method = 'convolution'),
-      logqavg = as.numeric(logqavg)
-      ) %>% 
-    select(Date, logqavg, logq) %>% 
-    mutate(Site_Code = st)
-  
-  # append to output
-  siteflo[[st]] <- na.omit(floavg)
-  
-}
-
-siteflo <- do.call('rbind', siteflo) %>% 
-  data.frame(., stringsAsFactors = F)
-row.names(siteflo) <- 1:nrow(siteflo)
-
-# combine the smoothed flow records with nut data for the corresponding station
-delt_dat <- left_join(delt_dat, siteflo, by = c('Site_Code', 'Date'))
-
-# save new delt_dat
-save(delt_dat, file = 'data/delt_dat.RData')
+flocor <- corests
+save(flocor, file = 'data/flocor.RData', compress = 'xz')
 
 ######
-# run winsrch_optim on matched nutrient, flow data
-# this ids 'optimal' half-window widths for each station
-# this takes several days
+# nutrients v nutrients, similar analysis as above but ccf of nutrient data to each other
 
-library(WRTDStidal)
-library(dplyr)
+rm(list = ls())
 
 data(delt_dat)
+data(flow_dat)
 
-library(doParallel)
-ncores <- detectCores() - 2  
-registerDoParallel(cores = ncores)
+toeval <- select(delt_dat, -Latitude, -Longitude, -sal, -tn) %>% 
+  group_by(Site_Code, Location)
 
-sites <- unique(delt_dat$Site_Code)
-mods_opt <- vector('list', length = length(sites))
-names(mods_opt) <- sites
-for(site in sites){
-  
-  cat(site, '\n')
-  
-  # data prep
-  tomod <- filter(delt_dat, Site_Code == site) %>% 
-    select(Date, no23, logqavg) %>% 
-    mutate(
-      lim = -1e6,
-      no23 = log(1 + no23)
-      ) %>% 
-    data.frame %>% 
-    tidal(., 
-      reslab = expression(paste('ln-nitrite/nitrate (mg ', L^-1, ')')), 
-      flolab = expression(paste('ln-flow (standardized)'))
-    )
-  
-  mod <- winsrch_optim(tomod, tau = 0.5)
-  
-  mods_opt[[site]] <- mod
-
-  save(mods_opt, file = 'data/mods_opt.RData')
-  
-}
-
-######
-# create models from optimal half window widths above
-
-library(WRTDStidal)
-library(dplyr)
-library(foreach)
-library(doParallel)
-     
-#setup parallel backend to use 8 processors
-cl<-makeCluster(8)
-registerDoParallel(cl)
-
-data(delt_dat)
-data(mods_opt)
-
-# iterate through each site to get optimal window values and create mod
-sites <- unique(delt_dat$Site_Code)
-mods <- foreach(site = sites, .packages = c('dplyr', 'WRTDStidal')) %dopar% {
-  
-  cat(site, '\n')
-  
-  
-  # data prep
-  tomod <- filter(delt_dat, Site_Code == site) %>% 
-    select(Date, no23, logqavg) %>% 
-    mutate(
-      lim = -1e6,
-      no23 = log(1 + no23)
-      ) %>% 
-    data.frame %>% 
-    tidal(., 
-      reslab = expression(paste('ln-nitrite/nitrate (mg ', L^-1, ')')), 
-      flolab = expression(paste('ln-flow (standardized)'))
-    )
-  
-  # get optimal window half-widhs, create mod
-  wins_in <- as.list(mods_opt[[site]]$par)
-  mod <- modfit(tomod, tau = c(0.1, 0.5, 0.9), wins = wins_in)
-
-  # output
-  mod
-  
-}
-names(mods) <- sites
-
-save(mods, file = 'data/mods.RData')
-
-
+corests <- nest(toeval) %>% 
+  mutate(corest = map(data, 
+    function(x){
+      
+      dattmp <- mutate(x, 
+          Year = year(Date), 
+          Month = month(Date), 
+          Day = day(Date),
+          nh = log(1 + nh), 
+          no23 = log(1 + no23), 
+          din = log(1 +din)
+        ) %>% 
+        select(-Date) %>% 
+        complete(Year, Month, Day) %>% 
+        group_by(Year, Month) %>% 
+        summarize(
+          nh = mean(nh, na.rm = TRUE),
+          no23 = mean(no23, na.rm = TRUE), 
+          din = mean(din, na.rm = TRUE)
+        ) %>% 
+        data.frame
     
+      # this is terrible
+      dinnh <- with(dattmp, ccf(din, nh, na.action = na.exclude, lag.max = 12, plot = F)) %>% 
+        with(., data.frame(lag = lag, acf = acf))
+      dinno23 <- with(dattmp, ccf(din, no23, na.action = na.exclude, lag.max = 12, plot = F)) %>% 
+        with(., data.frame(lag = lag, acf = acf)) 
+      nhdin <- with(dattmp, ccf(nh, din, na.action = na.exclude, lag.max = 12, plot = F)) %>% 
+        with(., data.frame(lag = lag, acf = acf))
+      nhno23 <- with(dattmp, ccf(nh, no23, na.action = na.exclude, lag.max = 12, plot = F)) %>% 
+        with(., data.frame(lag = lag, acf = acf))
+      no23din <- with(dattmp, ccf(no23, din, na.action = na.exclude, lag.max = 12, plot = F)) %>% 
+        with(., data.frame(lag = lag, acf = acf))
+      no23nh <- with(dattmp, ccf(no23, nh, na.action = na.exclude, lag.max = 12, plot = F)) %>% 
+        with(., data.frame(lag = lag, acf = acf)) 
+      nhdin <- with(dattmp, ccf(nh, din, na.action = na.exclude, lag.max = 12, plot = F)) %>% 
+        with(., data.frame(lag = lag, acf = acf))
+      no23din <- with(dattmp, ccf(no23, din, na.action = na.exclude, lag.max = 12, plot = F)) %>% 
+        with(., data.frame(lag = lag, acf = acf))
+      
+      out <- list(
+        din_nh = dinnh, 
+        din_no23 = dinno23, 
+        nh_din = nhdin, 
+        nh_no23 = nhno23, 
+        no23_din = no23din, 
+        no23_nh = no23nh, 
+        nh_din = nhdin, 
+        no23_din = no23din
+        )
+      
+      out <- reshape2::melt(out, id.vars = c('lag', 'acf'))
+        
+      return(out)
+      
+    })
+  )
+
+corests <- unnest(corests, corest) %>% 
+  separate(L1, c('var1', 'var2'), sep = '_') %>% 
+  data.frame
+
+nutcor <- corests
+save(nutcor, file = 'data/nutcor.RData')
 
