@@ -31,7 +31,7 @@ The above analysis was repeated to compare temporal variation of nitrogen specie
 
 ![](README_files/figure-html/unnamed-chunk-3-1.png)
 
-<img src="README_files/figure-html/unnamed-chunk-4-1.png" title="" alt="" width="450px" /><img src="README_files/figure-html/unnamed-chunk-4-2.png" title="" alt="" width="450px" /><img src="README_files/figure-html/unnamed-chunk-4-3.png" title="" alt="" width="450px" /><img src="README_files/figure-html/unnamed-chunk-4-4.png" title="" alt="" width="450px" /><img src="README_files/figure-html/unnamed-chunk-4-5.png" title="" alt="" width="450px" /><img src="README_files/figure-html/unnamed-chunk-4-6.png" title="" alt="" width="450px" />
+<img src="README_files/figure-html/unnamed-chunk-4-1.png" title="" alt="" width="400px" /><img src="README_files/figure-html/unnamed-chunk-4-2.png" title="" alt="" width="400px" /><img src="README_files/figure-html/unnamed-chunk-4-3.png" title="" alt="" width="400px" /><img src="README_files/figure-html/unnamed-chunk-4-4.png" title="" alt="" width="400px" /><img src="README_files/figure-html/unnamed-chunk-4-5.png" title="" alt="" width="400px" /><img src="README_files/figure-html/unnamed-chunk-4-6.png" title="" alt="" width="400px" />
 
 ### Matching stations to flow or salinity records
 

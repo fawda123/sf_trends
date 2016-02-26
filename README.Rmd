@@ -67,7 +67,7 @@ ggplot(nutcor, aes(x = lag, y = acf, colour = var2, group = var2)) +
 
 ```
 
-```{r, eval = T, out.width = '450px', fig.height = 9, fig.width = 9, echo = F, warning = F}
+```{r, eval = T, out.width = '400px', fig.height = 9, fig.width = 9, echo = F, warning = F}
 
 data(delt_dat)
 data(flow_dat)
