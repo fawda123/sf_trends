@@ -31,34 +31,7 @@ The above analysis was repeated to compare temporal variation of nitrogen specie
 
 ![](README_files/figure-html/unnamed-chunk-3-1.png)
 
-
-```r
-data(delt_dat)
-data(flow_dat)
-
-toplo <- tidyr::spread(flow_dat, station, q) %>% 
-  select(-east) %>% 
-  left_join(delt_dat, ., by = 'Date') %>% 
-  select(-Latitude, -Longitude, -tn) %>% 
-  gather('var', 'val', -Site_Code, -Date) %>% 
-  na.omit %>% 
-  mutate(
-    val = log(1 + val), 
-    ind = 1:nrow(.)
-    ) %>% 
-  spread(var, val) %>% 
-  select(-ind)
-
-for(site in unique(toplo$Site_Code)){
-  
-  siteplo <- filter(toplo, Site_Code %in% site) %>% 
-    select(-Site_Code)
-  
-  p <- ggpairs(siteplo) + 
-    theme_bw()
-  
-}
-```
+<img src="README_files/figure-html/unnamed-chunk-4-1.png" title="" alt="" width="450px" /><img src="README_files/figure-html/unnamed-chunk-4-2.png" title="" alt="" width="450px" /><img src="README_files/figure-html/unnamed-chunk-4-3.png" title="" alt="" width="450px" /><img src="README_files/figure-html/unnamed-chunk-4-4.png" title="" alt="" width="450px" /><img src="README_files/figure-html/unnamed-chunk-4-5.png" title="" alt="" width="450px" /><img src="README_files/figure-html/unnamed-chunk-4-6.png" title="" alt="" width="450px" />
 
 ### Matching stations to flow or salinity records
 

@@ -34,6 +34,7 @@ library(WRTDStidal)
 library(gridExtra)
 library(lubridate)
 library(purrr)
+library(GGally)
 source('R/funcs.R')
 ```
 
@@ -66,7 +67,7 @@ ggplot(nutcor, aes(x = lag, y = acf, colour = var2, group = var2)) +
 
 ```
 
-```{r, eval = F}
+```{r, eval = T, out.width = '450px', fig.height = 9, fig.width = 9, echo = F, warning = F}
 
 data(delt_dat)
 data(flow_dat)
@@ -75,22 +76,21 @@ toplo <- tidyr::spread(flow_dat, station, q) %>%
   select(-east) %>% 
   left_join(delt_dat, ., by = 'Date') %>% 
   select(-Latitude, -Longitude, -tn) %>% 
-  gather('var', 'val', -Site_Code, -Date) %>% 
+  gather('var', 'val', -Site_Code, -Date, -Location) %>% 
   na.omit %>% 
   mutate(
-    val = log(1 + val), 
-    ind = 1:nrow(.)
+    val = log(1 + val)
     ) %>% 
-  spread(var, val) %>% 
-  select(-ind)
+  spread(var, val)
 
 for(site in unique(toplo$Site_Code)){
   
   siteplo <- filter(toplo, Site_Code %in% site) %>% 
-    select(-Site_Code)
+    select(-Site_Code, -Location, -Date)
   
-  p <- ggpairs(siteplo) + 
-    theme_bw()
+  p <- ggpairs(siteplo, title = site)
+  
+  print(p)  
   
 }
 
