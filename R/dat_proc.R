@@ -61,6 +61,22 @@ delt_dat <- dat
 save(delt_dat, file = 'data/delt_dat.RData')
 
 ######
+# remove outliers (from viz in ggpairs, original readme)
+
+data(delt_dat)
+
+tokp <- with(delt_dat, !(Site_Code == 'C10' & sal > (exp(1.5) - 1)) | is.na(sal))
+delt_dat <- filter(delt_dat, tokp)
+tokp <- with(delt_dat, !(Site_Code == 'D4' & no23 > (exp(0.9) - 1)) & !(Site_Code == 'D4' & din > (exp(0.9) - 1)) | is.na(no23) | is.na(din))
+delt_dat <- filter(delt_dat, tokp)
+tokp <- with(delt_dat, !(Site_Code == 'D6' & no23 > (exp(0.75) - 1)) & !(Site_Code == 'D6' & nh > (exp(0.35) - 1)) | is.na(no23) | is.na(nh))
+delt_dat <- filter(delt_dat, tokp)
+tokp <- with(delt_dat, !(Site_Code == 'D7' & no23 > (exp(0.9) - 1)) | is.na(no23))
+delt_dat <- filter(delt_dat, tokp)
+
+save(delt_dat, file = 'data/delt_dat.RData')
+
+######
 # flow records
 
 # inputs and outputs for different locations, cubic feet per second
