@@ -5,6 +5,8 @@ Marcus W. Beck, beck.marcus@epa.gov
 
 **_data/_** Supporting RData files, usually from data in ignore folder, unless otherwise noted all files were created in `R/dat_proc.R`
 
+* `bests.RData` subset of `flocor.RData` for min or max cor of each nut parm with flow or sal time series, respectively.  Each site is matched with the flow or salinity record ided in figure 10 of Novick et al
+
 * `delt_dat.RData` Processed wq time series data `dwr_wq.RData`, includes all nitrogen analytes and current/active stations in the delta, also includes matched and smoothed flow records from `flocor.RData` results
 
 * `dwr_wq.RData` time series data of stations in the SF delta from California DWR-EMP (Department of Water Resources, Environmental Monitoring Program) , processed by E. Novick, all stations, analytes from 1975 to present.  Most analytes are measured as concentration, see original spreadsheet for values.  Unavailable in GitHub repo.
@@ -14,6 +16,8 @@ Marcus W. Beck, beck.marcus@epa.gov
 * `flow_dat.RData` time series of daily flow estimates for the delta, input stations from Novick et al (Fig 2) were used
 
 * `nutcor.RData` results of ccf analysis of selected delta and suisun stations comparing nitrogen species
+
+* `tomod.RData` dataset for wrtds, all response, flow values are ln + 1 transformed, flow (or salinity) records for each nutrient variable and station are combined based on the monthly lag ided from `bests.RData`
 
 **_R/_** Supporting R scripts
 
@@ -35,7 +39,32 @@ The above analysis was repeated to compare temporal variation of nitrogen specie
 
 ### Matching stations to flow or salinity records
 
-Stations were 
+
+|Site_Code |Location |resvar |flovar      | lag|        acf|
+|:---------|:--------|:------|:-----------|---:|----------:|
+|C10       |Delta    |din    |San Joaquin |   0| -0.6026198|
+|C10       |Delta    |nh     |San Joaquin |  -4| -0.2374222|
+|C10       |Delta    |no23   |San Joaquin |   0| -0.6234137|
+|C3        |Delta    |din    |Sacramento  |   0| -0.5162705|
+|C3        |Delta    |nh     |Sacramento  |   0| -0.6848292|
+|C3        |Delta    |no23   |Sacramento  |  -3| -0.2820576|
+|P8        |Delta    |din    |San Joaquin |   0| -0.4173214|
+|P8        |Delta    |nh     |San Joaquin |  -3| -0.1665356|
+|P8        |Delta    |no23   |San Joaquin |   0| -0.4745717|
+|D4        |Suisun   |din    |Salinity    |  -2|  0.5599347|
+|D4        |Suisun   |nh     |Salinity    |  -2|  0.4511271|
+|D4        |Suisun   |no23   |Salinity    |  -2|  0.5313091|
+|D6        |Suisun   |din    |Salinity    |  -2|  0.4412918|
+|D6        |Suisun   |nh     |Salinity    |  -1|  0.4212262|
+|D6        |Suisun   |no23   |Salinity    |  -2|  0.3767135|
+|D7        |Suisun   |din    |Salinity    |  -3|  0.5235820|
+|D7        |Suisun   |nh     |Salinity    |  -2|  0.4791597|
+|D7        |Suisun   |no23   |Salinity    |  -3|  0.4811756|
+Sites were matched with flow or salinity records based on flow contributions in Novick et al.  Weighted regression models were run for each station and each nutrient species of nitrogen.   
+
+![](README_files/figure-html/unnamed-chunk-6-1.png)![](README_files/figure-html/unnamed-chunk-6-2.png)![](README_files/figure-html/unnamed-chunk-6-3.png)
+
+![](README_files/figure-html/unnamed-chunk-7-1.png)![](README_files/figure-html/unnamed-chunk-7-2.png)![](README_files/figure-html/unnamed-chunk-7-3.png)
 
 ### To do 
 

@@ -241,3 +241,114 @@ corests <- unnest(corests, corest) %>%
 nutcor <- corests
 save(nutcor, file = 'data/nutcor.RData')
 
+######
+# min or max cor of each nut parm with flow or sal time series, respectively
+# each site is matched with the flow or salinity record ided in figure 10 of Novick et al
+
+data(flocor)
+
+# lookup table for flow, nutrient recs
+floref <- data.frame(
+  Site_Code = c('C10', 'C3', 'P8', 'D4', 'D6', 'D7'), 
+  flovar = c('San Joaquin', 'Sacramento', 'San Joaquin', 'Salinity', 'Salinity', 'Salinity'), 
+  stringsAsFactors = F
+  )
+
+# iterate through floref 
+bests <- NULL
+for(i in 1:nrow(floref)){
+  
+  site <- floref[i, 'Site_Code']
+  flo <- floref[i, 'flovar']
+  
+  toeval <- filter(flocor, Site_Code == site & flovar == flo) %>% 
+    filter(lag <= 0) %>% 
+    group_by(resvar)
+  
+  # get max cor if salinity
+  if(flo == 'Salinity'){
+  
+    outest <- filter(toeval, max(acf) == acf)
+    
+  # otherwise min cor  
+  } else {
+  
+    outest <- filter(toeval, min(acf) == acf)
+      
+  }
+  
+  bests <- rbind(bests, outest)
+  
+}
+
+bests <- as.data.frame(bests, stringsAsFactors = FALSE)
+
+save(bests, file = 'data/bests.RData', compress = 'xz')
+
+######
+# dataset for wrtds, all response, flow values are ln + 1 transformed, flow (or salinity) records for each nutrient variable and station are combined based on the monthly lag ided from bests.RData
+
+data(delt_dat)
+data(flow_dat)
+data(bests)
+
+# prep data for combining, have to get data as monthly averages for lag combos
+toeval <- tidyr::spread(flow_dat, station, q) %>% 
+  select(-east) %>% 
+  left_join(delt_dat, ., by = 'Date') %>% 
+  select(-Latitude, -Longitude, -tn) %>% 
+  tidyr::gather('resvar', 'resval', din:no23) %>% 
+  tidyr::gather('flovar', 'floval', sal:sjr) %>% 
+  mutate(
+    flovar = factor(flovar, levels = c('sacyolo', 'sal', 'sjr'), labels = c('Sacramento', 'Salinity', 'San Joaquin')), 
+    year = year(Date), 
+    month = month(Date)
+    ) %>% 
+  select(-Date) %>% 
+  group_by(Site_Code, Location, resvar, flovar) %>% 
+  complete(year, month) %>% 
+  group_by(Site_Code, Location, resvar, flovar, year, month) %>%   
+  summarize(
+    resval = mean(resval, na.rm = TRUE),
+    floval = mean(floval, na.rm = TRUE)
+    ) %>% 
+  mutate(
+    day = 1,
+    Date = paste(year, month, day, sep = '-'), 
+    Date = as.Date(Date)
+    ) %>% 
+  ungroup %>% 
+  select(Location, Site_Code, Date, resvar, resval, flovar, floval)
+
+# iterate through the lag combos, for each site and nut
+# bump up the flow record by the month lags, if any
+out <- NULL
+for(i in 1:nrow(bests)){
+  
+  site <- bests[i, 'Site_Code'] 
+  flo <- bests[i, 'flovar']
+  res <- bests[i, 'resvar']
+  lag <- abs(bests[i, 'lag'])
+  
+  tocomb <- filter(toeval, Site_Code == site & flovar == flo & resvar == res)
+
+  florec <- tocomb$floval
+  florec <- c(rep(NA, lag), florec)
+  n <- length(florec)
+  florec <- florec[c(1:(n - lag))]
+  tocomb$flolag <- florec
+  
+  out <- rbind(out, tocomb)
+  
+}
+
+out <- select(out, -floval) %>% 
+  mutate(
+    resval = log(1 + resval),
+    flolag = log(1 + flolag),
+    lim = -1e6
+  )
+
+tomod <- out
+
+save(tomod, file = 'data/tomod.RData', compress = 'xz')
