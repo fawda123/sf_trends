@@ -128,7 +128,7 @@ for(i in 1:nrow(mods)){
   p <- prdnrmplot(toplo) +
     ggtitle(lab) + 
     theme_minimal() +
-    theme(axis.title = element_blank(), legend.position = 'top') #+
+    theme(axis.title = element_blank(), legend.position = 'top')#+
     # scale_y_continuous(limits = c(0, limy))
 
   # get legend
@@ -198,13 +198,13 @@ for(i in 1:nrow(mods)){
   p <- dynaplot(toplo, month = c(1, 4, 7, 10), ncol = 1) +
     ggtitle(lab) + 
     theme_minimal() +
-    theme(axis.title = element_blank(), legend.position = 'top') +
-    scale_x_continuous(limits = c(0, 1))# +
+    theme(axis.title = element_blank(), legend.position = 'top')# +
+    # scale_x_continuous(limits = c(0, 1)) +
     # scale_y_continuous(limits = c(0, limy))
 
   # flip if Suisun (salinity was used)
   if(as.character(mods[i, 'Location']) == 'Suisun')
-    p <- p + scale_x_reverse(limits = c(1, 0))
+    p <- p + scale_x_reverse()
   
   # get legend
   if(i == 1) pleg <- g_legend(p)
@@ -226,7 +226,7 @@ ylab3 <- attr(mods$mod[[3]], 'reslab')
 grid.arrange(
   pleg, nrow = 3, heights = c(0.1, 1, 0.1), 
   arrangeGrob(
-  ncol = 2, widths = c(0.1, 1), 
+  ncol = 2, widths = c(0.05, 1), 
     grid::textGrob(ylab1, rot = 90), 
     arrangeGrob(p1, p4, p7, p10, p13, p16, ncol = 6)
   ), 
@@ -236,7 +236,7 @@ grid.arrange(
 grid.arrange(
   pleg, nrow = 3, heights = c(0.1, 1, 0.1), 
   arrangeGrob(
-  ncol = 2, widths = c(0.1, 1), 
+  ncol = 2, widths = c(0.05, 1), 
     grid::textGrob(ylab2, rot = 90), 
     arrangeGrob(p2, p5, p8, p11, p14, p17, ncol = 6)
   ), 
@@ -246,7 +246,7 @@ grid.arrange(
 grid.arrange(
   pleg, nrow = 3, heights = c(0.1, 1, 0.1), 
   arrangeGrob(
-  ncol = 2, widths = c(0.1, 1), 
+  ncol = 2, widths = c(0.05, 1), 
     grid::textGrob(ylab3, rot = 90), 
     arrangeGrob(p3, p6, p9, p12, p15, p18, ncol = 6)
   ), 
