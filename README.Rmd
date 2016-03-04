@@ -128,8 +128,8 @@ for(i in 1:nrow(mods)){
   p <- prdnrmplot(toplo) +
     ggtitle(lab) + 
     theme_minimal() +
-    theme(axis.title = element_blank(), legend.position = 'top')#+
-    # scale_y_continuous(limits = c(0, limy))
+    theme(axis.title = element_blank(), legend.position = 'top') +
+    scale_y_continuous(limits = c(0, limy))
 
   # get legend
   if(i == 1) pleg <- g_legend(p)
@@ -198,9 +198,9 @@ for(i in 1:nrow(mods)){
   p <- dynaplot(toplo, month = c(1, 4, 7, 10), ncol = 1) +
     ggtitle(lab) + 
     theme_minimal() +
-    theme(axis.title = element_blank(), legend.position = 'top')# +
+    theme(axis.title = element_blank(), legend.position = 'top') +
     # scale_x_continuous(limits = c(0, 1)) +
-    # scale_y_continuous(limits = c(0, limy))
+    scale_y_continuous(limits = c(0, limy))
 
   # flip if Suisun (salinity was used)
   if(as.character(mods[i, 'Location']) == 'Suisun')
