@@ -7,6 +7,9 @@ library(readxl)
 library(ggplot2)
 library(lubridate)
 library(purrr)
+library(WRTDStidal)
+library(foreach)
+library(doParallel)
 
 ######
 # wq data
@@ -45,6 +48,7 @@ dat <- filter(dat, Site_Code %in% c('C3', 'C10', 'P8', 'D4', 'D7', 'D6')) %>%
     month = month(Date), 
     day = day(Date)
   ) %>% 
+  filter(year > 1975 & year < 2014) %>% 
   gather('var', 'val', Latitude:sal) %>% 
   group_by(Site_Code, year, month, day, var) %>% 
   summarize(val = mean(val, na.rm = TRUE)) %>% 
@@ -349,6 +353,129 @@ out <- select(out, -floval) %>%
     lim = -1e6
   )
 
-tomod <- out
+mods <- out
 
-save(tomod, file = 'data/tomod.RData', compress = 'xz')
+save(mods, file = 'data/mods.RData', compress = 'xz')
+
+######
+# fit models with default window widths
+# get predictions with daily flow records
+
+cl <- makeCluster(7)
+registerDoParallel(cl)
+
+data(mods)
+
+mods <- mutate(mods, resdup = resvar) %>% 
+  group_by(Location, Site_Code, resvar, flovar) %>% 
+  nest 
+
+# resvar label lookup
+lablk <- list(
+  shrt = c('din', 'nh', 'no23'),
+  lngs = c(
+    expression(paste('ln-dissolved inorganic nitrogen (mg ', L^-1, ')')),
+    expression(paste('ln-ammonium (mg ', L^-1, ')')),
+    expression(paste('ln-nitrite/nitrate (mg ', L^-1, ')'))
+    )
+  )
+
+# flovar label lookup
+stalk <- list(
+  shrt = c('sjr', 'sacyolo', 'sal'),
+  lngs = c('San Joaquin', 'Sacramento', 'Salinity')
+  )
+
+strt <- Sys.time()
+
+# iterate through stations, res vars to model
+# get predictions from obs time series of salinity or flow
+mods_out <- foreach(i = 1:nrow(mods)) %dopar% {
+  
+  data(flow_dat)
+  data(delt_dat)
+  
+  library(dplyr)
+  library(WRTDStidal)
+  
+  sink('C:/Users/mbeck/Desktop/log.txt')
+  cat(i, 'of', nrow(mods), '\n')
+  print(Sys.time()-strt)
+  sink()
+  
+  # data, respons variable label
+  dat <- mods[i, ]$data[[1]]
+  resvar <- mods[i, ]$resvar
+  flovar <- mods[i, ]$flovar
+  sta <- mods[i, ]$Site_Code
+  reslab <- with(lablk, lngs[shrt == resvar])
+  flolab <- with(stalk, shrt[lngs == flovar])
+  
+  # prep data as tidal object
+  tomod <- select(dat, Date, resval, flolag, lim) %>% 
+    rename(
+      res = resval, 
+      flo = flolag
+    ) %>% 
+    data.frame %>% 
+    tidal(., 
+      reslab = reslab, 
+      flolab = expression(paste('ln-flow (standardized)'))
+    )
+
+  # get flo or salinity variable to predict 
+  if(flolab == 'sal'){
+    
+    topred <- filter(delt_dat, Site_Code == sta) %>% 
+      mutate(flo = log(1 + sal)) %>% 
+      rename(date = Date) %>% 
+      select(date, flo) %>% 
+      filter(date >= min(tomod$date) & date <= max(tomod$date)) %>% 
+      na.omit %>% 
+      data.frame
+    
+  } else {
+    
+    topred <- filter(flow_dat, station == flolab) %>% 
+      mutate(flo = log(1 + q)) %>% 
+      rename(date = Date) %>% 
+      select(date, flo) %>% 
+      filter(date >= min(tomod$date) & date <= max(tomod$date)) %>% 
+      na.omit %>% 
+      data.frame
+    
+  }
+  
+  # create model and exit
+  mod <- wrtds(tomod, tau = c(0.1, 0.5, 0.9), wins = list(0.5, 10, 0.5), flo_div = 30, min_obs = NULL)
+  
+  # get predictions, norms from obs flow data
+  out <- fitspred <- mod %>% 
+    respred(dat_pred = topred) %>% 
+    resnorm
+
+  # assign to unique object, save in case of fuckery
+  outnm <- paste0(sta, '_', resvar)
+  assign(outnm, out)
+  save(list = outnm, file = paste0('data/', outnm, '.RData'), compress = 'xz')
+  
+  # out for list
+  out
+  
+}
+
+# import each file, add to nested mods dataframe
+fls <- list.files('data', pattern = '^C3|^C10|^P8|^D6|^D4|^D7', full.names = T)
+dat <- lapply(fls, load, .GlobalEnv)
+names(dat) <- unlist(dat)
+dat <- lapply(dat, get)
+
+mods <- unite(mods, 'tmp', Site_Code, resvar, remove = F) %>% 
+  mutate(mod = dat[match(tmp, names(dat))]) %>% 
+  select(-tmp)
+
+# remove the individual files
+file.remove(fls)
+
+# save output
+save(mods, file = 'data/mods.RData', compress = 'xz')

@@ -22,7 +22,7 @@ author: "Marcus W. Beck, beck.marcus@epa.gov"
 
 * `nutcor.RData` results of ccf analysis of selected delta and suisun stations comparing nitrogen species
 
-* `tomod.RData` dataset for wrtds, all response, flow values are ln + 1 transformed, flow (or salinity) records for each nutrient variable and station are combined based on the monthly lag ided from `bests.RData`
+* `mods.RData` dataset for wrtds, including model results. This is a nested data frame with identifiers.  All response, flow values are ln + 1 transformed, flow (or salinity) records for each nutrient variable and station are combined based on the monthly lag ided from `bests.RData`
 
 **_R/_** Supporting R scripts
 
