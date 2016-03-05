@@ -52,8 +52,9 @@ shinyServer(function(input, output) {
     florng <- attr(flo, 'floobs_rng')
     flolab <- attr(flo, 'flolab')
     flo <- dplyr::select(flo, date, flo) %>% 
-      mutate(flo = flo * abs(diff(florng)) + florng[1])
-
+      mutate(flo = flo * abs(diff(florng)) + florng[1]) %>% 
+      na.omit
+    
     ggplot(flo, aes(x = date, y = flo)) + 
       geom_line() +
       scale_y_continuous('ln - flow') +
