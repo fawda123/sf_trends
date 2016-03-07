@@ -66,6 +66,10 @@ Sites were matched with flow or salinity records based on flow contributions in 
 
 ![](README_files/figure-html/unnamed-chunk-7-1.png)![](README_files/figure-html/unnamed-chunk-7-2.png)![](README_files/figure-html/unnamed-chunk-7-3.png)
 
+Seasonal trends between years, flow-normalized results.
+![](README_files/figure-html/unnamed-chunk-8-1.png)![](README_files/figure-html/unnamed-chunk-8-2.png)![](README_files/figure-html/unnamed-chunk-8-3.png)
+
+
 ### To do 
 
 * get detection limits

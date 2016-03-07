@@ -255,6 +255,73 @@ grid.arrange(
 
 ```
 
+Seasonal trends between years, flow-normalized results.
+```{r, fig.height = 6.5, fig.width = 10, echo = F, message = F, warning = F, eval = T}
+
+data(mods)
+
+# y axis limits for each plot
+lims <- data.frame(
+  var = c('din', 'nh', 'no23'),
+  upy = c(1.4, 0.6, 1.2)
+)
+
+for(i in 1:nrow(mods)){
+
+  toplo <- mods$mod[[i]]
+  lab <- paste(mods[i, 'Location'], mods[i, 'Site_Code'], sep = ', ')
+  
+  limy <- as.character(mods[i, 'resvar'])
+  limy <- lims[lims$var == limy, 'upy']
+    
+  p <- seasyrplot(toplo, predicted = F) +
+    ggtitle(lab) + 
+    theme_minimal() +
+    theme(axis.title = element_blank(), legend.position = 'top') +
+    scale_y_continuous(limits = c(0, limy))
+
+  # get legend
+  if(i == 1) pleg <- g_legend(p)
+  p <- p + theme(legend.position = 'none')
+
+  assign(paste0('p', i), p)
+
+}
+
+ylab1 <- attr(mods$mod[[1]], 'reslab')
+ylab2 <- attr(mods$mod[[2]], 'reslab')
+ylab3 <- attr(mods$mod[[3]], 'reslab')
+
+grid.arrange(
+  pleg, nrow = 2, heights = c(0.1, 1), 
+  arrangeGrob(
+  ncol = 2, widths = c(0.1, 1), 
+    grid::textGrob(ylab1, rot = 90), 
+    arrangeGrob(p1, p4, p7, p10, p13, p16, ncol = 3)
+  )
+)
+
+grid.arrange(
+  pleg, nrow = 2, heights = c(0.1, 1), 
+  arrangeGrob(
+  ncol = 2, widths = c(0.1, 1), 
+    grid::textGrob(ylab2, rot = 90), 
+    arrangeGrob(p2, p5, p8, p11, p14, p17, ncol = 3)
+  )
+)
+
+grid.arrange(
+  pleg, nrow = 2, heights = c(0.1, 1), 
+  arrangeGrob(
+  ncol = 2, widths = c(0.1, 1), 
+    grid::textGrob(ylab3, rot = 90), 
+    arrangeGrob(p3, p6, p9, p12, p15, p18, ncol = 3)
+  )
+)
+
+```
+
+
 ### To do 
 
 * get detection limits
