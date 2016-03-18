@@ -27,7 +27,7 @@ Marcus W. Beck, beck.marcus@epa.gov
 
 
 
-Monthly nutrient samples at selected stations were compared with flow estimates to characterize variation in time series correlations. Time series were compared using cross-correlation analysis with lags +/- 12 months.  Selected stations from the delta were C10, C, and P8 and selected stations from Suisun were D4, D6, and D7.  Flow estimates from Novick et al. were the Sacramento River plus Yolo bypass (`sacyolo = sac + yolo`),  San Joaquin River (`sjr`).  Nutrient data were also compared with salinity observations at each station.  Nitrogen species evaluated included dissolved inorganic nitrogen (`din`), ammonium (`nh`), and nitrite/nitrate (`no23`). 
+Monthly nutrient samples at selected stations were compared with flow estimates to characterize variation in time series correlations. Time series were compared using cross-correlation analysis with lags +/- 12 months.  Selected stations from the delta were C10, C3, and P8 and selected stations from Suisun were D4, D6, and D7.  Flow estimates from Novick et al. were the Sacramento River plus Yolo bypass (`sacyolo = sac + yolo`),  San Joaquin River (`sjr`).  Nutrient data were also compared with salinity observations at each station.  Nitrogen species evaluated included dissolved inorganic nitrogen (`din`), ammonium (`nh`), and nitrite/nitrate (`no23`). 
 
 ![](README_files/figure-html/unnamed-chunk-2-1.png)
   
@@ -35,10 +35,9 @@ The above analysis was repeated to compare temporal variation of nitrogen specie
 
 ![](README_files/figure-html/unnamed-chunk-3-1.png)
 
-<img src="README_files/figure-html/unnamed-chunk-4-1.png" title="" alt="" width="400px" /><img src="README_files/figure-html/unnamed-chunk-4-2.png" title="" alt="" width="400px" /><img src="README_files/figure-html/unnamed-chunk-4-3.png" title="" alt="" width="400px" /><img src="README_files/figure-html/unnamed-chunk-4-4.png" title="" alt="" width="400px" /><img src="README_files/figure-html/unnamed-chunk-4-5.png" title="" alt="" width="400px" /><img src="README_files/figure-html/unnamed-chunk-4-6.png" title="" alt="" width="400px" />
-
 ### Matching stations to flow or salinity records
 
+This table shows the preceding lag in months at which the correlation of the flow variable was highest (as an absolute magnitude) for the corresponding site and nutrient variable.  Flow variables matched with each nutrient station were those with the nearest geographic location, e.g., C10 is near the inflow of San Joaquin into the delta, D4 is closer to the ocean and was matched wtih salinity, etc.  Nutrient data were matched with the flow/salinity time series at the corresponding lag to develop weighted regression models.  For example, a maximum lag of -4 means that the flow record four months prior to the nutrient record was matched on the observed date of the nutrient sample. 
 
 |Site_Code |Location |resvar |flovar      | lag|        acf|
 |:---------|:--------|:------|:-----------|---:|----------:|
@@ -60,14 +59,37 @@ The above analysis was repeated to compare temporal variation of nitrogen specie
 |D7        |Suisun   |din    |Salinity    |  -3|  0.5189457|
 |D7        |Suisun   |nh     |Salinity    |  -2|  0.4753318|
 |D7        |Suisun   |no23   |Salinity    |  -3|  0.4664261|
-Sites were matched with flow or salinity records based on flow contributions in Novick et al.  Weighted regression models were run for each station and each nutrient species of nitrogen.   
+
+The plots below show annually-averaged results of weighted regression for each station using the nutrient records and matched flow/salinity data.  The three lines in each plot represent model results for the conditional distributions of the 10th, 50th, and 90th percentiles of the nutrient record.  Points represent model predictions and lines are flow-normalized predictions that show trends independent of flow variation.The following describes points of interest that can be idenfied from the plots:
+
+* General trends - flow-normalized trends over time are the most descriptive of changes, are nutrients decreasing, inreasing, or constant?
+* Differences in the percentiles - variation in the 10th or 90th percentile distributions that differ from the median response suggest changes in frequency occurrence of low or high nutrient events, respectively.  In other words, the median response does not tell the whole picture about change in nutrient concentrations over time.  
+* Differences in flow-normalized predictions and observed predictions - large differences between the two represent either a large effect of flow or an inappropriate flow variable
+* Differences in the magnitude of the modelled response between locations - differences can show the relative proportions of nitrogen species at each site.  This is why the y-axis limits are constant for each response measure.
+* Differences by nutrient species - how do the plots change with the nutrient species given any of the above information?  
+
+![](README_files/figure-html/unnamed-chunk-5-1.png)![](README_files/figure-html/unnamed-chunk-5-2.png)![](README_files/figure-html/unnamed-chunk-5-3.png)
+
+The plots below show changes over time in the relationship between nutrients and flow.  The plots are also separated by month because changes are expected to vary by season. In general, flow increases (or salinity decreases) are related to decreases in nutrient concentrations as more freshwater inputs have a dilution effect. The data in each plot are from the interpolation grid for weighted regression that is created during model fitting.  The data are model predicions from the fit at each unique point in the time series.  The flow values that are observed in each month across all years are used for model fitting and prediction.  The following information can be obtained from each plot:
+
+* General response of nutrients to flow - a negative relationship is of course common.
+* Changes in the response over time - does the relationship vary from early to later in the time series?  These changes might suggest system response to different sources of pollution.  Previous studies (Hirsch et al. 2010, Beck and Hagy 2015) suggested that changes in this response might indicate shifts between point and non-point sources of pollution.  That is, nutrients will show minimal response to changes in flow (flat lines) if point-sources dominate load inputs because they will not vary with flow.  Conversely, non-point sources of pollution will change with flow such that a negative response of nutrient concention to increasing flow may suggest a larger influence of non-point sources. 
+* Changes in the concentration over time independent of the flow response - are the response lines higher or lower from early to later in the time series?  This can indicate a change in the average concentration, which should also be verified with the plots above.
+* Changes by season - from top to bottom (variation by rows), how does the nutrient-flow relatinship vary throughout the year?  How does the nutrient-flow relatonship vary by season and throughout the time series (i.e., season/year interaction)?  Seasonal changes may be expected given climate patterns and flow inputs throughout the year.  Seasonal changes may also occur based on the succession of phytoplankton species throughout the year and the affinity for different nutrients. 
+* Changes between sites - how does the flow/nutrient response vary by location (variation between columns)?  This could differ for a number of reasons. 
+* Changes by nutrient species - how do the plots change with the nutrient species given any of the above information?  
 
 ![](README_files/figure-html/unnamed-chunk-6-1.png)![](README_files/figure-html/unnamed-chunk-6-2.png)![](README_files/figure-html/unnamed-chunk-6-3.png)
 
-![](README_files/figure-html/unnamed-chunk-7-1.png)![](README_files/figure-html/unnamed-chunk-7-2.png)![](README_files/figure-html/unnamed-chunk-7-3.png)
+The plots below show seasonal changes in flow-normalized results over time using a common-axis that shows only day of the year.  They are similar to the above plots except changes in response to flow are not explicitly included. As above, the lines are specific to different years in the time series.  Excluding specific information about flow response, most of the points for the above plots apply to those below.  The plots can be used as follows:
 
-Seasonal trends between years, flow-normalized results.
-![](README_files/figure-html/unnamed-chunk-8-1.png)![](README_files/figure-html/unnamed-chunk-8-2.png)![](README_files/figure-html/unnamed-chunk-8-3.png)
+* Changes by season - from left to right, how do nutrients change throughout the year? 
+* Changes by year - variation by color, do average nutrient concentrations change throughout the time series?
+* Changes by year and season - is there an interaction between the two?  That is, does the seasonal change from left the right vary given the year?  
+* Differences by location - how do the plots change with the site given any of the above information?  
+* Differences by nutrient species - how do the plots change with the nutrient species given any of the above information?  
+
+![](README_files/figure-html/unnamed-chunk-7-1.png)![](README_files/figure-html/unnamed-chunk-7-2.png)![](README_files/figure-html/unnamed-chunk-7-3.png)
 
 
 ### To do 
