@@ -91,6 +91,14 @@ The plots below show seasonal changes in flow-normalized results over time using
 
 ![](README_files/figure-html/unnamed-chunk-7-1.png)![](README_files/figure-html/unnamed-chunk-7-2.png)![](README_files/figure-html/unnamed-chunk-7-3.png)
 
+### Effect of using lagged flow or salinity variables
+
+The effect of using lagged or no lagged flow or salinity variables on model performance was evaluated with residual errors.  Models were fit using the 'optimal' lags from above and using no lags.  The plot below shows root mean squared error for the different models fit, using the conditional median as an example. The identified lag for each station, variable combination is below each bar. Using lagged variables causes an increase in error and reduction in performance. 
+
+![](README_files/figure-html/unnamed-chunk-8-1.png)
+
+
+
 
 ### To do 
 

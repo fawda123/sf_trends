@@ -331,6 +331,68 @@ grid.arrange(
 
 ```
 
+### Effect of using lagged flow or salinity variables
+
+The effect of using lagged or no lagged flow or salinity variables on model performance was evaluated with residual errors.  Models were fit using the 'optimal' lags from above and using no lags.  The plot below shows root mean squared error for the different models fit, using the conditional median as an example. The identified lag for each station, variable combination is below each bar. Using lagged variables causes an increase in error and reduction in performance. 
+
+```{r fig.height = 5, fig.width = 10, echo = FALSE}
+# load the data
+data(mods)
+data(mods_nolag)
+data(bests)
+
+## get model performance from the data objects
+
+# models w/ lagged flo variables
+wlag <- map(mods$mod, wrtdsperf) %>% 
+  do.call('rbind', .) %>% 
+  mutate(
+    lab = gsub('\\.[0-9]$', '', row.names(.)), 
+    typ = 'With lag'
+    ) %>% 
+  separate(lab, c('stat', 'var'), sep = '_')
+
+# models w/o no lagged variables
+nlag <- map(mods_nolag$mod, wrtdsperf) %>% 
+  do.call('rbind', .) %>% 
+  mutate(
+    lab = gsub('\\.[0-9]$', '', row.names(.)), 
+    typ = 'No lag'
+    ) %>% 
+  separate(lab, c('stat', 'var'), sep = '_')
+
+# combine for plotting, extract results for median mod
+perfs <- rbind(wlag, nlag) %>% 
+  filter(tau == 0.5)
+
+# txt to add to the plot showing lag
+txt <- rename(bests, 
+  var = resvar, 
+  stat = Site_Code
+)
+
+# color vector
+cols <- RColorBrewer::brewer.pal(9, 'Set1')[c(2, 3)]
+
+# the plot
+ggplot(perfs, aes(x = stat, y = rmse)) +
+  geom_bar(aes(fill = typ), stat = 'identity', position = 'dodge', alpha = 0.75) + 
+  geom_text(data = txt, aes(y = -0.007, label = lag)) +
+  facet_grid(~var) +
+  theme_minimal() +
+  theme(
+    axis.line.x = element_line(size = 0.5),
+    axis.line.y = element_line(size = 0.5),
+    legend.position = 'top',
+    legend.title = element_blank(), 
+    axis.title.x= element_blank()
+    ) + 
+  scale_fill_manual(values = cols)
+    
+```
+
+
+
 
 ### To do 
 
