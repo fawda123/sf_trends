@@ -56,22 +56,11 @@
 # 
 # save(mods_opt, file = 'data/mods_opt.RData', compress = 'xz')
 
-flo <- mods$mod[[1]]
-florng <- attr(flo, 'floobs_rng')
-flolab <- attr(flo, 'flolab')
-flo <- dplyr::select(flo, date, flo) %>% 
-  mutate(flo = flo * abs(diff(florng)) + florng[1])
+library(purrr)
+library(dplyr)
+library(WRTDStidal)
 
-yrrng <- c(1990, 2000)
-yrrng <- as.Date(paste0(yrrng, '-01-01'))
-p1 <- ggplot(flo, aes(x = date, y = flo)) + 
-  geom_line() +
-  scale_y_continuous('ln - flow') +
-  theme_minimal() +
-  theme(axis.title.x = element_blank()) +
-  scale_x_date(limits = yrrng)
-p2 <- fitplot(mods$mod[[1]], annuals = F, predicted = T, alpha = 0.7) +
-  scale_x_date(limits = yrrng)
-p3 <- fitplot(mods$mod[[1]], annuals = F, predicted = F, alpha = 0.7) +
-  scale_x_date(limits = yrrng)
+data(mods)
+
+perf <- map(mods$mod, wrtdsperf)
 

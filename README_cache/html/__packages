@@ -1,0 +1,9 @@
+base
+ggplot2
+dplyr
+tidyr
+WRTDStidal
+gridExtra
+lubridate
+purrr
+GGally
