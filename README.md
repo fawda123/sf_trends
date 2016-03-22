@@ -1,6 +1,8 @@
 # README
 Marcus W. Beck, beck.marcus@epa.gov  
 
+Content available at [https://github.com/fawda123/sf_trends](https://github.com/fawda123/sf_trends)
+
 ### Files
 
 **_data/_** Supporting RData files, usually from data in ignore folder, unless otherwise noted all files were created in `R/dat_proc.R`
@@ -18,6 +20,8 @@ Marcus W. Beck, beck.marcus@epa.gov
 * `nutcor.RData` results of ccf analysis of selected delta and suisun stations comparing nitrogen species
 
 * `mods.RData` dataset for wrtds, including model results. This is a nested data frame with identifiers.  All response, flow values are ln + 1 transformed, flow (or salinity) records for each nutrient variable and station are combined based on the monthly lag ided from `bests.RData`
+
+* `mods_nolag.RData` dataset for wrtds, including model results.  This is the same file as `mods.RData` except the matched flow variables are not lagged.
 
 **_R/_** Supporting R scripts
 

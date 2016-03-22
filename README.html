@@ -217,6 +217,7 @@ div.tocify {
 </div>
 
 
+<p>Content available at <a href="https://github.com/fawda123/sf_trends"><a href="https://github.com/fawda123/sf_trends" class="uri">https://github.com/fawda123/sf_trends</a></a></p>
 <div id="files" class="section level3">
 <h3>Files</h3>
 <p><strong><em>data/</em></strong> Supporting RData files, usually from data in ignore folder, unless otherwise noted all files were created in <code>R/dat_proc.R</code></p>
@@ -228,6 +229,7 @@ div.tocify {
 <li><p><code>flow_dat.RData</code> time series of daily flow estimates for the delta, input stations from Novick et al (Fig 2) were used</p></li>
 <li><p><code>nutcor.RData</code> results of ccf analysis of selected delta and suisun stations comparing nitrogen species</p></li>
 <li><p><code>mods.RData</code> dataset for wrtds, including model results. This is a nested data frame with identifiers. All response, flow values are ln + 1 transformed, flow (or salinity) records for each nutrient variable and station are combined based on the monthly lag ided from <code>bests.RData</code></p></li>
+<li><p><code>mods_nolag.RData</code> dataset for wrtds, including model results. This is the same file as <code>mods.RData</code> except the matched flow variables are not lagged.</p></li>
 </ul>
 <p><strong><em>R/</em></strong> Supporting R scripts</p>
 <p><strong><em>text/</em></strong> Summary text of analyses</p>
