@@ -4,6 +4,8 @@ output:
   html_document:
     keep_md: yes
     code_folding: hide
+    toc: true
+    toc_float: true
 author: "Marcus W. Beck, beck.marcus@epa.gov"
 ---
 
