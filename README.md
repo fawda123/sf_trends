@@ -93,26 +93,26 @@ knitr::kable(bests, format = 'markdown', caption = 'Minimum correlations and lag
 
 |Site_Code |Location |resvar |flovar      | lag|        acf|
 |:---------|:--------|:------|:-----------|---:|----------:|
-|C10       |Delta    |din    |San Joaquin |   0| -0.6269706|
-|C10       |Delta    |nh     |San Joaquin |  -4| -0.2451807|
-|C10       |Delta    |no23   |San Joaquin |   0| -0.6472901|
-|C3        |Delta    |din    |Sacramento  |   0| -0.5077493|
-|C3        |Delta    |nh     |Sacramento  |   0| -0.6839323|
-|C3        |Delta    |no23   |Sacramento  |  -3| -0.2711726|
-|P8        |Delta    |din    |San Joaquin |   0| -0.4151813|
-|P8        |Delta    |nh     |San Joaquin |  -3| -0.1764686|
-|P8        |Delta    |no23   |San Joaquin |   0| -0.4724534|
-|D4        |Suisun   |din    |Salinity    |  -2|  0.5440757|
-|D4        |Suisun   |nh     |Salinity    |  -2|  0.4444447|
-|D4        |Suisun   |no23   |Salinity    |  -2|  0.5116835|
-|D6        |Suisun   |din    |Salinity    |  -2|  0.4363288|
-|D6        |Suisun   |nh     |Salinity    |  -1|  0.4233493|
-|D6        |Suisun   |no23   |Salinity    |  -2|  0.3697885|
-|D7        |Suisun   |din    |Salinity    |  -3|  0.5189457|
-|D7        |Suisun   |nh     |Salinity    |  -2|  0.4753318|
-|D7        |Suisun   |no23   |Salinity    |  -3|  0.4664261|
+|C10       |Delta    |din    |San Joaquin |   0| -0.6541804|
+|C10       |Delta    |nh     |San Joaquin |  -3| -0.1250742|
+|C10       |Delta    |no23   |San Joaquin |   0| -0.6769895|
+|C3        |Delta    |din    |Sacramento  |   0| -0.5375051|
+|C3        |Delta    |nh     |Sacramento  |   0| -0.7299349|
+|C3        |Delta    |no23   |Sacramento  |  -4| -0.2635292|
+|P8        |Delta    |din    |San Joaquin |   0| -0.4399586|
+|P8        |Delta    |nh     |San Joaquin |  -3| -0.1641490|
+|P8        |Delta    |no23   |San Joaquin |   0| -0.4794830|
+|D4        |Suisun   |din    |Salinity    |  -3|  0.5319224|
+|D4        |Suisun   |nh     |Salinity    |  -2|  0.3478721|
+|D4        |Suisun   |no23   |Salinity    |  -3|  0.5023232|
+|D6        |Suisun   |din    |Salinity    |  -2|  0.4032670|
+|D6        |Suisun   |nh     |Salinity    |  -1|  0.3501523|
+|D6        |Suisun   |no23   |Salinity    |  -3|  0.3417281|
+|D7        |Suisun   |din    |Salinity    |  -3|  0.4688692|
+|D7        |Suisun   |nh     |Salinity    |  -2|  0.4210653|
+|D7        |Suisun   |no23   |Salinity    |  -4|  0.3972676|
 
-### Anually-averaged results {.tabset}
+### Annually-averaged results {.tabset}
 
 The plots below show annually-averaged results of weighted regression for each station using the nutrient records and matched flow/salinity data.  The three lines in each plot represent model results for the conditional distributions of the 10th, 50th, and 90th percentiles of the nutrient record.  Points represent model predictions and lines are flow-normalized predictions that show trends independent of flow variation.The following describes points of interest that can be idenfied from the plots:
 
@@ -128,7 +128,7 @@ The plots below show annually-averaged results of weighted regression for each s
 data(mods)
 lims <- data.frame(
   var = c('din', 'nh', 'no23'),
-  upy = c(1.3, 0.65, 1.25)
+  upy = c(3, 0.85, 2.6)
 )
 
 for(i in 1:nrow(mods)){
@@ -147,8 +147,8 @@ for(i in 1:nrow(mods)){
       legend.position = 'top', 
       axis.line.x = element_line(size = 0.5),
       axis.line.y = element_line(size = 0.5) 
-    ) #+
-    # scale_y_continuous(limits = c(0, limy))
+    ) +
+    scale_y_continuous(limits = c(0, limy))
 
   # get legend
   if(i == 1) pleg <- g_legend(p)
@@ -231,7 +231,7 @@ data(mods)
 # y axis limits for each plot
 lims <- data.frame(
   var = c('din', 'nh', 'no23'),
-  upy = c(1.7, 0.45, 1.3)
+  upy = c(3, 1, 2.8)
 )
 
 for(i in 1:nrow(mods)){
@@ -250,9 +250,9 @@ for(i in 1:nrow(mods)){
       legend.position = 'top', 
       axis.line.x = element_line(size = 0.5),
       axis.line.y = element_line(size = 0.5) 
-      ) #+
+      ) +
     # scale_x_continuous(limits = c(0, 1)) +
-    # scale_y_continuous(limits = c(0, limy))
+    scale_y_continuous(limits = c(0, limy))
 
   # flip if Suisun (salinity was used)
   if(as.character(mods[i, 'Location']) == 'Suisun')
@@ -341,7 +341,7 @@ data(mods)
 # y axis limits for each plot
 lims <- data.frame(
   var = c('din', 'nh', 'no23'),
-  upy = c(1.4, 0.6, 1.2)
+  upy = c(2.8, 0.8, 2.1)
 )
 
 for(i in 1:nrow(mods)){
@@ -360,8 +360,8 @@ for(i in 1:nrow(mods)){
       legend.position = 'top',
       axis.line.x = element_line(size = 0.5),
       axis.line.y = element_line(size = 0.5) 
-      ) #+
-    # scale_y_continuous(limits = c(0, limy))
+      ) +
+    scale_y_continuous(limits = c(0, limy))
 
   # get legend
   if(i == 1) pleg <- g_legend(p)

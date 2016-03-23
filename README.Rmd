@@ -90,7 +90,7 @@ data(bests)
 knitr::kable(bests, format = 'markdown', caption = 'Minimum correlations and lags of each nutrient station that corresponded to the flow estimates')
 ```
 
-### Anually-averaged results {.tabset}
+### Annually-averaged results {.tabset}
 
 The plots below show annually-averaged results of weighted regression for each station using the nutrient records and matched flow/salinity data.  The three lines in each plot represent model results for the conditional distributions of the 10th, 50th, and 90th percentiles of the nutrient record.  Points represent model predictions and lines are flow-normalized predictions that show trends independent of flow variation.The following describes points of interest that can be idenfied from the plots:
 
@@ -106,7 +106,7 @@ The plots below show annually-averaged results of weighted regression for each s
 data(mods)
 lims <- data.frame(
   var = c('din', 'nh', 'no23'),
-  upy = c(1.3, 0.65, 1.25)
+  upy = c(3, 0.85, 2.6)
 )
 
 for(i in 1:nrow(mods)){
@@ -125,8 +125,8 @@ for(i in 1:nrow(mods)){
       legend.position = 'top', 
       axis.line.x = element_line(size = 0.5),
       axis.line.y = element_line(size = 0.5) 
-    ) #+
-    # scale_y_continuous(limits = c(0, limy))
+    ) +
+    scale_y_continuous(limits = c(0, limy))
 
   # get legend
   if(i == 1) pleg <- g_legend(p)
@@ -201,7 +201,7 @@ data(mods)
 # y axis limits for each plot
 lims <- data.frame(
   var = c('din', 'nh', 'no23'),
-  upy = c(1.7, 0.45, 1.3)
+  upy = c(3, 1, 2.8)
 )
 
 for(i in 1:nrow(mods)){
@@ -220,9 +220,9 @@ for(i in 1:nrow(mods)){
       legend.position = 'top', 
       axis.line.x = element_line(size = 0.5),
       axis.line.y = element_line(size = 0.5) 
-      ) #+
+      ) +
     # scale_x_continuous(limits = c(0, 1)) +
-    # scale_y_continuous(limits = c(0, limy))
+    scale_y_continuous(limits = c(0, limy))
 
   # flip if Suisun (salinity was used)
   if(as.character(mods[i, 'Location']) == 'Suisun')
@@ -304,7 +304,7 @@ data(mods)
 # y axis limits for each plot
 lims <- data.frame(
   var = c('din', 'nh', 'no23'),
-  upy = c(1.4, 0.6, 1.2)
+  upy = c(2.8, 0.8, 2.1)
 )
 
 for(i in 1:nrow(mods)){
@@ -323,8 +323,8 @@ for(i in 1:nrow(mods)){
       legend.position = 'top',
       axis.line.x = element_line(size = 0.5),
       axis.line.y = element_line(size = 0.5) 
-      ) #+
-    # scale_y_continuous(limits = c(0, limy))
+      ) +
+    scale_y_continuous(limits = c(0, limy))
 
   # get legend
   if(i == 1) pleg <- g_legend(p)
