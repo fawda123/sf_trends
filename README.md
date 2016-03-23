@@ -139,7 +139,7 @@ for(i in 1:nrow(mods)){
   limy <- as.character(mods[i, 'resvar'])
   limy <- lims[lims$var == limy, 'upy']
     
-  p <- prdnrmplot(toplo) +
+  p <- prdnrmplot(toplo, logspace = F) +
     ggtitle(lab) + 
     theme_minimal() +
     theme(
@@ -147,8 +147,8 @@ for(i in 1:nrow(mods)){
       legend.position = 'top', 
       axis.line.x = element_line(size = 0.5),
       axis.line.y = element_line(size = 0.5) 
-    ) +
-    scale_y_continuous(limits = c(0, limy))
+    ) #+
+    # scale_y_continuous(limits = c(0, limy))
 
   # get legend
   if(i == 1) pleg <- g_legend(p)
@@ -163,9 +163,12 @@ for(i in 1:nrow(mods)){
 # nh <- which(mods$resvar == 'nh')
 # no23 <- which(mods$resvar == 'no23')
 
-ylab1 <- attr(mods$mod[[1]], 'reslab')
-ylab2 <- attr(mods$mod[[2]], 'reslab')
-ylab3 <- attr(mods$mod[[3]], 'reslab')
+ylab1 <- gsub('ln-', '', as.character(attr(mods$mod[[1]], 'reslab')))
+ylab1 <- parse(text = ylab1)
+ylab2 <- gsub('ln-', '', as.character(attr(mods$mod[[2]], 'reslab')))
+ylab2 <- parse(text = ylab2)
+ylab3 <- gsub('ln-', '', as.character(attr(mods$mod[[3]], 'reslab')))
+ylab3 <- parse(text = ylab3)
 
 grid.arrange(
   pleg, nrow = 2, heights = c(0.1, 1), 
@@ -239,7 +242,7 @@ for(i in 1:nrow(mods)){
   limy <- as.character(mods[i, 'resvar'])
   limy <- lims[lims$var == limy, 'upy']
     
-  p <- dynaplot(toplo, month = c(1, 4, 7, 10), ncol = 1) +
+  p <- dynaplot(toplo, month = c(1, 4, 7, 10), ncol = 1, logspace = F) +
     ggtitle(lab) + 
     theme_minimal() +
     theme(
@@ -247,9 +250,9 @@ for(i in 1:nrow(mods)){
       legend.position = 'top', 
       axis.line.x = element_line(size = 0.5),
       axis.line.y = element_line(size = 0.5) 
-      ) +
+      ) #+
     # scale_x_continuous(limits = c(0, 1)) +
-    scale_y_continuous(limits = c(0, limy))
+    # scale_y_continuous(limits = c(0, limy))
 
   # flip if Suisun (salinity was used)
   if(as.character(mods[i, 'Location']) == 'Suisun')
@@ -268,9 +271,12 @@ for(i in 1:nrow(mods)){
 # nh <- which(mods$resvar == 'nh')
 # no23 <- which(mods$resvar == 'no23')
 
-ylab1 <- attr(mods$mod[[1]], 'reslab')
-ylab2 <- attr(mods$mod[[2]], 'reslab')
-ylab3 <- attr(mods$mod[[3]], 'reslab')
+ylab1 <- gsub('ln-', '', as.character(attr(mods$mod[[1]], 'reslab')))
+ylab1 <- parse(text = ylab1)
+ylab2 <- gsub('ln-', '', as.character(attr(mods$mod[[2]], 'reslab')))
+ylab2 <- parse(text = ylab2)
+ylab3 <- gsub('ln-', '', as.character(attr(mods$mod[[3]], 'reslab')))
+ylab3 <- parse(text = ylab3)
 
 grid.arrange(
   pleg, nrow = 3, heights = c(0.1, 1, 0.1), 
@@ -346,7 +352,7 @@ for(i in 1:nrow(mods)){
   limy <- as.character(mods[i, 'resvar'])
   limy <- lims[lims$var == limy, 'upy']
     
-  p <- seasyrplot(toplo, predicted = F) +
+  p <- seasyrplot(toplo, predicted = F, logspace = F) +
     ggtitle(lab) + 
     theme_minimal() +
     theme(
@@ -354,8 +360,8 @@ for(i in 1:nrow(mods)){
       legend.position = 'top',
       axis.line.x = element_line(size = 0.5),
       axis.line.y = element_line(size = 0.5) 
-      ) +
-    scale_y_continuous(limits = c(0, limy))
+      ) #+
+    # scale_y_continuous(limits = c(0, limy))
 
   # get legend
   if(i == 1) pleg <- g_legend(p)
@@ -365,9 +371,12 @@ for(i in 1:nrow(mods)){
 
 }
 
-ylab1 <- attr(mods$mod[[1]], 'reslab')
-ylab2 <- attr(mods$mod[[2]], 'reslab')
-ylab3 <- attr(mods$mod[[3]], 'reslab')
+ylab1 <- gsub('ln-', '', as.character(attr(mods$mod[[1]], 'reslab')))
+ylab1 <- parse(text = ylab1)
+ylab2 <- gsub('ln-', '', as.character(attr(mods$mod[[2]], 'reslab')))
+ylab2 <- parse(text = ylab2)
+ylab3 <- gsub('ln-', '', as.character(attr(mods$mod[[3]], 'reslab')))
+ylab3 <- parse(text = ylab3)
 
 grid.arrange(
   pleg, nrow = 2, heights = c(0.1, 1), 
