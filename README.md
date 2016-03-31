@@ -19,9 +19,9 @@ Content available at [https://github.com/fawda123/sf_trends](https://github.com/
 
 * `nutcor.RData` results of ccf analysis of selected delta and suisun stations comparing nitrogen species
 
-* `mods.RData` dataset for wrtds, including model results. This is a nested data frame with identifiers.  All response, flow values are ln + 1 transformed, flow (or salinity) records for each nutrient variable and station are combined based on the monthly lag ided from `bests.RData`
+* `mods_lag.RData` dataset for wrtds, including model results. This is a nested data frame with identifiers.  All response, flow values are ln + 1 transformed, flow (or salinity) records for each nutrient variable and station are combined based on the monthly lag ided from `bests.RData`
 
-* `mods_nolag.RData` dataset for wrtds, including model results.  This is the same file as `mods.RData` except the matched flow variables are not lagged.
+* `mods_nolag.RData` dataset for wrtds, including model results.  This is the same file as `mods_lag.RData` except the matched flow variables are not lagged.
 
 **_R/_** Supporting R scripts
 
@@ -82,20 +82,23 @@ ggplot(nutcor, aes(x = lag, y = acf, colour = var2, group = var2)) +
 
 ### Effect of using lagged flow or salinity variables {.tabset}
 
-The above plots suggest that maximum correlations between flow and nutrient time series may be observed at specific monthly lags.  A logical expectation is that performance of weighted regression models could be improved if flow variables are matched with nutrient records at the lag with the maximum correlation.  The effect of using lagged or no lagged flow or salinity variables on model performance was evaluated with residual errors.  Models were fit using the 'optimal' lags from above and using no lags.  The plots below show root mean squared error for the different models fit for each of the conditional quantiles. The identified lag for each station/variable combination is below each bar. Interestingly, using lagged variables causes an increase in error and reduction in performance.  All results below are for models that did not include a temporal lag for the flow or salinity variables.  
+The above plots suggest that maximum correlations between flow and nutrient time series may be observed at specific monthly lags.  A logical expectation is that performance of weighted regression models could be improved if flow variables are matched with nutrient records at the lag with the maximum correlation.  The effect of using lagged or no lagged flow or salinity variables on model performance was evaluated with residual errors.  Models were fit using the 'optimal' lags from above and using no lags.  The plots below show root mean squared error for the different models fit for each of the conditional quantiles. The identified lag for each station/variable combination is below each bar. Interestingly, using lagged variables causes a slight increase in error, implying a reduction in performance.  All results below are for models that did not include a temporal lag for the flow or salinity variables.  Flow records matched to each station were based on physical proximity (e.g., C3 with Sacramento).
 
 #### 0.1
 
 ```r
 # load the data
-data(mods)
+data(mods_lag)
 data(mods_nolag)
 data(bests)
+
+ylims <- c(-0.05, 1.4)
+ytext <- -0.04
 
 ## get model performance from the data objects
 
 # models w/ lagged flo variables
-wlag <- map(mods$mod, wrtdsperf) %>% 
+wlag <- map(mods_lag$mod, wrtdsperf) %>% 
   do.call('rbind', .) %>% 
   mutate(
     lab = gsub('\\.[0-9]$', '', row.names(.)), 
@@ -127,7 +130,7 @@ cols <- RColorBrewer::brewer.pal(9, 'Set1')[c(2, 3)]
 # the plot
 ggplot(perfs[perfs$tau == 0.1,], aes(x = stat, y = rmse)) +
   geom_bar(aes(fill = typ), stat = 'identity', position = 'dodge', alpha = 0.75) + 
-  geom_text(data = txt, aes(y = -0.007, label = lag)) +
+  geom_text(data = txt, aes(y = ytext, label = lag)) +
   facet_grid(~var) +
   theme_minimal() +
   theme(
@@ -137,6 +140,7 @@ ggplot(perfs[perfs$tau == 0.1,], aes(x = stat, y = rmse)) +
     legend.title = element_blank(), 
     axis.title.x= element_blank()
     ) + 
+  scale_y_continuous(limits = ylims) + 
   scale_fill_manual(values = cols)
 ```
 
@@ -148,7 +152,7 @@ ggplot(perfs[perfs$tau == 0.1,], aes(x = stat, y = rmse)) +
 # the plot
 ggplot(perfs[perfs$tau == 0.5,], aes(x = stat, y = rmse)) +
   geom_bar(aes(fill = typ), stat = 'identity', position = 'dodge', alpha = 0.75) + 
-  geom_text(data = txt, aes(y = -0.007, label = lag)) +
+  geom_text(data = txt, aes(y = ytext, label = lag)) +
   facet_grid(~var) +
   theme_minimal() +
   theme(
@@ -158,7 +162,8 @@ ggplot(perfs[perfs$tau == 0.5,], aes(x = stat, y = rmse)) +
     legend.title = element_blank(), 
     axis.title.x= element_blank()
     ) + 
-  scale_fill_manual(values = cols)
+  scale_fill_manual(values = cols) + 
+  scale_y_continuous(limits = ylims)
 ```
 
 ![](README_files/figure-html/unnamed-chunk-5-1.png)
@@ -169,7 +174,7 @@ ggplot(perfs[perfs$tau == 0.5,], aes(x = stat, y = rmse)) +
 # the plot
 ggplot(perfs[perfs$tau == 0.9,], aes(x = stat, y = rmse)) +
   geom_bar(aes(fill = typ), stat = 'identity', position = 'dodge', alpha = 0.75) + 
-  geom_text(data = txt, aes(y = -0.007, label = lag)) +
+  geom_text(data = txt, aes(y = ytext, label = lag)) +
   facet_grid(~var) +
   theme_minimal() +
   theme(
@@ -179,14 +184,15 @@ ggplot(perfs[perfs$tau == 0.9,], aes(x = stat, y = rmse)) +
     legend.title = element_blank(), 
     axis.title.x= element_blank()
     ) + 
-  scale_fill_manual(values = cols)
+  scale_fill_manual(values = cols) + 
+  scale_y_continuous(limits = ylims)
 ```
 
 ![](README_files/figure-html/unnamed-chunk-6-1.png)
 
 ### Annually-averaged results {.tabset}
 
-The plots below show annually-averaged results of weighted regression for each station using the nutrient records and matched flow/salinity data.  The three lines in each plot represent model results for the conditional distributions of the 10th, 50th, and 90th percentiles of the nutrient record.  Points represent model predictions and lines are flow-normalized predictions that show trends independent of flow variation.The following describes points of interest that can be idenfied from the plots:
+The plots below show annually-averaged results of weighted regression for each station using the combined nutrient records and flow/salinity data.  The three lines in each plot represent model results for the conditional distributions of the 10th, 50th, and 90th percentiles of the nutrient record.  Points represent model predictions and lines are flow-normalized predictions that show trends independent of flow variation.The following describes points of interest that can be idenfied from the plots:
 
 * General trends - flow-normalized trends over time are the most descriptive of changes, are nutrients decreasing, inreasing, or constant?
 * Differences in the percentiles - variation in the 10th or 90th percentile distributions that differ from the median response suggest changes in frequency occurrence of low or high nutrient events, respectively.  In other words, the median response does not tell the whole picture about change in nutrient concentrations over time.  
@@ -197,18 +203,18 @@ The plots below show annually-averaged results of weighted regression for each s
 #### DIN
 
 ```r
-data(mods)
+data(mods_nolag)
 lims <- data.frame(
   var = c('din', 'nh', 'no23'),
   upy = c(3, 0.85, 2.6)
 )
 
-for(i in 1:nrow(mods)){
+for(i in 1:nrow(mods_nolag)){
 
-  toplo <- mods$mod[[i]]
-  lab <- paste(mods[i, 'Location'], mods[i, 'Site_Code'], sep = ', ')
+  toplo <- mods_nolag$mod[[i]]
+  lab <- paste(mods_nolag[i, 'Location'], mods_nolag[i, 'Site_Code'], sep = ', ')
   
-  limy <- as.character(mods[i, 'resvar'])
+  limy <- as.character(mods_nolag[i, 'resvar'])
   limy <- lims[lims$var == limy, 'upy']
     
   p <- prdnrmplot(toplo, logspace = F) +
@@ -231,15 +237,15 @@ for(i in 1:nrow(mods)){
 }
 
 # # for ref
-# din <- which(mods$resvar == 'din')
-# nh <- which(mods$resvar == 'nh')
-# no23 <- which(mods$resvar == 'no23')
+# din <- which(mods_nolag$resvar == 'din')
+# nh <- which(mods_nolag$resvar == 'nh')
+# no23 <- which(mods_nolag$resvar == 'no23')
 
-ylab1 <- gsub('ln-', '', as.character(attr(mods$mod[[1]], 'reslab')))
+ylab1 <- gsub('ln-', '', as.character(attr(mods_nolag$mod[[1]], 'reslab')))
 ylab1 <- parse(text = ylab1)
-ylab2 <- gsub('ln-', '', as.character(attr(mods$mod[[2]], 'reslab')))
+ylab2 <- gsub('ln-', '', as.character(attr(mods_nolag$mod[[2]], 'reslab')))
 ylab2 <- parse(text = ylab2)
-ylab3 <- gsub('ln-', '', as.character(attr(mods$mod[[3]], 'reslab')))
+ylab3 <- gsub('ln-', '', as.character(attr(mods_nolag$mod[[3]], 'reslab')))
 ylab3 <- parse(text = ylab3)
 
 grid.arrange(
@@ -298,7 +304,7 @@ The plots below show changes over time in the relationship between nutrients and
 #### DIN
 
 ```r
-data(mods)
+data(mods_nolag)
 
 # y axis limits for each plot
 lims <- data.frame(
@@ -306,12 +312,12 @@ lims <- data.frame(
   upy = c(3, 1, 2.8)
 )
 
-for(i in 1:nrow(mods)){
+for(i in 1:nrow(mods_nolag)){
 
-  toplo <- mods$mod[[i]]
-  lab <- paste(mods[i, 'Location'], mods[i, 'Site_Code'], sep = ', ')
+  toplo <- mods_nolag$mod[[i]]
+  lab <- paste(mods_nolag[i, 'Location'], mods_nolag[i, 'Site_Code'], sep = ', ')
   
-  limy <- as.character(mods[i, 'resvar'])
+  limy <- as.character(mods_nolag[i, 'resvar'])
   limy <- lims[lims$var == limy, 'upy']
     
   p <- dynaplot(toplo, month = c(1, 4, 7, 10), ncol = 1, logspace = F) +
@@ -327,7 +333,7 @@ for(i in 1:nrow(mods)){
     scale_y_continuous(limits = c(0, limy))
 
   # flip if Suisun (salinity was used)
-  if(as.character(mods[i, 'Location']) == 'Suisun')
+  if(as.character(mods_nolag[i, 'Location']) == 'Suisun')
     p <- p + scale_x_reverse()
   
   # get legend
@@ -339,15 +345,15 @@ for(i in 1:nrow(mods)){
 }
 
 # # for ref
-# din <- which(mods$resvar == 'din')
-# nh <- which(mods$resvar == 'nh')
-# no23 <- which(mods$resvar == 'no23')
+# din <- which(mods_nolag$resvar == 'din')
+# nh <- which(mods_nolag$resvar == 'nh')
+# no23 <- which(mods_nolag$resvar == 'no23')
 
-ylab1 <- gsub('ln-', '', as.character(attr(mods$mod[[1]], 'reslab')))
+ylab1 <- gsub('ln-', '', as.character(attr(mods_nolag$mod[[1]], 'reslab')))
 ylab1 <- parse(text = ylab1)
-ylab2 <- gsub('ln-', '', as.character(attr(mods$mod[[2]], 'reslab')))
+ylab2 <- gsub('ln-', '', as.character(attr(mods_nolag$mod[[2]], 'reslab')))
 ylab2 <- parse(text = ylab2)
-ylab3 <- gsub('ln-', '', as.character(attr(mods$mod[[3]], 'reslab')))
+ylab3 <- gsub('ln-', '', as.character(attr(mods_nolag$mod[[3]], 'reslab')))
 ylab3 <- parse(text = ylab3)
 
 grid.arrange(
@@ -408,7 +414,7 @@ The plots below show seasonal changes in flow-normalized results over time using
 #### DIN
 
 ```r
-data(mods)
+data(mods_nolag)
 
 # y axis limits for each plot
 lims <- data.frame(
@@ -416,12 +422,12 @@ lims <- data.frame(
   upy = c(2.8, 0.8, 2.1)
 )
 
-for(i in 1:nrow(mods)){
+for(i in 1:nrow(mods_nolag)){
 
-  toplo <- mods$mod[[i]]
-  lab <- paste(mods[i, 'Location'], mods[i, 'Site_Code'], sep = ', ')
+  toplo <- mods_nolag$mod[[i]]
+  lab <- paste(mods_nolag[i, 'Location'], mods_nolag[i, 'Site_Code'], sep = ', ')
   
-  limy <- as.character(mods[i, 'resvar'])
+  limy <- as.character(mods_nolag[i, 'resvar'])
   limy <- lims[lims$var == limy, 'upy']
     
   p <- seasyrplot(toplo, predicted = F, logspace = F) +
@@ -443,11 +449,11 @@ for(i in 1:nrow(mods)){
 
 }
 
-ylab1 <- gsub('ln-', '', as.character(attr(mods$mod[[1]], 'reslab')))
+ylab1 <- gsub('ln-', '', as.character(attr(mods_nolag$mod[[1]], 'reslab')))
 ylab1 <- parse(text = ylab1)
-ylab2 <- gsub('ln-', '', as.character(attr(mods$mod[[2]], 'reslab')))
+ylab2 <- gsub('ln-', '', as.character(attr(mods_nolag$mod[[2]], 'reslab')))
 ylab2 <- parse(text = ylab2)
-ylab3 <- gsub('ln-', '', as.character(attr(mods$mod[[3]], 'reslab')))
+ylab3 <- gsub('ln-', '', as.character(attr(mods_nolag$mod[[3]], 'reslab')))
 ylab3 <- parse(text = ylab3)
 
 grid.arrange(

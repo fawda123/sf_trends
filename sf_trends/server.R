@@ -4,7 +4,7 @@ library(ggplot2)
 library(dplyr)
 
 # raw data
-load(file = 'mods.RData')
+load(file = 'mods_nolag.RData')
 
 # Define server logic required to generate and plot data
 shinyServer(function(input, output) {
@@ -18,7 +18,7 @@ shinyServer(function(input, output) {
     stat <- input$stat
     res <- input$res
     
-    out <- filter(mods, Site_Code == stat & resvar == res) %>% 
+    out <- filter(mods_nolag, Site_Code == stat & resvar == res) %>% 
       .$mod
     out <- out[[1]]
     
