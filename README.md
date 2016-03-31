@@ -204,18 +204,20 @@ The plots below show annually-averaged results of weighted regression for each s
 
 ```r
 data(mods_nolag)
-lims <- data.frame(
-  var = c('din', 'nh', 'no23'),
-  upy = c(3, 0.85, 2.6)
-)
+
+# y axis limits
+lims <- data.frame(Delta = c(3, 0.85, 2.6), Suisun = c(1, 0.2, 0.8))
+row.names(lims) <- c('din', 'nh', 'no23')
 
 for(i in 1:nrow(mods_nolag)){
 
   toplo <- mods_nolag$mod[[i]]
   lab <- paste(mods_nolag[i, 'Location'], mods_nolag[i, 'Site_Code'], sep = ', ')
   
-  limy <- as.character(mods_nolag[i, 'resvar'])
-  limy <- lims[lims$var == limy, 'upy']
+  # axis limits by resp var and location var
+  resv <- as.character(mods_nolag[i, 'resvar'])
+  locv <- as.character(mods_nolag[i, 'Location'])
+  limy <- lims[resv, locv]
     
   p <- prdnrmplot(toplo, logspace = F) +
     ggtitle(lab) + 
@@ -306,19 +308,19 @@ The plots below show changes over time in the relationship between nutrients and
 ```r
 data(mods_nolag)
 
-# y axis limits for each plot
-lims <- data.frame(
-  var = c('din', 'nh', 'no23'),
-  upy = c(3, 1, 2.8)
-)
+# y axis limits
+lims <- data.frame(Delta = c(3.2, 1.2, 3), Suisun = c(1, 0.25, 1))
+row.names(lims) <- c('din', 'nh', 'no23')
 
 for(i in 1:nrow(mods_nolag)){
 
   toplo <- mods_nolag$mod[[i]]
   lab <- paste(mods_nolag[i, 'Location'], mods_nolag[i, 'Site_Code'], sep = ', ')
   
-  limy <- as.character(mods_nolag[i, 'resvar'])
-  limy <- lims[lims$var == limy, 'upy']
+  # axis limits by resp var and location var
+  resv <- as.character(mods_nolag[i, 'resvar'])
+  locv <- as.character(mods_nolag[i, 'Location'])
+  limy <- lims[resv, locv]
     
   p <- dynaplot(toplo, month = c(1, 4, 7, 10), ncol = 1, logspace = F) +
     ggtitle(lab) + 
@@ -419,16 +421,22 @@ data(mods_nolag)
 # y axis limits for each plot
 lims <- data.frame(
   var = c('din', 'nh', 'no23'),
-  upy = c(2.8, 0.8, 2.1)
+  upy = c(2.8, 0.9, 2.1)
 )
+
+# y axis limits
+lims <- data.frame(Delta = c(2.8, 0.9, 2.1), Suisun = c(1, 0.2, 0.6))
+row.names(lims) <- c('din', 'nh', 'no23')
 
 for(i in 1:nrow(mods_nolag)){
 
   toplo <- mods_nolag$mod[[i]]
   lab <- paste(mods_nolag[i, 'Location'], mods_nolag[i, 'Site_Code'], sep = ', ')
   
-  limy <- as.character(mods_nolag[i, 'resvar'])
-  limy <- lims[lims$var == limy, 'upy']
+  # axis limits by resp var and location var
+  resv <- as.character(mods_nolag[i, 'resvar'])
+  locv <- as.character(mods_nolag[i, 'Location'])
+  limy <- lims[resv, locv]
     
   p <- seasyrplot(toplo, predicted = F, logspace = F) +
     ggtitle(lab) + 
