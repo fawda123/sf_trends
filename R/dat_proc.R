@@ -11,105 +11,105 @@ library(WRTDStidal)
 library(foreach)
 library(doParallel)
 
-# ######
-# # wq data
-# 
-# load(file = 'ignore/dwr_wq.RData')
-# 
-# statmeta <- read_excel('ignore/Discrete_Stations.xls')
-# curr <- filter(statmeta, Historic_or_Current == 'Current') %>% 
-#   .$Site_Code %>% 
-#   unique
-# hist <- filter(statmeta, Historic_or_Current == 'Historic') %>% 
-#   .$Site_Code %>% 
-#   unique
-# 
-# ## Combine C10 with C10A, C3 with C3A, P12 with P12A, P10 with P10A, MD10 with MD10A, MD7 with MD7A
-# # the following three have to be added manually to curr because they were combined in original processing script from Novick
-# curr <- c(curr, 'C10', 'C3', 'MD10')  
-# 
-# # add lat/long from meta
-# # only get current stations
-# # remove EZ2/EZ6 (no lat/long data, TN record only back to 2010)
-# # remove NZ stations, no nitrogen data
-# # select ammonia, nitrate, dissolved inorganic nitrogen, total nitrogen (all as mg/L), and salinity (psu probably)
-# dat <- select(statmeta, Site_Code, Latitude, Longitude) %>% 
-#   na.omit %>% 
-#   right_join(., dwr_wq, by = c('Site_Code' = 'Station')) %>% 
-#   filter(Site_Code %in% curr) %>% 
-#   filter(!Site_Code %in% c('EZ2', 'EZ6', 'NZ002', 'NZ004', 'NZ032', 'NZ325', 'NZS42')) %>% 
-#   select(Site_Code, Date, Latitude, Longitude, nh, no23, din, tn, sal)
-# 
-# # finally, subset by selected delta and suisun stations
-# # make sure each date is unique
-# dat <- filter(dat, Site_Code %in% c('C3', 'C10', 'P8', 'D4', 'D7', 'D6')) %>% 
-#   mutate(
-#     year = year(Date), 
-#     month = month(Date), 
-#     day = day(Date)
-#   ) %>% 
-#   filter(year > 1975 & year < 2014) %>% 
-#   gather('var', 'val', Latitude:sal) %>% 
-#   group_by(Site_Code, year, month, day, var) %>% 
-#   summarize(val = mean(val, na.rm = TRUE)) %>% 
-#   spread(var, val) %>% 
-#   ungroup %>% 
-#   mutate(
-#     Date = as.Date(paste(year, month, day, sep = '-'), format = '%Y-%m-%d'),
-#     Location = 'Delta'
-#     ) %>% 
-#   select(Site_Code, Location, Date, Latitude, Longitude, din, nh, no23, tn, sal)
-# dat$Location[dat$Site_Code %in%  c('D4', 'D7', 'D6')] <- 'Suisun'
-# 
-# delt_dat <- dat
-# save(delt_dat, file = 'data/delt_dat.RData')
-# 
-# ######
-# # remove outliers (from viz in ggpairs, original readme)
-# 
-# data(delt_dat)
-# 
-# tokp <- with(delt_dat, !(Site_Code == 'C10' & sal > (exp(1.5) - 1)) | is.na(sal))
-# delt_dat <- filter(delt_dat, tokp)
-# tokp <- with(delt_dat, !(Site_Code == 'D4' & no23 > (exp(0.9) - 1)) & !(Site_Code == 'D4' & din > (exp(0.9) - 1)) | is.na(no23) | is.na(din))
-# delt_dat <- filter(delt_dat, tokp)
-# tokp <- with(delt_dat, !(Site_Code == 'D6' & no23 > (exp(0.75) - 1)) & !(Site_Code == 'D6' & nh > (exp(0.35) - 1)) | is.na(no23) | is.na(nh))
-# delt_dat <- filter(delt_dat, tokp)
-# tokp <- with(delt_dat, !(Site_Code == 'D7' & no23 > (exp(0.9) - 1)) | is.na(no23))
-# delt_dat <- filter(delt_dat, tokp)
-# 
-# save(delt_dat, file = 'data/delt_dat.RData')
-# 
-# ######
-# # flow records
-# 
-# # inputs and outputs for different locations, cubic feet per second
-# # input stations retained, converted to m3/s
-# flow_dat <- read.csv('ignore/DAYFLOW_1975_2015.csv') %>% 
-#   select(DATE, SAC, YOLO, CSMR, MOKE, MISC, SJR, EAST, TOT, XGEO, WEST, PREC, SJR) %>% 
-#   mutate(
-#     DATE = as.character(DATE), 
-#     DATE = as.Date(DATE, format = '%m/%d/%y')
-#   ) %>% 
-#   gather('var', 'val', -DATE) %>% 
-#   mutate(
-#     val = val * 0.028316847,
-#     var = tolower(var)
-#     ) %>% 
-#   rename(Date = DATE)
-# 
-# # pull out input stations from Novick et al, combine based on fig 2
-# flow_dat <- filter(flow_dat, var %in% c('sjr', 'sac', 'yolo', 'csmr', 'moke', 'misc')) %>% 
-#   spread(var, val) %>% 
-#   mutate(
-#     east = csmr + moke + misc,
-#     sacyolo = sac + yolo
-#   ) %>% 
-#   select(Date, sacyolo, east, sjr) %>% 
-#   gather('station', 'q', sacyolo:sjr)
-# 
-# save(flow_dat, file = 'data/flow_dat.RData')
-# 
+######
+# wq data
+
+load(file = 'ignore/dwr_wq.RData')
+
+statmeta <- read_excel('ignore/Discrete_Stations.xls')
+curr <- filter(statmeta, Historic_or_Current == 'Current') %>% 
+  .$Site_Code %>% 
+  unique
+hist <- filter(statmeta, Historic_or_Current == 'Historic') %>% 
+  .$Site_Code %>% 
+  unique
+
+## Combine C10 with C10A, C3 with C3A, P12 with P12A, P10 with P10A, MD10 with MD10A, MD7 with MD7A
+# the following three have to be added manually to curr because they were combined in original processing script from Novick
+curr <- c(curr, 'C10', 'C3', 'MD10')  
+
+# add lat/long from meta
+# only get current stations
+# remove EZ2/EZ6 (no lat/long data, TN record only back to 2010)
+# remove NZ stations, no nitrogen data
+# select ammonia, nitrate, dissolved inorganic nitrogen, total nitrogen (all as mg/L), and salinity (psu probably)
+dat <- select(statmeta, Site_Code, Latitude, Longitude) %>% 
+  na.omit %>% 
+  right_join(., dwr_wq, by = c('Site_Code' = 'Station')) %>% 
+  filter(Site_Code %in% curr) %>% 
+  filter(!Site_Code %in% c('EZ2', 'EZ6', 'NZ002', 'NZ004', 'NZ032', 'NZ325', 'NZS42')) %>% 
+  select(Site_Code, Date, Latitude, Longitude, nh, no23, din, tn, sal)
+
+# finally, subset by selected delta and suisun stations
+# make sure each date is unique
+dat <- filter(dat, Site_Code %in% c('C3', 'C10', 'P8', 'D4', 'D7', 'D6')) %>% 
+  mutate(
+    year = year(Date), 
+    month = month(Date), 
+    day = day(Date)
+  ) %>% 
+  filter(year > 1975 & year < 2014) %>% 
+  gather('var', 'val', Latitude:sal) %>% 
+  group_by(Site_Code, year, month, day, var) %>% 
+  summarize(val = mean(val, na.rm = TRUE)) %>% 
+  spread(var, val) %>% 
+  ungroup %>% 
+  mutate(
+    Date = as.Date(paste(year, month, day, sep = '-'), format = '%Y-%m-%d'),
+    Location = 'Delta'
+    ) %>% 
+  select(Site_Code, Location, Date, Latitude, Longitude, din, nh, no23, tn, sal)
+dat$Location[dat$Site_Code %in%  c('D4', 'D7', 'D6')] <- 'Suisun'
+
+delt_dat <- dat
+save(delt_dat, file = 'data/delt_dat.RData')
+
+######
+# remove outliers (from viz in ggpairs, original readme)
+
+data(delt_dat)
+
+tokp <- with(delt_dat, !(Site_Code == 'C10' & sal > (exp(1.5) - 1)) | is.na(sal))
+delt_dat <- filter(delt_dat, tokp)
+tokp <- with(delt_dat, !(Site_Code == 'D4' & no23 > (exp(0.9) - 1)) & !(Site_Code == 'D4' & din > (exp(0.9) - 1)) | is.na(no23) | is.na(din))
+delt_dat <- filter(delt_dat, tokp)
+tokp <- with(delt_dat, !(Site_Code == 'D6' & no23 > (exp(0.75) - 1)) & !(Site_Code == 'D6' & nh > (exp(0.35) - 1)) | is.na(no23) | is.na(nh))
+delt_dat <- filter(delt_dat, tokp)
+tokp <- with(delt_dat, !(Site_Code == 'D7' & no23 > (exp(0.9) - 1)) | is.na(no23))
+delt_dat <- filter(delt_dat, tokp)
+
+save(delt_dat, file = 'data/delt_dat.RData')
+
+######
+# flow records
+
+# inputs and outputs for different locations, cubic feet per second
+# input stations retained, converted to m3/s
+flow_dat <- read.csv('ignore/DAYFLOW_1975_2015.csv') %>% 
+  select(DATE, SAC, YOLO, CSMR, MOKE, MISC, SJR, EAST, TOT, XGEO, WEST, PREC, SJR) %>% 
+  mutate(
+    DATE = as.character(DATE), 
+    DATE = as.Date(DATE, format = '%m/%d/%y')
+  ) %>% 
+  gather('var', 'val', -DATE) %>% 
+  mutate(
+    val = val * 0.028316847,
+    var = tolower(var)
+    ) %>% 
+  rename(Date = DATE)
+
+# pull out input stations from Novick et al, combine based on fig 2
+flow_dat <- filter(flow_dat, var %in% c('sjr', 'sac', 'yolo', 'csmr', 'moke', 'misc')) %>% 
+  spread(var, val) %>% 
+  mutate(
+    east = csmr + moke + misc,
+    sac = sac
+  ) %>% 
+  select(Date, sac, east, sjr) %>% 
+  gather('station', 'q', sac:sjr)
+
+save(flow_dat, file = 'data/flow_dat.RData')
+
 ######
 # ccf comparison of nitrogen data to flow data for selected delta and suisun stations
 # all data are matched by corresponding days in the record
@@ -130,7 +130,7 @@ toeval <- tidyr::spread(flow_dat, station, q) %>%
   mutate(sal = 1 + sal) %>% 
   tidyr::gather('resvar', 'resval', din:no23) %>% 
   tidyr::gather('flovar', 'floval', sal:sjr) %>% 
-  mutate(flovar = factor(flovar, levels = c('sacyolo', 'sal', 'sjr'), labels = c('Sacramento', 'Salinity', 'San Joaquin'))) %>% 
+  mutate(flovar = factor(flovar, levels = c('sac', 'sal', 'sjr'), labels = c('Sacramento', 'Salinity', 'San Joaquin'))) %>% 
   group_by(Site_Code, Location, resvar, flovar)
 
 # get ccf by nesting by grouping variable
@@ -306,7 +306,7 @@ toeval <- tidyr::spread(flow_dat, station, q) %>%
   tidyr::gather('resvar', 'resval', din:no23) %>% 
   tidyr::gather('flovar', 'floval', sal:sjr) %>% 
   mutate(
-    flovar = factor(flovar, levels = c('sacyolo', 'sal', 'sjr'), labels = c('Sacramento', 'Salinity', 'San Joaquin')), 
+    flovar = factor(flovar, levels = c('sac', 'sal', 'sjr'), labels = c('Sacramento', 'Salinity', 'San Joaquin')), 
     year = year(Date), 
     month = month(Date)
     ) %>% 
@@ -359,9 +359,9 @@ out <- select(out, -floval) %>%
     lim = -1e6
   )
 
-mods <- out
+mods_lag <- out
 
-save(mods, file = 'data/mods.RData', compress = 'xz')
+save(mods_lag, file = 'data/mods_lag.RData', compress = 'xz')
 
 ######
 # fit models with default window widths
@@ -370,9 +370,9 @@ save(mods, file = 'data/mods.RData', compress = 'xz')
 cl <- makeCluster(7)
 registerDoParallel(cl)
 
-data(mods)
+data(mods_lag)
 
-mods <- mutate(mods, resdup = resvar) %>% 
+mods_lag <- mutate(mods_lag, resdup = resvar) %>% 
   group_by(Location, Site_Code, resvar, flovar) %>% 
   nest 
 
@@ -388,7 +388,7 @@ lablk <- list(
 
 # flovar label lookup
 stalk <- list(
-  shrt = c('sjr', 'sacyolo', 'sal'),
+  shrt = c('sjr', 'sac', 'sal'),
   lngs = c('San Joaquin', 'Sacramento', 'Salinity')
   )
 
@@ -396,7 +396,7 @@ strt <- Sys.time()
 
 # iterate through stations, res vars to model
 # get predictions from obs time series of salinity or flow
-mods_out <- foreach(i = 1:nrow(mods)) %dopar% {
+mods_out <- foreach(i = 1:nrow(mods_lag)) %dopar% {
   
   data(flow_dat)
   data(delt_dat)
@@ -405,15 +405,15 @@ mods_out <- foreach(i = 1:nrow(mods)) %dopar% {
   library(WRTDStidal)
   
   sink('C:/Users/mbeck/Desktop/log.txt')
-  cat(i, 'of', nrow(mods), '\n')
+  cat(i, 'of', nrow(mods_lag), '\n')
   print(Sys.time()-strt)
   sink()
   
   # data, response variable label
-  dat <- mods[i, ]$data[[1]]
-  resvar <- mods[i, ]$resvar
-  flovar <- mods[i, ]$flovar
-  sta <- mods[i, ]$Site_Code
+  dat <- mods_lag[i, ]$data[[1]]
+  resvar <- mods_lag[i, ]$resvar
+  flovar <- mods_lag[i, ]$flovar
+  sta <- mods_lag[i, ]$Site_Code
   reslab <- with(lablk, lngs[shrt == resvar])
   flolab <- with(stalk, shrt[lngs == flovar])
   
@@ -470,13 +470,13 @@ mods_out <- foreach(i = 1:nrow(mods)) %dopar% {
   
 }
 
-# import each file, add to nested mods dataframe
+# import each file, add to nested mods_lag dataframe
 fls <- list.files('data', pattern = '^C3|^C10|^P8|^D6|^D4|^D7', full.names = T)
 dat <- lapply(fls, load, .GlobalEnv)
 names(dat) <- unlist(dat)
 dat <- lapply(dat, get)
 
-mods <- unite(mods, 'tmp', Site_Code, resvar, remove = F) %>% 
+mods_lag <- unite(mods_lag, 'tmp', Site_Code, resvar, remove = F) %>% 
   mutate(mod = dat[match(tmp, names(dat))]) %>% 
   select(-tmp)
 
@@ -484,7 +484,7 @@ mods <- unite(mods, 'tmp', Site_Code, resvar, remove = F) %>%
 file.remove(fls)
 
 # save output
-save(mods, file = 'data/mods.RData', compress = 'xz')
+save(mods_lag, file = 'data/mods_lag.RData', compress = 'xz')
 
 ######
 # dataset for wrtds, all response, flow values are ln transformed
@@ -505,7 +505,7 @@ toeval <- tidyr::spread(flow_dat, station, q) %>%
   tidyr::gather('resvar', 'resval', din:no23) %>% 
   tidyr::gather('flovar', 'floval', sal:sjr) %>% 
   mutate(
-    flovar = factor(flovar, levels = c('sacyolo', 'sal', 'sjr'), labels = c('Sacramento', 'Salinity', 'San Joaquin')), 
+    flovar = factor(flovar, levels = c('sac', 'sal', 'sjr'), labels = c('Sacramento', 'Salinity', 'San Joaquin')), 
     year = year(Date), 
     month = month(Date)
     ) %>% 
@@ -586,7 +586,7 @@ lablk <- list(
 
 # flovar label lookup
 stalk <- list(
-  shrt = c('sjr', 'sacyolo', 'sal'),
+  shrt = c('sjr', 'sac', 'sal'),
   lngs = c('San Joaquin', 'Sacramento', 'Salinity')
   )
 

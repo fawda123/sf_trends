@@ -62,7 +62,6 @@ ggplot(flocor, aes(x = lag, y = acf, colour = flovar, group = flovar)) +
 ![](README_files/figure-html/unnamed-chunk-2-1.png)
   
 #### Nutrients to nutrients
-The above analysis was repeated to compare temporal variation of nitrogen species.  
 
 
 ```r
@@ -79,38 +78,111 @@ ggplot(nutcor, aes(x = lag, y = acf, colour = var2, group = var2)) +
 
 ![](README_files/figure-html/unnamed-chunk-3-1.png)
 
-### Matching stations to flow or salinity records
+### Model performance w/ and w/o flow lags
 
-This table shows the preceding lag in months at which the correlation of the flow variable was highest (as an absolute magnitude) for the corresponding site and nutrient variable.  Flow variables matched with each nutrient station were those with the nearest geographic location, e.g., C10 is near the inflow of San Joaquin into the delta, D4 is closer to the ocean and was matched wtih salinity, etc.  Nutrient data were matched with the flow/salinity time series at the corresponding lag to develop weighted regression models.  For example, a maximum lag of -4 means that the flow record four months prior to the nutrient record was matched on the observed date of the nutrient sample. 
+### Effect of using lagged flow or salinity variables {.tabset}
+
+The above plots suggest that maximum correlations between flow and nutrient time series may be observed at specific monthly lags.  A logical expectation is that performance of weighted regression models could be improved if flow variables are matched with nutrient records at the lag with the maximum correlation.  The effect of using lagged or no lagged flow or salinity variables on model performance was evaluated with residual errors.  Models were fit using the 'optimal' lags from above and using no lags.  The plots below show root mean squared error for the different models fit for each of the conditional quantiles. The identified lag for each station/variable combination is below each bar. Interestingly, using lagged variables causes an increase in error and reduction in performance.  All results below are for models that did not include a temporal lag for the flow or salinity variables.  
+
+#### 0.1
 
 ```r
+# load the data
+data(mods)
+data(mods_nolag)
 data(bests)
-  
-knitr::kable(bests, format = 'markdown', caption = 'Minimum correlations and lags of each nutrient station that corresponded to the flow estimates')
+
+## get model performance from the data objects
+
+# models w/ lagged flo variables
+wlag <- map(mods$mod, wrtdsperf) %>% 
+  do.call('rbind', .) %>% 
+  mutate(
+    lab = gsub('\\.[0-9]$', '', row.names(.)), 
+    typ = 'With lag'
+    ) %>% 
+  separate(lab, c('stat', 'var'), sep = '_')
+
+# models w/o no lagged variables
+nlag <- map(mods_nolag$mod, wrtdsperf) %>% 
+  do.call('rbind', .) %>% 
+  mutate(
+    lab = gsub('\\.[0-9]$', '', row.names(.)), 
+    typ = 'No lag'
+    ) %>% 
+  separate(lab, c('stat', 'var'), sep = '_')
+
+# combine for plotting, extract results for median mod
+perfs <- rbind(wlag, nlag)
+
+# txt to add to the plot showing lag
+txt <- rename(bests, 
+  var = resvar, 
+  stat = Site_Code
+)
+
+# color vector
+cols <- RColorBrewer::brewer.pal(9, 'Set1')[c(2, 3)]
+
+# the plot
+ggplot(perfs[perfs$tau == 0.1,], aes(x = stat, y = rmse)) +
+  geom_bar(aes(fill = typ), stat = 'identity', position = 'dodge', alpha = 0.75) + 
+  geom_text(data = txt, aes(y = -0.007, label = lag)) +
+  facet_grid(~var) +
+  theme_minimal() +
+  theme(
+    axis.line.x = element_line(size = 0.5),
+    axis.line.y = element_line(size = 0.5),
+    legend.position = 'top',
+    legend.title = element_blank(), 
+    axis.title.x= element_blank()
+    ) + 
+  scale_fill_manual(values = cols)
 ```
 
+![](README_files/figure-html/unnamed-chunk-4-1.png)
 
+#### 0.5
 
-|Site_Code |Location |resvar |flovar      | lag|        acf|
-|:---------|:--------|:------|:-----------|---:|----------:|
-|C10       |Delta    |din    |San Joaquin |   0| -0.6541804|
-|C10       |Delta    |nh     |San Joaquin |  -3| -0.1250742|
-|C10       |Delta    |no23   |San Joaquin |   0| -0.6769895|
-|C3        |Delta    |din    |Sacramento  |   0| -0.5375051|
-|C3        |Delta    |nh     |Sacramento  |   0| -0.7299349|
-|C3        |Delta    |no23   |Sacramento  |  -4| -0.2635292|
-|P8        |Delta    |din    |San Joaquin |   0| -0.4399586|
-|P8        |Delta    |nh     |San Joaquin |  -3| -0.1641490|
-|P8        |Delta    |no23   |San Joaquin |   0| -0.4794830|
-|D4        |Suisun   |din    |Salinity    |  -3|  0.5319224|
-|D4        |Suisun   |nh     |Salinity    |  -2|  0.3478721|
-|D4        |Suisun   |no23   |Salinity    |  -3|  0.5023232|
-|D6        |Suisun   |din    |Salinity    |  -2|  0.4032670|
-|D6        |Suisun   |nh     |Salinity    |  -1|  0.3501523|
-|D6        |Suisun   |no23   |Salinity    |  -3|  0.3417281|
-|D7        |Suisun   |din    |Salinity    |  -3|  0.4688692|
-|D7        |Suisun   |nh     |Salinity    |  -2|  0.4210653|
-|D7        |Suisun   |no23   |Salinity    |  -4|  0.3972676|
+```r
+# the plot
+ggplot(perfs[perfs$tau == 0.5,], aes(x = stat, y = rmse)) +
+  geom_bar(aes(fill = typ), stat = 'identity', position = 'dodge', alpha = 0.75) + 
+  geom_text(data = txt, aes(y = -0.007, label = lag)) +
+  facet_grid(~var) +
+  theme_minimal() +
+  theme(
+    axis.line.x = element_line(size = 0.5),
+    axis.line.y = element_line(size = 0.5),
+    legend.position = 'top',
+    legend.title = element_blank(), 
+    axis.title.x= element_blank()
+    ) + 
+  scale_fill_manual(values = cols)
+```
+
+![](README_files/figure-html/unnamed-chunk-5-1.png)
+
+#### 0.9
+
+```r
+# the plot
+ggplot(perfs[perfs$tau == 0.9,], aes(x = stat, y = rmse)) +
+  geom_bar(aes(fill = typ), stat = 'identity', position = 'dodge', alpha = 0.75) + 
+  geom_text(data = txt, aes(y = -0.007, label = lag)) +
+  facet_grid(~var) +
+  theme_minimal() +
+  theme(
+    axis.line.x = element_line(size = 0.5),
+    axis.line.y = element_line(size = 0.5),
+    legend.position = 'top',
+    legend.title = element_blank(), 
+    axis.title.x= element_blank()
+    ) + 
+  scale_fill_manual(values = cols)
+```
+
+![](README_files/figure-html/unnamed-chunk-6-1.png)
 
 ### Annually-averaged results {.tabset}
 
@@ -180,7 +252,7 @@ grid.arrange(
 )
 ```
 
-![](README_files/figure-html/unnamed-chunk-5-1.png)
+![](README_files/figure-html/unnamed-chunk-7-1.png)
 
 #### NH4
 
@@ -195,7 +267,7 @@ grid.arrange(
 )
 ```
 
-![](README_files/figure-html/unnamed-chunk-6-1.png)
+![](README_files/figure-html/unnamed-chunk-8-1.png)
 
 #### NO23 
 
@@ -210,7 +282,7 @@ grid.arrange(
 )
 ```
 
-![](README_files/figure-html/unnamed-chunk-7-1.png)
+![](README_files/figure-html/unnamed-chunk-9-1.png)
 
 ### Flow by nutrients by time {.tabset}
 
@@ -289,7 +361,7 @@ grid.arrange(
 )
 ```
 
-![](README_files/figure-html/unnamed-chunk-8-1.png)
+![](README_files/figure-html/unnamed-chunk-10-1.png)
 
 #### NH4
 
@@ -305,7 +377,7 @@ grid.arrange(
 )
 ```
 
-![](README_files/figure-html/unnamed-chunk-9-1.png)
+![](README_files/figure-html/unnamed-chunk-11-1.png)
 
 #### NO23
 
@@ -321,7 +393,7 @@ grid.arrange(
 )
 ```
 
-![](README_files/figure-html/unnamed-chunk-10-1.png)
+![](README_files/figure-html/unnamed-chunk-12-1.png)
 
 ### Nutrients by season by year {.tabset}
 
@@ -388,7 +460,7 @@ grid.arrange(
 )
 ```
 
-![](README_files/figure-html/unnamed-chunk-11-1.png)
+![](README_files/figure-html/unnamed-chunk-13-1.png)
 
 #### NH4
 
@@ -403,7 +475,7 @@ grid.arrange(
 )
 ```
 
-![](README_files/figure-html/unnamed-chunk-12-1.png)
+![](README_files/figure-html/unnamed-chunk-14-1.png)
 
 #### NO23
 
@@ -418,111 +490,7 @@ grid.arrange(
 )
 ```
 
-![](README_files/figure-html/unnamed-chunk-13-1.png)
-
-### Effect of using lagged flow or salinity variables {.tabset}
-
-The effect of using lagged or no lagged flow or salinity variables on model performance was evaluated with residual errors.  Models were fit using the 'optimal' lags from above and using no lags.  The plot below shows root mean squared error for the different models fit, using the conditional median as an example. The identified lag for each station, variable combination is below each bar. Using lagged variables causes an increase in error and reduction in performance. 
-
-#### 0.1
-
-```r
-# load the data
-data(mods)
-data(mods_nolag)
-data(bests)
-
-## get model performance from the data objects
-
-# models w/ lagged flo variables
-wlag <- map(mods$mod, wrtdsperf) %>% 
-  do.call('rbind', .) %>% 
-  mutate(
-    lab = gsub('\\.[0-9]$', '', row.names(.)), 
-    typ = 'With lag'
-    ) %>% 
-  separate(lab, c('stat', 'var'), sep = '_')
-
-# models w/o no lagged variables
-nlag <- map(mods_nolag$mod, wrtdsperf) %>% 
-  do.call('rbind', .) %>% 
-  mutate(
-    lab = gsub('\\.[0-9]$', '', row.names(.)), 
-    typ = 'No lag'
-    ) %>% 
-  separate(lab, c('stat', 'var'), sep = '_')
-
-# combine for plotting, extract results for median mod
-perfs <- rbind(wlag, nlag)
-
-# txt to add to the plot showing lag
-txt <- rename(bests, 
-  var = resvar, 
-  stat = Site_Code
-)
-
-# color vector
-cols <- RColorBrewer::brewer.pal(9, 'Set1')[c(2, 3)]
-
-# the plot
-ggplot(perfs[perfs$tau == 0.1,], aes(x = stat, y = rmse)) +
-  geom_bar(aes(fill = typ), stat = 'identity', position = 'dodge', alpha = 0.75) + 
-  geom_text(data = txt, aes(y = -0.007, label = lag)) +
-  facet_grid(~var) +
-  theme_minimal() +
-  theme(
-    axis.line.x = element_line(size = 0.5),
-    axis.line.y = element_line(size = 0.5),
-    legend.position = 'top',
-    legend.title = element_blank(), 
-    axis.title.x= element_blank()
-    ) + 
-  scale_fill_manual(values = cols)
-```
-
-![](README_files/figure-html/unnamed-chunk-14-1.png)
-
-#### 0.5
-
-```r
-# the plot
-ggplot(perfs[perfs$tau == 0.5,], aes(x = stat, y = rmse)) +
-  geom_bar(aes(fill = typ), stat = 'identity', position = 'dodge', alpha = 0.75) + 
-  geom_text(data = txt, aes(y = -0.007, label = lag)) +
-  facet_grid(~var) +
-  theme_minimal() +
-  theme(
-    axis.line.x = element_line(size = 0.5),
-    axis.line.y = element_line(size = 0.5),
-    legend.position = 'top',
-    legend.title = element_blank(), 
-    axis.title.x= element_blank()
-    ) + 
-  scale_fill_manual(values = cols)
-```
-
 ![](README_files/figure-html/unnamed-chunk-15-1.png)
-
-#### 0.9
-
-```r
-# the plot
-ggplot(perfs[perfs$tau == 0.9,], aes(x = stat, y = rmse)) +
-  geom_bar(aes(fill = typ), stat = 'identity', position = 'dodge', alpha = 0.75) + 
-  geom_text(data = txt, aes(y = -0.007, label = lag)) +
-  facet_grid(~var) +
-  theme_minimal() +
-  theme(
-    axis.line.x = element_line(size = 0.5),
-    axis.line.y = element_line(size = 0.5),
-    legend.position = 'top',
-    legend.title = element_blank(), 
-    axis.title.x= element_blank()
-    ) + 
-  scale_fill_manual(values = cols)
-```
-
-![](README_files/figure-html/unnamed-chunk-16-1.png)
 
 ### To do 
 
