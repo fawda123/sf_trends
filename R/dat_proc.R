@@ -42,7 +42,7 @@ dat <- select(statmeta, Site_Code, Latitude, Longitude) %>%
 
 # finally, subset by selected delta and suisun stations
 # make sure each date is unique
-dat <- filter(dat, Site_Code %in% c('C3', 'C10', 'P8', 'D4', 'D7', 'D6')) %>% 
+dat <- filter(dat, Site_Code %in% c('C3', 'C10', 'P8', 'D4', 'D7', 'D6', 'D19', 'D26', 'D28A')) %>% 
   mutate(
     year = year(Date), 
     month = month(Date), 
@@ -56,10 +56,12 @@ dat <- filter(dat, Site_Code %in% c('C3', 'C10', 'P8', 'D4', 'D7', 'D6')) %>%
   ungroup %>% 
   mutate(
     Date = as.Date(paste(year, month, day, sep = '-'), format = '%Y-%m-%d'),
-    Location = 'Delta'
+    Location = 'Delta', 
+    Site_Code = gsub('[A-Z]$', '', Site_Code)
     ) %>% 
   select(Site_Code, Location, Date, Latitude, Longitude, din, nh, no23, tn, sal)
 dat$Location[dat$Site_Code %in%  c('D4', 'D7', 'D6')] <- 'Suisun'
+dat$Location[dat$Site_Code %in% c('D19', 'D26', 'D28')] <- 'Middle'
 
 delt_dat <- dat
 save(delt_dat, file = 'data/delt_dat.RData')
@@ -77,9 +79,13 @@ tokp <- with(delt_dat, !(Site_Code == 'D6' & no23 > (exp(0.75) - 1)) & !(Site_Co
 delt_dat <- filter(delt_dat, tokp)
 tokp <- with(delt_dat, !(Site_Code == 'D7' & no23 > (exp(0.9) - 1)) | is.na(no23))
 delt_dat <- filter(delt_dat, tokp)
+tokp <- with(delt_dat, !(Site_Code == 'D26' & sal < (exp(0.05) - 1)) | is.na(sal))
+delt_dat <- filter(delt_dat, tokp)
+tokp <- with(delt_dat, !(Site_Code == 'D28' & nh > (exp(0.4) - 1)) | is.na(nh))
+delt_dat <- filter(delt_dat, tokp)
 
 save(delt_dat, file = 'data/delt_dat.RData')
-
+  
 ######
 # flow records
 
