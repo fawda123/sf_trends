@@ -17,6 +17,8 @@ Content available at [https://github.com/fawda123/sf_trends](https://github.com/
 
 * `flow_dat.RData` time series of daily flow estimates for the delta, input stations from Novick et al (Fig 2) were used
 
+* `midle_fits.RData` error estimates for middle delta models using three daily flow estimates
+
 * `nutcor.RData` results of ccf analysis of selected delta and suisun stations comparing nitrogen species
 
 * `mods_lag.RData` dataset for wrtds, including model results. This is a nested data frame with identifiers.  All response, flow values are ln + 1 transformed, flow (or salinity) records for each nutrient variable and station are combined based on the monthly lag ided from `bests.RData`
@@ -83,6 +85,8 @@ ggplot(nutcor, aes(x = lag, y = acf, colour = var2, group = var2)) +
 ### Effect of using lagged flow or salinity variables {.tabset}
 
 The above plots suggest that maximum correlations between flow and nutrient time series may be observed at specific monthly lags.  A logical expectation is that performance of weighted regression models could be improved if flow variables are matched with nutrient records at the lag with the maximum correlation.  The effect of using lagged or no lagged flow or salinity variables on model performance was evaluated with residual errors.  Models were fit using the 'optimal' lags from above and using no lags.  The plots below show root mean squared error for the different models fit for each of the conditional quantiles. The identified lag for each station/variable combination is below each bar. Interestingly, using lagged variables causes a slight increase in error, implying a reduction in performance.  All results below are for models that did not include a temporal lag for the flow or salinity variables.  Flow records matched to each station were based on physical proximity (e.g., C3 with Sacramento).
+
+See [here](http://fawda123.github.io/sf_trends/middle_delta) for an evaluation of model fit for middle delta stations (D19, D26, D28) with Sacramento, San Joaquin, and East daily flow values.
 
 #### 0.1
 

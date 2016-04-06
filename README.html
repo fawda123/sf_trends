@@ -227,6 +227,7 @@ div.tocify {
 <li><p><code>dwr_wq.RData</code> time series data of stations in the SF delta from California DWR-EMP (Department of Water Resources, Environmental Monitoring Program) , processed by E. Novick, all stations, analytes from 1975 to present. Most analytes are measured as concentration, see original spreadsheet for values. Unavailable in GitHub repo.</p></li>
 <li><p><code>flocor.RData</code> results of ccf analysis of selected delta and suisun stations comparing nitrogen and flow</p></li>
 <li><p><code>flow_dat.RData</code> time series of daily flow estimates for the delta, input stations from Novick et al (Fig 2) were used</p></li>
+<li><p><code>midle_fits.RData</code> error estimates for middle delta models using three daily flow estimates</p></li>
 <li><p><code>nutcor.RData</code> results of ccf analysis of selected delta and suisun stations comparing nitrogen species</p></li>
 <li><p><code>mods_lag.RData</code> dataset for wrtds, including model results. This is a nested data frame with identifiers. All response, flow values are ln + 1 transformed, flow (or salinity) records for each nutrient variable and station are combined based on the monthly lag ided from <code>bests.RData</code></p></li>
 <li><p><code>mods_nolag.RData</code> dataset for wrtds, including model results. This is the same file as <code>mods_lag.RData</code> except the matched flow variables are not lagged.</p></li>
@@ -279,6 +280,7 @@ ggplot(nutcor, aes(x = lag, y = acf, colour = var2, group = var2)) +
 <div id="effect-of-using-lagged-flow-or-salinity-variables" class="section level3 tabset">
 <h3>Effect of using lagged flow or salinity variables</h3>
 <p>The above plots suggest that maximum correlations between flow and nutrient time series may be observed at specific monthly lags. A logical expectation is that performance of weighted regression models could be improved if flow variables are matched with nutrient records at the lag with the maximum correlation. The effect of using lagged or no lagged flow or salinity variables on model performance was evaluated with residual errors. Models were fit using the ‘optimal’ lags from above and using no lags. The plots below show root mean squared error for the different models fit for each of the conditional quantiles. The identified lag for each station/variable combination is below each bar. Interestingly, using lagged variables causes a slight increase in error, implying a reduction in performance. All results below are for models that did not include a temporal lag for the flow or salinity variables. Flow records matched to each station were based on physical proximity (e.g., C3 with Sacramento).</p>
+<p>See <a href="http://fawda123.github.io/sf_trends/middle_delta">here</a> for an evaluation of model fit for middle delta stations (D19, D26, D28) with Sacramento, San Joaquin, and East daily flow values.</p>
 <div id="section" class="section level4">
 <h4>0.1</h4>
 <pre class="r"><code># load the data

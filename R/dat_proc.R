@@ -68,6 +68,7 @@ save(delt_dat, file = 'data/delt_dat.RData')
 
 ######
 # remove outliers (from viz in ggpairs, original readme)
+# delt data have not been transformed, values below are from viz eval of ggpairs plots that were transformed
 
 data(delt_dat)
 
