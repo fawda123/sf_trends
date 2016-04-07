@@ -314,7 +314,7 @@ The plots below show changes over time in the relationship between nutrients and
 data(mods_nolag)
 
 # y axis limits
-lims <- data.frame(Delta = c(3.2, 1.2, 3), Middle = c(0.9, 0.175, 0.8), Suisun = c(1, 0.25, 1))
+lims <- data.frame(Delta = c(3.2, 1.2, 3), Middle = c(1.5, 0.25, 1.4), Suisun = c(1, 0.25, 1))
 row.names(lims) <- c('din', 'nh', 'no23')
 
 for(i in 1:nrow(mods_nolag)){
@@ -327,7 +327,7 @@ for(i in 1:nrow(mods_nolag)){
   locv <- as.character(mods_nolag[i, 'Location'])
   limy <- lims[resv, locv]
     
-  p <- dynaplot(toplo, month = c(1, 4, 7, 10), ncol = 1, logspace = F) +
+  p <- dynaplot(toplo, month = c(1, 4, 7, 10), ncol = 4, logspace = F) +
     ggtitle(lab) + 
     theme_minimal() +
     theme(
@@ -335,9 +335,9 @@ for(i in 1:nrow(mods_nolag)){
       legend.position = 'top', 
       axis.line.x = element_line(size = 0.5),
       axis.line.y = element_line(size = 0.5) 
-      ) #+
-    # scale_x_continuous(limits = c(0, 1)) +
-    # scale_y_continuous(limits = c(0, limy))
+      ) +
+    scale_x_continuous(limits = c(0, 1)) +
+    scale_y_continuous(limits = c(0, limy))
 
   # flip if Suisun (salinity was used)
   if(as.character(mods_nolag[i, 'Location']) == 'Suisun')
@@ -364,11 +364,11 @@ ylab3 <- gsub('ln-', '', as.character(attr(mods_nolag$mod[[3]], 'reslab')))
 ylab3 <- parse(text = ylab3)
 
 grid.arrange(
-  pleg, nrow = 3, heights = c(0.1, 1, 0.1), 
+  pleg, nrow = 3, heights = c(0.1, 3, 0.1), 
   arrangeGrob(
-  ncol = 2, widths = c(0.05, 1), 
+  ncol = 2, widths = c(0.025, 1), 
     grid::textGrob(ylab1, rot = 90), 
-    arrangeGrob(p1, p4, p7, p10, p13, p16, ncol = 6)
+    arrangeGrob(p1, p4, p7, p19, p22, p25, p10, p13, p16, ncol = 1)
   ), 
   grid::textGrob('Flow or Salinity (standardized)')
 )
@@ -380,11 +380,11 @@ grid.arrange(
 
 ```r
 grid.arrange(
-  pleg, nrow = 3, heights = c(0.1, 1, 0.1), 
+  pleg, nrow = 3, heights = c(0.1, 3, 0.1), 
   arrangeGrob(
-  ncol = 2, widths = c(0.05, 1), 
+  ncol = 2, widths = c(0.025, 1), 
     grid::textGrob(ylab2, rot = 90), 
-    arrangeGrob(p2, p5, p8, p11, p14, p17, ncol = 6)
+    arrangeGrob(p2, p5, p8, p20, p23, p26, p11, p14, p17, ncol = 1)
   ), 
   grid::textGrob('Flow or Salinity (standardized)')
 )
@@ -396,11 +396,11 @@ grid.arrange(
 
 ```r
 grid.arrange(
-  pleg, nrow = 3, heights = c(0.1, 1, 0.1), 
+  pleg, nrow = 3, heights = c(0.1, 3, 0.1), 
   arrangeGrob(
-  ncol = 2, widths = c(0.05, 1), 
+  ncol = 2, widths = c(0.025, 1), 
     grid::textGrob(ylab3, rot = 90), 
-    arrangeGrob(p3, p6, p9, p12, p15, p18, ncol = 6)
+    arrangeGrob(p3, p6, p9, p21, p24, p27, p12, p15, p18, ncol = 1)
   ), 
   grid::textGrob('Flow or Salinity (standardized)')
 )

@@ -446,7 +446,7 @@ mods_out <- foreach(i = 1:nrow(mods_lag)) %dopar% {
       filter(date >= min(tomod$date) & date <= max(tomod$date)) %>% 
       na.omit %>% 
       data.frame
-    
+
   } else {
     
     topred <- filter(flow_dat, station == flolab) %>% 
@@ -456,7 +456,17 @@ mods_out <- foreach(i = 1:nrow(mods_lag)) %dopar% {
       filter(date >= min(tomod$date) & date <= max(tomod$date)) %>% 
       na.omit %>% 
       data.frame
-    
+
+    # if D19, remove gap in time series with no data
+    if(sta == 'D19'){
+      
+      dts <- as.Date(c('1995-12-01', '2004-05-01')) # looked at orig record for this
+      
+      torm <- with(topred, date > dts[1] & date < dts[2])
+      topred$flo[torm] <- NA
+      
+    }
+        
   }
   
   # create model and exit
@@ -654,6 +664,16 @@ mods_out <- foreach(i = 1:nrow(mods_nolag)) %dopar% {
       filter(date >= min(tomod$date) & date <= max(tomod$date)) %>% 
       na.omit %>% 
       data.frame
+    
+    # if D19, remove gap in time series with no data
+    if(sta == 'D19'){
+      
+      dts <- as.Date(c('1995-12-01', '2004-05-01')) # looked at orig record for this
+      
+      torm <- with(topred, date > dts[1] & date < dts[2])
+      topred$flo[torm] <- NA
+      
+    }
     
   }
   
