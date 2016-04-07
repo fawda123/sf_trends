@@ -478,7 +478,7 @@ mods_out <- foreach(i = 1:nrow(mods_lag)) %dopar% {
 }
 
 # import each file, add to nested mods_lag dataframe
-fls <- list.files('data', pattern = '^C3|^C10|^P8|^D6|^D4|^D7', full.names = T)
+fls <- list.files('data', pattern = '^C3|^C10|^P8|^D6|^D4|^D7|^D19|^D26|^D28', full.names = T)
 dat <- lapply(fls, load, .GlobalEnv)
 names(dat) <- unlist(dat)
 dat <- lapply(dat, get)

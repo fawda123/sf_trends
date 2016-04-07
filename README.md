@@ -80,8 +80,6 @@ ggplot(nutcor, aes(x = lag, y = acf, colour = var2, group = var2)) +
 
 ![](README_files/figure-html/unnamed-chunk-3-1.png)
 
-### Model performance w/ and w/o flow lags
-
 ### Effect of using lagged flow or salinity variables {.tabset}
 
 The above plots suggest that maximum correlations between flow and nutrient time series may be observed at specific monthly lags.  A logical expectation is that performance of weighted regression models could be improved if flow variables are matched with nutrient records at the lag with the maximum correlation.  The effect of using lagged or no lagged flow or salinity variables on model performance was evaluated with residual errors.  Models were fit using the 'optimal' lags from above and using no lags.  The plots below show root mean squared error for the different models fit for each of the conditional quantiles. The identified lag for each station/variable combination is below each bar. Interestingly, using lagged variables causes a slight increase in error, implying a reduction in performance.  All results below are for models that did not include a temporal lag for the flow or salinity variables.  Flow records matched to each station were based on physical proximity (e.g., C3 with Sacramento).
@@ -204,6 +202,8 @@ The plots below show annually-averaged results of weighted regression for each s
 * Differences in flow-normalized predictions and observed predictions - large differences between the two represent either a large effect of flow or an inappropriate flow variable
 * Differences in the magnitude of the modelled response between locations - differences can show the relative proportions of nitrogen species at each site.  This is why the y-axis limits are constant for each response measure.
 * Differences by nutrient species - how do the plots change with the nutrient species given any of the above information?  
+
+See [here](https://beckmw.shinyapps.io/sf_trends/) for an interactive application of model results. 
 
 #### DIN
 
