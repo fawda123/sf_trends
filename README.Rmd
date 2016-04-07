@@ -55,7 +55,7 @@ Monthly nutrient samples at selected stations were compared with flow estimates 
 
 #### Nutrients to flow variables 
 
-```{r fig.height = 7, fig.width = 11, echo = T, cache = TRUE}
+```{r fig.height = 10, fig.width = 11, echo = T, cache = TRUE}
 data(flocor)
 
 ggplot(flocor, aes(x = lag, y = acf, colour = flovar, group = flovar)) +
@@ -69,7 +69,7 @@ ggplot(flocor, aes(x = lag, y = acf, colour = flovar, group = flovar)) +
   
 #### Nutrients to nutrients
 
-```{r fig.height = 7, fig.width = 11, echo = T, cache = TRUE}
+```{r fig.height = 10, fig.width = 11, echo = T, cache = TRUE}
 data(nutcor)
 
 ggplot(nutcor, aes(x = lag, y = acf, colour = var2, group = var2)) +
@@ -91,7 +91,7 @@ The above plots suggest that maximum correlations between flow and nutrient time
 See [here](http://fawda123.github.io/sf_trends/middle_delta) for an evaluation of model fit for middle delta stations (D19, D26, D28) with Sacramento, San Joaquin, and East daily flow values.
 
 #### 0.1
-```{r fig.height = 4.5, fig.width = 10, echo = T, warning = F}
+```{r fig.height = 4.5, fig.width = 10, echo = T, warning = F, eval = T}
 # load the data
 data(mods_lag)
 data(mods_nolag)
@@ -121,7 +121,8 @@ nlag <- map(mods_nolag$mod, wrtdsperf) %>%
   separate(lab, c('stat', 'var'), sep = '_')
 
 # combine for plotting, extract results for median mod
-perfs <- rbind(wlag, nlag)
+perfs <- rbind(wlag, nlag) %>% 
+  mutate(stat  = factor(stat, levels = c('C10', 'C3', 'P8', 'D19', 'D26', 'D28', 'D4', 'D6', 'D7')))
 
 # txt to add to the plot showing lag
 txt <- rename(bests, 
@@ -151,7 +152,7 @@ ggplot(perfs[perfs$tau == 0.1,], aes(x = stat, y = rmse)) +
 ```
 
 #### 0.5
-```{r fig.height = 4.5, fig.width = 10, echo = T}
+```{r fig.height = 4.5, fig.width = 10, echo = T, eval = T}
 # the plot
 ggplot(perfs[perfs$tau == 0.5,], aes(x = stat, y = rmse)) +
   geom_bar(aes(fill = typ), stat = 'identity', position = 'dodge', alpha = 0.75) + 
@@ -171,7 +172,7 @@ ggplot(perfs[perfs$tau == 0.5,], aes(x = stat, y = rmse)) +
 ```
 
 #### 0.9
-```{r fig.height = 4.5, fig.width = 10, echo = T}
+```{r fig.height = 4.5, fig.width = 10, echo = T, eval = T}
 # the plot
 ggplot(perfs[perfs$tau == 0.9,], aes(x = stat, y = rmse)) +
   geom_bar(aes(fill = typ), stat = 'identity', position = 'dodge', alpha = 0.75) + 
@@ -201,12 +202,12 @@ The plots below show annually-averaged results of weighted regression for each s
 * Differences by nutrient species - how do the plots change with the nutrient species given any of the above information?  
 
 #### DIN
-```{r, fig.height = 7, fig.width = 12, echo = T, message = F, warning = F, cache = TRUE}
+```{r, fig.height = 10, fig.width = 12, echo = T, message = F, warning = F, cache = TRUE}
 
 data(mods_nolag)
 
 # y axis limits
-lims <- data.frame(Delta = c(3, 0.85, 2.6), Suisun = c(1, 0.2, 0.8))
+lims <- data.frame(Delta = c(3, 0.85, 2.6), Middle = c(0.9, 0.175, 0.8), Suisun = c(1, 0.2, 0.8))
 row.names(lims) <- c('din', 'nh', 'no23')
 
 for(i in 1:nrow(mods_nolag)){
@@ -255,31 +256,31 @@ grid.arrange(
   arrangeGrob(
   ncol = 2, widths = c(0.1, 1), 
     grid::textGrob(ylab1, rot = 90), 
-    arrangeGrob(p1, p4, p7, p10, p13, p16, ncol = 3)
+    arrangeGrob(p1, p4, p7, p19, p22, p25, p10, p13, p16, ncol = 3)
   )
 )
 ```
 
 #### NH4
-```{r, fig.height = 7, fig.width = 12, echo = T, message = F, warning = F, cache = TRUE}
+```{r, fig.height = 10, fig.width = 12, echo = T, message = F, warning = F, cache = TRUE}
 grid.arrange(
   pleg, nrow = 2, heights = c(0.1, 1), 
   arrangeGrob(
   ncol = 2, widths = c(0.1, 1), 
     grid::textGrob(ylab2, rot = 90), 
-    arrangeGrob(p2, p5, p8, p11, p14, p17, ncol = 3)
+    arrangeGrob(p2, p5, p8, p20, p23, p26, p11, p14, p17, ncol = 3)
   )
 )
 ```
 
 #### NO23 
-```{r, fig.height = 7, fig.width = 12, echo = T, message = F, warning = F, cache = TRUE}
+```{r, fig.height = 10, fig.width = 12, echo = T, message = F, warning = F, cache = TRUE}
 grid.arrange(
   pleg, nrow = 2, heights = c(0.1, 1), 
   arrangeGrob(
   ncol = 2, widths = c(0.1, 1), 
     grid::textGrob(ylab3, rot = 90), 
-    arrangeGrob(p3, p6, p9, p12, p15, p18, ncol = 3)
+    arrangeGrob(p3, p6, p9, p21, p24, p27, p12, p15, p18, ncol = 3)
   )
 )
 ```
@@ -301,7 +302,7 @@ The plots below show changes over time in the relationship between nutrients and
 data(mods_nolag)
 
 # y axis limits
-lims <- data.frame(Delta = c(3.2, 1.2, 3), Suisun = c(1, 0.25, 1))
+lims <- data.frame(Delta = c(3.2, 1.2, 3), Middle = c(0.9, 0.175, 0.8), Suisun = c(1, 0.25, 1))
 row.names(lims) <- c('din', 'nh', 'no23')
 
 for(i in 1:nrow(mods_nolag)){
@@ -322,9 +323,9 @@ for(i in 1:nrow(mods_nolag)){
       legend.position = 'top', 
       axis.line.x = element_line(size = 0.5),
       axis.line.y = element_line(size = 0.5) 
-      ) +
+      ) #+
     # scale_x_continuous(limits = c(0, 1)) +
-    scale_y_continuous(limits = c(0, limy))
+    # scale_y_continuous(limits = c(0, limy))
 
   # flip if Suisun (salinity was used)
   if(as.character(mods_nolag[i, 'Location']) == 'Suisun')
@@ -399,7 +400,7 @@ The plots below show seasonal changes in flow-normalized results over time using
 * Differences by nutrient species - how do the plots change with the nutrient species given any of the above information?  
 
 #### DIN
-```{r, fig.height = 6.5, fig.width = 10, echo = T, message = F, warning = F, eval = T, cache = TRUE}
+```{r, fig.height = 9, fig.width = 10, echo = T, message = F, warning = F, eval = T, cache = TRUE}
 
 data(mods_nolag)
 
@@ -410,7 +411,7 @@ lims <- data.frame(
 )
 
 # y axis limits
-lims <- data.frame(Delta = c(2.8, 0.9, 2.1), Suisun = c(1, 0.2, 0.6))
+lims <- data.frame(Delta = c(2.8, 0.9, 2.1), Middle = c(1, 0.175, 0.95), Suisun = c(0.75, 0.175, 0.6))
 row.names(lims) <- c('din', 'nh', 'no23')
 
 for(i in 1:nrow(mods_nolag)){
@@ -454,31 +455,31 @@ grid.arrange(
   arrangeGrob(
   ncol = 2, widths = c(0.1, 1), 
     grid::textGrob(ylab1, rot = 90), 
-    arrangeGrob(p1, p4, p7, p10, p13, p16, ncol = 3)
+    arrangeGrob(p1, p4, p7, p19, p22, p25, p10, p13, p16, ncol = 3)
   )
 )
 ```
 
 #### NH4
-```{r, fig.height = 6.5, fig.width = 10, echo = T, message = F, warning = F, eval = T, cache = TRUE}
+```{r, fig.height = 9, fig.width = 10, echo = T, message = F, warning = F, eval = T, cache = TRUE}
 grid.arrange(
   pleg, nrow = 2, heights = c(0.1, 1), 
   arrangeGrob(
   ncol = 2, widths = c(0.1, 1), 
     grid::textGrob(ylab2, rot = 90), 
-    arrangeGrob(p2, p5, p8, p11, p14, p17, ncol = 3)
+    arrangeGrob(p2, p5, p8, p20, p23, p26, p11, p14, p17, ncol = 3)
   )
 )
 ```
 
 #### NO23
-```{r, fig.height = 6.5, fig.width = 10, echo = T, message = F, warning = F, eval = T, cache = TRUE}
+```{r, fig.height = 9, fig.width = 10, echo = T, message = F, warning = F, eval = T, cache = TRUE}
 grid.arrange(
   pleg, nrow = 2, heights = c(0.1, 1), 
   arrangeGrob(
   ncol = 2, widths = c(0.1, 1), 
     grid::textGrob(ylab3, rot = 90), 
-    arrangeGrob(p3, p6, p9, p12, p15, p18, ncol = 3)
+    arrangeGrob(p3, p6, p9,  p21, p24, p27, p12, p15, p18, ncol = 3)
   )
 )
 ```

@@ -120,7 +120,8 @@ nlag <- map(mods_nolag$mod, wrtdsperf) %>%
   separate(lab, c('stat', 'var'), sep = '_')
 
 # combine for plotting, extract results for median mod
-perfs <- rbind(wlag, nlag)
+perfs <- rbind(wlag, nlag) %>% 
+  mutate(stat  = factor(stat, levels = c('C10', 'C3', 'P8', 'D19', 'D26', 'D28', 'D4', 'D6', 'D7')))
 
 # txt to add to the plot showing lag
 txt <- rename(bests, 
@@ -210,7 +211,7 @@ The plots below show annually-averaged results of weighted regression for each s
 data(mods_nolag)
 
 # y axis limits
-lims <- data.frame(Delta = c(3, 0.85, 2.6), Suisun = c(1, 0.2, 0.8))
+lims <- data.frame(Delta = c(3, 0.85, 2.6), Middle = c(0.9, 0.175, 0.8), Suisun = c(1, 0.2, 0.8))
 row.names(lims) <- c('din', 'nh', 'no23')
 
 for(i in 1:nrow(mods_nolag)){
@@ -259,7 +260,7 @@ grid.arrange(
   arrangeGrob(
   ncol = 2, widths = c(0.1, 1), 
     grid::textGrob(ylab1, rot = 90), 
-    arrangeGrob(p1, p4, p7, p10, p13, p16, ncol = 3)
+    arrangeGrob(p1, p4, p7, p19, p22, p25, p10, p13, p16, ncol = 3)
   )
 )
 ```
@@ -274,7 +275,7 @@ grid.arrange(
   arrangeGrob(
   ncol = 2, widths = c(0.1, 1), 
     grid::textGrob(ylab2, rot = 90), 
-    arrangeGrob(p2, p5, p8, p11, p14, p17, ncol = 3)
+    arrangeGrob(p2, p5, p8, p20, p23, p26, p11, p14, p17, ncol = 3)
   )
 )
 ```
@@ -289,7 +290,7 @@ grid.arrange(
   arrangeGrob(
   ncol = 2, widths = c(0.1, 1), 
     grid::textGrob(ylab3, rot = 90), 
-    arrangeGrob(p3, p6, p9, p12, p15, p18, ncol = 3)
+    arrangeGrob(p3, p6, p9, p21, p24, p27, p12, p15, p18, ncol = 3)
   )
 )
 ```
@@ -313,7 +314,7 @@ The plots below show changes over time in the relationship between nutrients and
 data(mods_nolag)
 
 # y axis limits
-lims <- data.frame(Delta = c(3.2, 1.2, 3), Suisun = c(1, 0.25, 1))
+lims <- data.frame(Delta = c(3.2, 1.2, 3), Middle = c(0.9, 0.175, 0.8), Suisun = c(1, 0.25, 1))
 row.names(lims) <- c('din', 'nh', 'no23')
 
 for(i in 1:nrow(mods_nolag)){
@@ -334,9 +335,9 @@ for(i in 1:nrow(mods_nolag)){
       legend.position = 'top', 
       axis.line.x = element_line(size = 0.5),
       axis.line.y = element_line(size = 0.5) 
-      ) +
+      ) #+
     # scale_x_continuous(limits = c(0, 1)) +
-    scale_y_continuous(limits = c(0, limy))
+    # scale_y_continuous(limits = c(0, limy))
 
   # flip if Suisun (salinity was used)
   if(as.character(mods_nolag[i, 'Location']) == 'Suisun')
@@ -429,7 +430,7 @@ lims <- data.frame(
 )
 
 # y axis limits
-lims <- data.frame(Delta = c(2.8, 0.9, 2.1), Suisun = c(1, 0.2, 0.6))
+lims <- data.frame(Delta = c(2.8, 0.9, 2.1), Middle = c(1, 0.175, 0.95), Suisun = c(0.75, 0.175, 0.6))
 row.names(lims) <- c('din', 'nh', 'no23')
 
 for(i in 1:nrow(mods_nolag)){
@@ -473,7 +474,7 @@ grid.arrange(
   arrangeGrob(
   ncol = 2, widths = c(0.1, 1), 
     grid::textGrob(ylab1, rot = 90), 
-    arrangeGrob(p1, p4, p7, p10, p13, p16, ncol = 3)
+    arrangeGrob(p1, p4, p7, p19, p22, p25, p10, p13, p16, ncol = 3)
   )
 )
 ```
@@ -488,7 +489,7 @@ grid.arrange(
   arrangeGrob(
   ncol = 2, widths = c(0.1, 1), 
     grid::textGrob(ylab2, rot = 90), 
-    arrangeGrob(p2, p5, p8, p11, p14, p17, ncol = 3)
+    arrangeGrob(p2, p5, p8, p20, p23, p26, p11, p14, p17, ncol = 3)
   )
 )
 ```
@@ -503,7 +504,7 @@ grid.arrange(
   arrangeGrob(
   ncol = 2, widths = c(0.1, 1), 
     grid::textGrob(ylab3, rot = 90), 
-    arrangeGrob(p3, p6, p9, p12, p15, p18, ncol = 3)
+    arrangeGrob(p3, p6, p9,  p21, p24, p27, p12, p15, p18, ncol = 3)
   )
 )
 ```

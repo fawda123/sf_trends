@@ -13,7 +13,7 @@ shinyUI(fluidPage(
       
       selectInput(inputId = 'stat',
         label = h4('Station'),
-        choices = c('C10', 'C3', 'P8', 'D4', 'D6', 'D7'), 
+        choices = c('C10', 'C3', 'P8', 'D19', 'D26', 'D28', 'D4', 'D6', 'D7'), 
         selected = 'C10')
       
     ),
