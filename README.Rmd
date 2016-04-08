@@ -19,6 +19,8 @@ Content available at [https://github.com/fawda123/sf_trends](https://github.com/
 
 * `delt_dat.RData` Processed wq time series data `dwr_wq.RData`, includes all nitrogen analytes and current/active stations in the delta, also includes matched and smoothed flow records from `flocor.RData` results
 
+* `delt_map.RData` SpatialPolygonsDataFrame object of approximate map of Delta region
+
 * `dwr_wq.RData` time series data of stations in the SF delta from California DWR-EMP (Department of Water Resources, Environmental Monitoring Program) , processed by E. Novick, all stations, analytes from 1975 to present.  Most analytes are measured as concentration, see original spreadsheet for values.  Unavailable in GitHub repo.
 
 * `flocor.RData` results of ccf analysis of selected delta and suisun stations comparing nitrogen and flow

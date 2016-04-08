@@ -12,6 +12,15 @@ library(foreach)
 library(doParallel)
 
 ######
+# import ESRI shapefile, save as RData object
+# shapefile from dissolved/clipped object created in ArcMap
+# source data from http://www.sfei.org/data/california-aquatic-resource-inventory-cari-version-01-gis-data#sthash.ykwo9qLo.dpbs
+
+delt_map <- maptools::readShapeSpatial('M:/GIS/sf_delta.shp')
+
+save(delt_map, file = 'data/delt_map.RData', compress = 'xz')
+  
+######
 # wq data
 
 load(file = 'ignore/dwr_wq.RData')
