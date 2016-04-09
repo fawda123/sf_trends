@@ -10,6 +10,9 @@ library(tidyr)
 library(purrr)
 library(RColorBrewer)
 library(scales)
+library(gridExtra)
+library(ggrepel)
+source('R/funcs.R')
 
 data(delt_dat)
 data(delt_map)
@@ -23,12 +26,13 @@ statmeta <- select(delt_dat, Site_Code, Latitude, Longitude) %>%
 # bounding box
 lims<- select(statmeta, -Site_Code) %>% 
   apply(., 2, function(x) range(x, na.rm = TRUE))
-buff <- 0.002
+buffy <- 0.001
+buffx <- 0.00025
 lims <- c(
-  (1 + buff) * lims[1, 2], 
-  (1 - buff) * lims[1, 1], 
-  (1 - buff) * lims[2, 2], 
-  (1 + buff) * lims[2, 1]
+  (1 + buffx) * lims[1, 2], 
+  (1 - buffy) * lims[1, 1], 
+  (1 - buffx) * lims[2, 2], 
+  (1 + buffy) * lims[2, 1]
   )    
 names(lims) <- c('left', 'bottom', 'right', 'top')
 
@@ -36,10 +40,10 @@ names(lims) <- c('left', 'bottom', 'right', 'top')
 # get trends using wrtdstrnd function
 
 # args to split
-mobrks <- c(-Inf, 3, 6, 9, Inf)
-yrbrks <- c(-Inf, 1985, 1994, 2003, Inf)
-molabs <- c('JFM', 'AMJ', 'JAS', 'OND')
-yrlabs <- c('1976-1985', '1986-1994', '1995-2003', '2004-2012')
+mobrks <- c(-Inf, 4, 8, Inf)
+yrbrks <- c(-Inf, 1988, 2000, Inf)
+molabs <- c('JFMA', 'MJJA', 'SOND')
+yrlabs <- c('1976-1988', '1989-2000', '2001-2012')
 
 # get trends, merge with statmeta for lat/lon
 trnds <- mutate(mods_nolag, 
@@ -61,22 +65,21 @@ delt_map <- fortify(delt_map)
 # base delta map
 pbase <- ggplot(delt_map, aes(x = long, y = lat)) + 
   geom_polygon(aes(group = group, fill = hole)) +
-  scale_fill_manual(values=c("lightblue", "#FFFFFF"), guide="none") +  
-  theme(axis.line=element_blank(), axis.text.x=element_blank(),
-    axis.text.y=element_blank(), axis.ticks=element_blank(),
+  scale_fill_manual(values=c("cornflowerblue", "#FFFFFF"), guide="none") +  
+  theme_bw() +
+  theme(
     axis.title.x=element_blank(),
     axis.title.y=element_blank(),
-    panel.background=element_blank(),panel.border=element_blank(),panel.grid.major=element_blank(),
+    panel.background=element_blank(),panel.grid.major=element_blank(),
     panel.grid.minor=element_blank(),plot.background=element_blank(), 
-    legend.position = 'top', 
-    legend.title = element_blank()
+    legend.position = 'none'
     ) +  
   coord_fixed(ratio = 1, xlim = lims[c(1, 3)], ylim = lims[c(2, 4)])
 
 # globals for plot and legend
 cols <- brewer.pal(9, 'Set1') %>% 
   .[c(1, 3)]
-sz_rng <- c(0.5, 7.5)
+sz_rng <- c(3, 12)
 shps <- c(24, 25)
 res <- 'no23'
 
@@ -87,12 +90,23 @@ toplo[toplo$chg < 0, 'shp'] <- shps[2]
 toplo$sz <- rescale(abs(toplo$chg), to = sz_rng)
 toplo$col <- cols[1]
 toplo[toplo$chg < 0, 'col'] <- cols[2]
+toplo[!toplo$cat %in% yrlabs[1] , 'Site_Code'] <- NA
 
-pbase +
+ptrnd <- pbase +
+  geom_label_repel(
+    data = toplo, 
+    aes(x = Longitude, y = Latitude, label = Site_Code), 
+    label.r = unit(0, "lines"),
+    box.padding = unit(1, "lines"), 
+    point.padding = unit(0, "lines"), 
+    force = 2, size = 2,
+    fill = 'lightgrey'
+  ) +
   geom_point(data = toplo, 
     aes(x = Longitude, y = Latitude), 
-    pch = toplo$shp, size = toplo$sz, fill = toplo$col, alpha = 0.8)  + 
-  facet_wrap( ~ cat, ncol = 4)
+    pch = toplo$shp, size = toplo$sz, fill = toplo$col, alpha = 0.8
+  )  + 
+  facet_wrap( ~ cat, ncol = 3)
 
 ## manual changes to legend
 ndivs <- 6
@@ -116,24 +130,35 @@ inc <- toplo$chg[!negs]
 inc <- seq(min(inc), max(inc), length = ndivs/2)
 leglab <- round(c(dec, inc), 1)
 
-
-fakeleg <- data.frame(
+fakedat<- data.frame(
   shp = leglab,
   sz = leglab,
   col = leglab
 )
 
-ggplot(fakeleg, aes(x = shp, y = sz, fill = factor(col), size = factor(sz), shape = factor(shp))) +
+pleg <- ggplot(fakedat, aes(x = shp, y = sz, fill = factor(col), size = factor(sz), shape = factor(shp))) +
   geom_point() +
-  theme_minimal() + 
-  theme(legend.position = 'right') +
+  scale_fill_manual(legtitle, values = rev(legcols), labels = leglab) +
+  scale_size_manual(legtitle, values = rev(legszs), labels = leglab) +
+  scale_shape_manual(legtitle, values = rev(legshps), labels = leglab) +
   guides(
-    col = guide_legend(title = legtitle, nrow = 2), 
-    size = guide_legend(title = legtitle, nrow = 2), 
-    shape = guide_legend(title = legtitle, nrow = 2), nrow = 1
+    fill = guide_legend(title = legtitle, nrow = 1), 
+    size = guide_legend(title = legtitle), 
+    shape = guide_legend(title = legtitle)
     ) +
-  scale_fill_manual(legtitle, values = legcols) +
-  scale_size_manual(legtitle, values = legszs) +
-  scale_shape_manual(legtitle, values = legshps)
+  theme_minimal() + 
+  theme(legend.position = 'top')
+
+pleg <- g_legend(pleg)
+
+
+pdf('C:/Users/mbeck/Desktop/test.pdf', height = 6, width = 9, family = 'serif')
+grid.arrange(
+  arrangeGrob(
+    pleg, ptrnd, ncol = 1, 
+    heights = c(0.12, 1))
+)
+dev.off()
+
 
   
