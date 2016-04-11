@@ -1,0 +1,933 @@
+\documentclass[final,t]{beamer}
+\mode<presentation>
+{
+%  \usetheme{Warsaw}
+%  \usetheme{Aachen}
+%  \usetheme{Oldi6}
+%  \usetheme{I6td}
+  \usetheme{I6dv}
+%  \usetheme{I6pd}
+%  \usetheme{I6pd2}
+}
+% additional settings
+\setbeamerfont{itemize}{size=\normalsize}
+\setbeamerfont{itemize/enumerate body}{size=\normalsize}
+\setbeamerfont{itemize/enumerate subbody}{size=\normalsize}
+
+% additional packages
+\usepackage{xcolor}
+\usepackage{times}
+\usepackage{amsmath,amsthm, amssymb, latexsym}
+\usepackage{exscale}
+\usepackage{subfig}
+%\boldmath
+\usepackage{booktabs, array}
+\usepackage{tabularx}
+%\usepackage{rotating} %sideways environment
+\usepackage[english]{babel}
+\usepackage[latin1]{inputenc}
+\usepackage[orientation=landscape,size=custom,width=115.57,height=99.695,scale=1.55]{beamerposter} % in cm, equal to 45.5" wide x 39.3701" high
+\listfiles
+% Display a grid to help align images
+%\beamertemplategridbackground[1cm]
+
+\newcolumntype{R}{>{\raggedleft\arraybackslash}X}
+
+
+\title{\LARGE Analysis of macrophyte indicator variation as a function of sampling, temporal, and stressor effects}
+\author[Beck et al.]{Marcus W. Beck, Cynthia M. Tomcko, Ray D. Valley, David F. Staples}
+\institute[CB Grad Program, U of M]{University of Minnesota, Minnesota Dept. of Natural Resources, St. Paul, MN}
+\date[May 20, 2014]{May 20, 2014}
+
+\begin{document}
+
+\begin{frame}{}
+
+	\vspace{-0.6cm} %spacing for block distance from header
+  \begin{columns}[t]
+  	\hspace{0.4cm}
+  	
+  	%%%%%%%%%%%%%%
+  	% LEFT
+  	%%%%%%%%%%%%%%
+  	\begin{column}{.31\linewidth}
+
+			%%%%%%
+			% abstract
+			%%%%%%
+      \begin{block}{Abstract}
+        		\alert{Eight macrophyte indicators were estimated in 23 Minnesota (USA) lakes using four years of surveys to quantify sampling and temporal variation, response to development (phosphorus) and climate stress (growing degree days), and power to detect significant change at various annual sampling intervals.  Indicators included a macrophyte index of biotic integrity, floristic quality index, maximum depth of growth, total species richness, common species richness, species per survey point, and frequency occurrence of rooted species and Chara sp.  Regression and smoothed additive models indicated significant relationships of indicators to lake phosphorus and mean annual growing degree days.  The macrophyte index of biotic integrity, floristic quality index, and the frequency rooted species had minimal sampling variation, were responsive to development or climate stress, and had low annual variation resulting in high to moderate power for detecting significant change.  Results from these analyses will facilitate the use of precise and powerful indicators that respond to stressors that are of concern for the management of freshwater glacial lakes.}
+      \end{block}
+      
+      %%%%%%
+      % Objectives
+      %%%%%%
+      \begin{block}{Objectives}
+    	\begin{itemize}
+    	\item Quantify variation of indicators within and among lakes
+    	\item Identify patterns in variation related to total phosphorus and annual growing degrees days
+    	\item Quantify minimum sampling effort necessary for power to detect change over a finite period of observation 
+    	\end{itemize}
+    	
+      \end{block}
+      		
+      %%%%%%
+      % Data
+      %%%%%%
+			\begin{block}{Data}
+			Surveys were completed in \alert{23 lakes} each summer from \alert{2008 to 2011}, eight indicators were estimated
+			\vspace{1cm}
+				\begin{columns}[b]
+      		\begin{column}{0.45\linewidth}
+      		
+% state map
+<<map, echo = F, eval = F, fig = F, include = F>>=
+#scatterplots for latitude and longitude
+
+library(maptools)
+library(scales)
+library(RColorBrewer)
+
+######
+#import data, combine
+
+#shapefiles to plot
+state<-readShapeSpatial('C:/Projects/manuscripts/Veg_indicators/figs_and_tabs/map/state.shp')
+ecoregs<-readShapeSpatial('C:/Projects/manuscripts/Veg_indicators/figs_and_tabs/map/slice_eco.shp')
+counties<-readShapeSpatial('C:/Projects/manuscripts/Veg_indicators/figs_and_tabs/map/bdry_counpy2.shp')
+
+#get UTM coords for SLICE lakes
+tmp<-read.csv('C:/Projects/Manuscripts/Veg_indicators/120703wGDD.csv')
+dows<-unique(tmp$DOW)
+dows[nchar(dows)==7]<-paste0(0,dows[nchar(dows)==7])
+dows<-dows[!dows %in% c('01014201','01014202')]
+
+lake_data_fun<-function(val){
+  
+	cat(val,'\n')
+	flush.console()
+	
+  library(foreign)
+  library(XML)
+
+  full<-{
+    full_all<-dir('C:/Projects/Biological response/macrophyte_data/all_data/')
+    full_all[substr(full_all,1,8)==val]
+    }
+
+  dow_out<-strsplit(full,'_')[[1]][1]
+
+
+  lat_out<-{
+    if(!exists('tenkpts_dbf')){
+      tenkpts_dbf<<-read.dbf(
+        'C:/Projects/GIS data/downloaded data/10k Lakes Layer/mndnrdata/10k_pts.dbf',
+        as.is=T
+        )
+      }
+    tenkpts_sub<-na.omit(tenkpts_dbf[,c('DOWLKNUM','UTM_Y','UTM_X')])
+  
+    out<-tenkpts_dbf[tenkpts_dbf$DOWLKNUM %in% dow_out,'UTM_Y']
+    if(length(out)>0) out
+    else out<-tenkpts_dbf[tenkpts_dbf$MAIN_DOW %in% dow_out,'UTM_Y']
+    if(length(out)>0) out
+    else NA
+    }
+
+  lon_out<-{
+    if(!exists('tenkpts_dbf')){
+      tenkpts_dbf<<-read.dbf(
+        'C:/Projects/GIS data/downloaded data/10k Lakes Layer/mndnrdata/10k_pts.dbf',
+        as.is=T
+        )
+      }
+    tenkpts_sub<-na.omit(tenkpts_dbf[,c('DOWLKNUM','UTM_Y','UTM_X')])
+  
+    out<-tenkpts_dbf[tenkpts_dbf$DOWLKNUM %in% dow_out,'UTM_X']
+    if(length(out)>0) out
+    else out<-tenkpts_dbf[tenkpts_dbf$MAIN_DOW %in% dow_out,'UTM_X']
+    if(length(out)>0) out
+    else NA
+    }
+
+ 
+  out<-c(dow_out,lat_out,lon_out)
+    
+  out
+
+  }
+
+slice.dat<-mapply(lake_data_fun,dows)
+
+out.names<-c('DOW','UTM_Y','UTM_X')
+
+out<-data.frame(t(slice.dat),stringsAsFactors=F)
+names(out)<-out.names
+out$DOW<-as.numeric(out$DOW)
+
+keys<-unique(tmp[,c('DOW','LakeName')])
+out<-merge(keys,out,by='DOW')
+
+######
+#plots
+
+#col.pts<-colorRampPalette(c(colors()[204],colors()[350])))(4)
+# col.eco<-colorRampPalette(c('grey60','grey90'))(4)
+col.eco<-colorRampPalette(brewer.pal(3,'Blues'))(4)
+col.eco<-c(col.eco[1],col.eco[3],col.eco[2],col.eco[4])
+
+##
+pdf('C:/Projects/Presentations/JASM_2014/Beck_etal_poster-map.pdf', family = 'serif', 
+	height = 4.5, width = 4)
+
+par(mar=c(0,0,0,0),family='serif')
+
+new.y <- spread.labs(as.numeric(out$UTM_Y), mindiff = 15000)
+new.x <- spread.labs(as.numeric(out$UTM_X), mindiff = 5000)
+plot(state)
+plot(ecoregs,col=col.eco,border=NA,add=T)
+plot(counties,border='grey40',add=T)
+plot(state,add=T)
+ points(out$UTM_X,out$UTM_Y,cex=2,pch=16,col=alpha('blue',0.8))
+text(x = new.x, y = new.y, 
+	labels = out$LakeName, srt = 0, cex = 1.2, adj = 0, pos = 3)
+
+dev.off()
+@      	
+      			\begin{figure}
+      				\centerline{\includegraphics[width=1.05\linewidth]{Beck_etal_poster-map.pdf}}
+      				\caption{\footnotesize Locations of 23 survey lakes, sampled every four years.}
+	      		\end{figure}
+	 
+	      	\end{column}
+	      	\begin{column}{0.45\linewidth}
+	      	
+% PI example
+<<pi_ex, echo = F, eval = F, fig = F, include = F>>=
+library(maptools)
+library(raster)
+library(fields)
+library(RColorBrewer)
+library(scales)
+
+source('C:/Projects/R code/modified transects/modified_funcs.r')
+
+#root path
+root<-'C:/Projects/GIS data/my data/modified_transects/Kriging data'
+
+#vector shapefiles  
+#cvx.poly<-readShapeSpatial(paste(root,'xmas_cvx.shp',sep='/'))
+
+#first, mask lake raster using external polygon for cvx hull
+cvx.poly<-readShapeSpatial(paste(root,'xmas_cvx_out.shp',sep='/'))
+cvx.out<-slot(cvx.poly,'polygons')[[1]]@Polygons[[1]]
+cvx.out<-Polygons(list(cvx.out),ID=1)
+cvx.out<-SpatialPolygons(list(cvx.out))
+
+#mask rasters using external polygon for cvx hull
+pa.rast<-raster(paste(root,'xmas/rescaled/xmas_pa',sep='/'))
+pa.mask<-mask(pa.rast,cvx.out) #mask
+
+##
+cols<-colorRampPalette(brewer.pal(9,'Blues'))
+
+pdf('C:/Projects/Presentations/JASM_2014/Beck_etal_poster-pi_ex.pdf',width=6,height=7,family='serif')
+par(mar=c(0,0,3,0),mfrow=c(1,1),oma=numeric(4))
+image(pa.mask,col=cols(100),asp=1,axes=F,xlab='',ylab='',main='')
+plot(cvx.out,add=T)
+#points(rand.pi(cvx.poly,72),pch=19,col='red',cex=1.5)
+xmas.pi<-readShapeSpatial(paste(root,'xmas_with_veg_data.shp',sep='/'))
+col.vec<-rep('black',nrow(xmas.pi))
+col.vec[xmas.pi$PA==1]<-'red'
+col.vec<-alpha(col.vec,0.7)
+points(xmas.pi,pch=16,col=col.vec,cex=1.5)
+
+ramp.vals<-c(0,1)#c(minValue(pa.mask),maxValue(pa.mask))
+image.plot(
+  zlim=c(min(ramp.vals),max(ramp.vals)),
+  legend.only=T,col=cols(100),horizontal=T,
+  smallplot=c(0.4,0.6,0.90,0.95),
+  legend.args=list(text='Species occurrence', side=3, line=0.7, cex=1.5),
+  axis.args=list(
+    at=c(0,1),#c(min(ramp.vals),max(ramp.vals)),
+    cex.axis=1.2
+    )
+  )
+#par('usr')[2]-600,par('usr')[4]+125
+legend('bottomright',col=alpha(c('red','black'),0.7),pch=16,legend=c('species present','species absent'),title='Survey points',pt.cex=1.5,bty='n',cex=1.5,adj=0,xpd=T,inset=0.07)
+dev.off()
+@	      	
+	      		\begin{figure}
+	 				 		\centerline{\includegraphics[width=1.05\linewidth, trim = 0cm 1cm 0cm 0cm, clip = true]{Beck_etal_poster-pi_ex.pdf}}
+	 				 		\caption{\footnotesize Example of aquatic plant survey used to estimate indicators.}
+	 					\end{figure}
+	      	\end{column}
+      	\end{columns}
+      \vspace{-1.45cm}
+			\end{block}
+
+    \end{column}
+    
+  	%%%%%%%%%%%%%%
+  	% CENTER
+  	%%%%%%%%%%%%%%    
+    \begin{column}{.31\linewidth}
+    
+      %%%%%%
+      % First objective
+      %%%%%%
+      \begin{block}{First Objective}
+      Substantial \alert{variation} of indicators was observed \alert{within and among} the 23 lakes across \alert{four years}
+
+% barplots of indic values by lake/year/variable
+<<yr_bar, eval = F, echo = F, include = F, fig = F>>=
+library(reshape)
+
+setwd('C:/Projects/manuscripts/Veg_indicators/')
+
+dat<-read.csv('120703wGDD.csv')
+dat<-subset(dat, select=c('LakeName','Year','PlantIBI','FQI','FreqChara','FreqAnchored','MaxVegDepth','TotalTaxa','NumGT10perc','Ave_Taxa_Site','GDD5','lnTP','STRATIFY'))
+
+old.indic<-c('PlantIBI','FQI','FreqChara','FreqAnchored','MaxVegDepth','TotalTaxa','NumGT10perc','Ave_Taxa_Site')
+new.indic<-c('IBI','FQI','Chara','Rooted','MaxDepth','RichTot','RichCom','MeanPt')
+names(dat)[names(dat) %in% old.indic]<-new.indic
+
+#convert MaxDepth to meters
+dat$MaxDepth<-0.3048*dat$MaxDepth
+
+#factor for year category
+year.cat<-rep(seq(1,4),length(unique(dat$LakeName)))
+year.cat<-factor(year.cat[-89],levels=c(1,2,3,4),labels=c('2008','2009','2010','2011'))
+dat<-data.frame(dat,year.cat)
+
+######
+#plot
+library(ggplot2)
+library(scales)
+to.plo<-dat[,!names(dat) %in% c('GDD5','lnTP','STRATIFY','Year')]
+
+to.plo<-melt(to.plo,id.vars=c('LakeName','year.cat'))
+
+#reorder indicator factors
+new.indic<-c('IBI','FQI','MaxDepth','RichTot','RichCom','MeanPt','Rooted','Chara')
+to.plo$variable<-factor(to.plo$variable,levels=new.indic,labels=new.indic)
+
+new.cols<-lapply(split(to.plo,to.plo$variable),
+	function(x) {
+		agg.vals<-aggregate(value~LakeName,x,mean, na.rm =T)#[,2]
+		agg.vals<-merge(x,agg.vals,by='LakeName',all.x=T)
+		non.na<-!is.na(agg.vals$value.y)
+		agg.vals$col<-NA
+		agg.vals$col[non.na]<-colorRampPalette(c('orange', 'blue'))(sum(non.na))[rank(agg.vals$value.y[non.na])]
+
+		agg.vals
+		}
+	)
+to.plo<-do.call('rbind', new.cols)
+
+# new factor labels for plotting
+to.plo$variable <- factor(as.character(to.plo$variable), 
+	levels= c('IBI', 'FQI', 'MaxDepth', 'RichTot', 'RichCom', 'MeanPt', 'Rooted',
+		'Chara'),
+	labels = c('Biotic Integrity', 'Floristic Quality', 'Maximum Plant Depth', 
+		'Total Richness', 'Common Richness', 'Species Per Point', 
+		'Frequency Rooted', 'Frequency Chara')
+)
+
+p<-ggplot(to.plo,aes(x=LakeName,y=value.x,group=year.cat)) +
+	geom_bar(stat='identity',width=0.65,position = 'dodge', aes(fill = col), 
+		alpha = 0.8) +
+	facet_wrap(~variable,scales='free_y', ncol = 4) + 
+	theme_bw() +
+	theme(legend.position='none') + 
+	scale_x_discrete(name=element_blank()) + 
+	scale_y_continuous(name='Indicator value') + 
+	scale_fill_manual(
+		limits = to.plo$col,
+		values = as.character(to.plo$col)
+		) +
+	theme(
+		axis.text.x=element_text(colour='black',angle=90,vjust=0.5,hjust=1,size=6)
+		) 
+
+pdf('C:/Projects/presentations/JASM_2014/Beck_etal_poster-yr_bar.pdf',
+	height = 3.7, width = 9, family = 'serif')
+print(p)
+dev.off()
+@
+						% barplot
+            \begin{figure}
+      				\centerline{\includegraphics[width=1\linewidth]{Beck_etal_poster-yr_bar.pdf}}
+      				\caption{\footnotesize Estimated indicator values by lake for four years, colored by mean values between years and each indicator.}
+	      		\end{figure}
+	      	\vspace{-1cm}
+
+% map of mean indicator values across years 
+<<yr_map, eval = F, echo = F, include = F, fig = F>>=
+#scatterplots for latitude and longitude
+
+library(plyr)
+library(maptools)
+library(scales)
+
+setwd('C:/Projects/manuscripts/Veg_indicators/')
+
+######
+#import data, combine
+
+#shapefiles to plot
+state<-readShapeSpatial('C:/Projects/manuscripts/Veg_indicators/figs_and_tabs/map/state.shp')
+ecoregs<-readShapeSpatial('C:/Projects/manuscripts/Veg_indicators/figs_and_tabs/map/slice_eco.shp')
+counties<-readShapeSpatial('C:/Projects/manuscripts/Veg_indicators/figs_and_tabs/map/bdry_counpy2.shp')
+
+#actual data
+dat<-read.csv('120703wGDD.csv')
+dat<-subset(dat, select=c('LakeName','Year','PlantIBI','FQI','FreqCLPspr','FreqChara','FreqAnchored','MaxVegDepth','TotalTaxa','NumGT10perc','Ave_Taxa_Site'))
+
+#rename indicators
+old.indic<-c('PlantIBI','FQI','FreqCLPspr','FreqChara','FreqAnchored','MaxVegDepth','TotalTaxa','NumGT10perc','Ave_Taxa_Site')
+new.indic<-c('IBI','FQI','Curly','Chara','Rooted','MaxDepth','RichTot','RichCom','MeanPt')
+names(dat)[names(dat) %in% old.indic]<-new.indic
+
+#reorder indicators
+new.indic<-c('IBI','FQI','MaxDepth','RichTot','RichCom','MeanPt','Rooted','Curly','Chara')
+dat<-cbind(
+	dat[,c(1,2)],
+	dat[,-c(1,2)][,match(new.indic,names(dat[,-c(1,2)]))]
+	)
+
+#convert feet to meters for maxdepth
+dat$MaxDepth<-0.3048*dat$MaxDepth
+
+#get UTM coords for SLICE lakes
+tmp<-read.csv('C:/Projects/Manuscripts/Veg_indicators/120703wGDD.csv')
+dows<-unique(tmp$DOW)
+dows[nchar(dows)==7]<-paste0(0,dows[nchar(dows)==7])
+dows<-dows[!dows %in% c('01014201','01014202')]
+
+lake_data_fun<-function(val){
+  
+  library(foreign)
+  library(XML)
+
+  full<-{
+    full_all<-dir('C:/Projects/Biological response/macrophyte_data/all_data/')
+    full_all[substr(full_all,1,8)==val]
+    }
+
+  dow_out<-strsplit(full,'_')[[1]][1]
+
+
+  lat_out<-{
+    if(!exists('tenkpts_dbf')){
+      tenkpts_dbf<<-read.dbf(
+        'C:/Projects/GIS data/downloaded data/10k Lakes Layer/mndnrdata/10k_pts.dbf',
+        as.is=T
+        )
+      }
+    tenkpts_sub<-na.omit(tenkpts_dbf[,c('DOWLKNUM','UTM_Y','UTM_X')])
+  
+    out<-tenkpts_dbf[tenkpts_dbf$DOWLKNUM %in% dow_out,'UTM_Y']
+    if(length(out)>0) out
+    else out<-tenkpts_dbf[tenkpts_dbf$MAIN_DOW %in% dow_out,'UTM_Y']
+    if(length(out)>0) out
+    else NA
+    }
+
+  lon_out<-{
+    if(!exists('tenkpts_dbf')){
+      tenkpts_dbf<<-read.dbf(
+        'C:/Projects/GIS data/downloaded data/10k Lakes Layer/mndnrdata/10k_pts.dbf',
+        as.is=T
+        )
+      }
+    tenkpts_sub<-na.omit(tenkpts_dbf[,c('DOWLKNUM','UTM_Y','UTM_X')])
+  
+    out<-tenkpts_dbf[tenkpts_dbf$DOWLKNUM %in% dow_out,'UTM_X']
+    if(length(out)>0) out
+    else out<-tenkpts_dbf[tenkpts_dbf$MAIN_DOW %in% dow_out,'UTM_X']
+    if(length(out)>0) out
+    else NA
+    }
+
+ 
+  out<-c(dow_out,lat_out,lon_out)
+    
+  out
+
+  }
+
+slice.dat<-mapply(lake_data_fun,dows)
+
+out.names<-c('DOW','UTM_Y','UTM_X')
+
+out<-data.frame(t(slice.dat),stringsAsFactors=F)
+names(out)<-out.names
+out$DOW<-as.numeric(out$DOW)
+
+keys<-unique(tmp[,c('DOW','LakeName')])
+out<-merge(keys,out,by='DOW')
+
+
+#merge two data frames, average by year
+dat<-merge(dat,out,by='LakeName')
+dat<-dat[,!names(dat) %in% c('DOW','Year')]
+
+dat<-ddply(
+	dat,
+	.(LakeName),
+	.fun=function(x) 
+		apply(x[,-1],2,function(y) mean(as.numeric(y),na.rm=T))
+	)
+
+
+#vector for pt.scaling
+scl.rng<-c(1,5)
+scl.vals<-apply(dat[,2:(ncol(dat)-2)],2,function(x) rescale(x, scl.rng))
+
+######
+#plots
+
+library(RColorBrewer)
+
+#col.pts<-colorRampPalette(c(colors()[204],colors()[350])))(4)
+col.eco<-colorRampPalette(brewer.pal(3,'Blues'))(4)
+col.eco<-c(col.eco[1],col.eco[3],col.eco[2],col.eco[4])
+
+col.pts <- colorRampPalette(c('orange', 'blue'))(nrow(dat))
+
+# indic names
+indic_nm <- data.frame(
+	old = new.indic[new.indic != 'Curly'],
+	new = c('Biotic Integrity', 'Floristic Quality', 'Maximum Plant Depth', 
+		'Total Richness', 'Common Richness', 'Species Per Point', 
+		'Frequency Rooted', 'Frequency Chara'),
+	stringsAsFactors = F
+)
+
+####
+pdf('C:/Projects/presentations/JASM_2014/Beck_etal_poster-yr_map.pdf', width = 9, height = 4, 
+	family = 'serif')
+par(mfrow=c(2,4),mar=c(0,0,1,0),family='serif')
+for(val in new.indic[new.indic != 'Curly']){ #remove curly
+	
+	tmp<-dat[,c('UTM_Y','UTM_X',val)]
+	plot(state)
+	plot(ecoregs,col=col.eco,border=NA,add=T)
+	plot(counties,border='grey40',add=T)
+	plot(state,add=T)
+	points(tmp$UTM_X,tmp$UTM_Y,cex=scl.vals[,val],pch=16,
+		col=alpha(col.pts,0.8)[rank(scl.vals[,val])])
+	title(indic_nm[indic_nm$old == val,2], line=0, cex.main=1.5)
+	
+	x_line<-600000
+	y_start<-5180000
+	sep_val<-70000
+	points(
+	  rep(x_line,4),
+	  mapply(function(x) y_start-x*sep_val,c(seq(0,3))),
+	  pch=16,
+	  col=alpha(colorRampPalette(c('orange', 'blue'))(4),0.8),
+	  cex=seq(scl.rng[1],scl.rng[2],length=4)
+	  )
+	
+	text(
+	  rep(x_line+30000,4),
+	  mapply(function(x) y_start-x*sep_val,c(seq(0,3))),
+	  round(seq(min(tmp[,3],na.rm=T),max(tmp[,3],na.rm=T),length=4),1),
+	  cex=1.3,
+	  pos=4
+	  )
+	
+	}
+dev.off()
+@
+						% map
+      			\begin{figure}
+      				\centerline{\includegraphics[width=1\linewidth]{Beck_etal_poster-yr_map.pdf}}
+      				\caption{\footnotesize Spatial variation in mean indicator values in each lake for four years, colored and sized across the indicator range.}
+	      		\end{figure}				
+				\vspace{-2cm}
+				
+      \end{block}
+
+   		%%%%%%
+			% Second Objective
+			%%%%%%
+      \begin{block}{Second Objective}
+    	\alert{Indicators were responsive} to spatial gradients in \alert{total phosphorus} and mean \alert{growing degree days}
+			\vspace{-1.5cm}
+			
+% gam figure of tp/gdd by indic
+<<gam, eval = F, echo = F, fig = F, include = F>>=
+library(scales)
+library(reshape2)
+library(plyr)
+library(mgcv)
+
+load('C:/Projects/Manuscripts/Veg_Indicators/revision_dnr/figs_and_tabs/tab1.RData')
+tab1<-tab1[,c('LakeName','DOW','lat')]
+tab1<-tab1[order(tab1$LakeName),]
+
+Data = read.csv('C:/Projects/Manuscripts/Veg_Indicators/120703wGDD.csv')
+
+Data.Indic = subset(Data, select=c("LakeName","Year","PlantIBI","FQI","FreqCLPspr","FreqChara","FreqAnchored","MaxVegDepth","TotalTaxa","NumGT10perc","Ave_Taxa_Site","GDD5","lnTP","STRATIFY"))
+
+#convert MaxDepth to meters
+Data.Indic$MaxVegDepth<-0.3048*Data.Indic$MaxVegDepth
+
+#aggregate annual data by LakeName
+#as per D. Staples suggestions 2/20 to avoid pseudorep
+Data.Indic<-Data.Indic[,!names(Data.Indic) %in% 'Year']
+Data.Indic<-ddply(
+	Data.Indic,
+	.(LakeName),
+	.fun=function(x) apply(x[,2:ncol(x)],2,function(y) mean(y,na.rm=T))
+	)
+
+#lookup table for indicator names
+#curly removed due to insufficient sample size
+to.pred<-data.frame(
+	indic=c('IBI','FQI','MaxDepth','RichTot','RichCom','MeanPt','Rooted','Curly','Chara'),
+	indic.name=c('PlantIBI','FQI','MaxVegDepth','TotalTaxa','NumGT10perc','Ave_Taxa_Site','FreqAnchored','FreqCLPspr','FreqChara'),
+	stringsAsFactors=F
+	)
+to.pred<-to.pred[to.pred$indic!='Curly',]
+
+out.vals<-NULL
+resids<-NULL
+for(row in 1:nrow(to.pred)){
+	
+	#names
+	mod.name<-to.pred[row,'indic']
+	var.name<-to.pred[row,'indic.name']
+	
+	cat(mod.name,'\n')
+	
+	#default gam model formula, exceptiions for most indicators below
+	form.in<-formula(paste(var.name,'~
+   	s(lnTP,fx=F,k=-1,bs="cr") +
+		s(GDD5,fx=F,k=-1,bs="cr")'))
+	
+	##
+	# exceptions for models that need to have limited smoothing because of overfitting
+	
+	# ibi
+	if(mod.name == 'IBI'){
+		form.in<-formula(paste(var.name,'~
+   		s(lnTP,fx=T,k=6,bs="cr") +
+			s(GDD5,fx=T,k=6,bs="cr")'))	
+	}
+	
+	# maxdepth
+	if(mod.name == 'MaxDepth'){
+		form.in<-formula(paste(var.name,'~
+   		s(lnTP,fx=T,k=8,bs="cr") +
+			s(GDD5,fx=T,k=5,bs="cr")'))	
+	}	
+	
+	# RichCom
+	if(mod.name == 'RichCom'){
+		form.in<-formula(paste(var.name,'~
+   		s(lnTP,fx=T,k=7,bs="cr") +
+			s(GDD5,fx=T,k=5,bs="cr")'))	
+	}
+	
+	# MeanPt
+	if(mod.name == 'MeanPt'){
+		form.in<-formula(paste(var.name,'~
+   		s(lnTP,fx=T,k=7,bs="cr") +
+			s(GDD5,fx=T,k=6,bs="cr")'))	
+	}
+	
+	# gam mod using form.in as input
+	mod<-gam(form.in,data=Data.Indic)
+	
+	#predictor variables for smoother
+	pdat<-with(Data.Indic,
+     data.frame(
+     lnTP=c(seq(min(lnTP),max(lnTP),length=100),rep(mean(lnTP),100)),
+     GDD5=c(rep(mean(GDD5),100),seq(min(GDD5),max(GDD5),length=100))
+     ))
+	lats<-merge(eval(mod$call$data),tab1,by='LakeName',all.x=T)
+	
+	#get predictions
+	pred.vals<-predict(mod,type='terms',newdata=pdat,se.fit=T,interval='confidence')
+	me.vals<-pred.vals$se.fit
+	pred.vals<-pred.vals$fit
+	me.vals<-data.frame(cbind(me.vals[1:100,1],me.vals[101:200,2]))
+	pred.vals<-data.frame(cbind(pred.vals[1:100,1],
+		pred.vals[101:200,2]))
+	names(me.vals)<-c('lnTP','GDD')
+	names(pred.vals)<-c('lnTP','GDD')
+	me.vals<-melt(me.vals)
+	pred.vals<-melt(pred.vals)
+	pred.vals$lower<-pred.vals[,2]-me.vals[,2]
+	pred.vals$upper<-pred.vals[,2]+me.vals[,2]
+	pred.vals$exp<-c(pdat[1:100,1],pdat[101:200,2])
+	
+	out<-data.frame(indic=mod.name,pred.vals)
+	
+	#model residuals
+	#uses partial residuals
+	#https://stat.ethz.ch/pipermail/r-help/2011-February/269005.html
+	resid<-residuals(mod)
+	inds<-as.numeric(rownames(Data.Indic))
+	resid<-rep(resid,2)+melt(predict(mod,type='terms'))$value
+	exps<-melt(with(Data.Indic,data.frame(lnTP=lnTP[inds],GDD=GDD5[inds])))
+	resid<-data.frame(exps,resid)
+	resid$lat<-rep(rescale(as.numeric(lats$lat[inds]),to=c(0.5,2)),2)
+
+	resid<-data.frame(indic=mod.name,resid)
+	
+	out.vals<-rbind(out.vals,out)
+	resids<-rbind(resids,resid)
+
+	#plot(mod,residuals=T,pch=16,main=mod.name)
+	
+	}
+
+library(ggplot2)
+
+to.plo<-out.vals
+
+# new factor labels for plotting
+to.plo$indic <- factor(as.character(to.plo$indic), 
+	levels= c('IBI', 'FQI', 'MaxDepth', 'RichTot', 'RichCom', 'MeanPt', 'Rooted',
+		'Chara'),
+	labels = c('Biotic Integrity', 'Floristic Quality', 'Maximum Plant Depth', 
+		'Total Richness', 'Common Richness', 'Species Per Point', 
+		'Frequency Rooted', 'Frequency Chara')
+)
+
+# new factor labels for plotting
+resids$indic <- factor(as.character(resids$indic), 
+	levels= c('IBI', 'FQI', 'MaxDepth', 'RichTot', 'RichCom', 'MeanPt', 'Rooted',
+		'Chara'),
+	labels = c('Biotic Integrity', 'Floristic Quality', 'Maximum Plant Depth', 
+		'Total Richness', 'Common Richness', 'Species Per Point', 
+		'Frequency Rooted', 'Frequency Chara')
+)
+
+gdd <- to.plo[to.plo$variable == 'GDD',]
+resid_gdd <- resids[resids$variable == 'GDD',]
+lntp <- to.plo[to.plo$variable == 'lnTP',]
+resid_lntp <- resids[resids$variable == 'lnTP',]
+
+# color vectors for latitude points
+col.pts.gdd <- colorRampPalette(c('orange', 'blue'))(nrow(resid_gdd))
+col.pts.lntp <- col.pts.gdd
+
+col.pts.gdd <- col.pts.gdd[rank(resid_gdd$lat)]
+col.pts.lntp <- col.pts.lntp[rank(resid_lntp$lat)]
+
+p1<-ggplot(gdd,aes(x=exp,y=value)) +
+	geom_point(data=resid_gdd,aes(x=value,y=resid,size=lat, 
+		colour = factor(lat))) + 
+	geom_line(aes(y=upper),linetype='dashed',alpha=0.6) +
+	geom_line(aes(y=lower),linetype='dashed',alpha=0.6) +
+	geom_line(alpha=0.6) + 
+	scale_y_continuous(name='s(Predictor)') +
+	scale_x_continuous(name=expression(paste('Mean growing degree days (base 5',degree, ' C)'))) + 
+	facet_wrap( ~ indic,scales='free_y',ncol = 4) + 
+	theme_bw() +
+	scale_colour_manual(
+		limits = factor(resid_gdd$lat), 
+		values = alpha(col.pts.gdd, 0.7)) +
+	theme(legend.position='none')
+
+p2<-ggplot(lntp,aes(x=exp,y=value)) +
+	geom_point(data=resid_lntp,aes(x=value,y=resid,size=lat, 
+		colour = factor(lat))) + 
+	geom_line(aes(y=upper),linetype='dashed',alpha=0.6) +
+	geom_line(aes(y=lower),linetype='dashed',alpha=0.6) +
+	geom_line(alpha=0.6) + 
+	scale_y_continuous(name='s(Predictor)') +
+	scale_x_continuous(name='Mean log total phosphorus') + 
+	facet_wrap( ~ indic,scales='free_y',ncol = 4) + 
+	scale_colour_manual(
+		limits = factor(resid_lntp$lat), 
+		values = alpha(col.pts.lntp, 0.7)) +
+	theme_bw() + 
+	theme(legend.position='none')
+
+pdf('C:/Projects/presentations/JASM_2014/Beck_etal_poster-gam.pdf', width = 9,
+	height = 3.2, family = 'serif')
+print(p1)
+print(p2)
+dev.off()
+@			
+				% gam figs using subfigure
+				\begin{figure}
+				\captionsetup[subfigure]{labelformat=empty}
+				\subfloat[][]{
+				\centerline{\includegraphics[width=1\textwidth,keepaspectratio=T,page=2]{Beck_etal_poster-gam.pdf}}
+				\label{fig:gam_gdd}
+				}
+				\vspace{-1.5cm}
+				\subfloat[][]{
+				\centerline{\includegraphics[width=1\textwidth,keepaspectratio=T,page=1]{Beck_etal_poster-gam.pdf}}
+				\label{fig:gam_lntp}
+				}
+				\vspace{-1cm}
+				
+				\caption{\footnotesize Relationships of each indicator with total phosphorus and mean growing degrees days expressed with additive smoothing models.  Points are colored and sized in relation to lake latitude.}
+				\label{fig:gam}
+				\end{figure}
+				\vspace{-1cm}
+				
+			\end{block}
+
+    \end{column}
+    
+  	%%%%%%%%%%%%%%
+  	% RIGHT
+  	%%%%%%%%%%%%%%
+    \begin{column}{.31\linewidth}
+
+			%%%%%%
+			% Third objective
+			%%%%%%
+		  \begin{block}{Third Objective}
+		  Estimates of \alert{total uncertainty} for each indicator were related to differing contributions of \alert{sampling} and \alert{temporal} uncertainty
+		  % table for indicator uncertainty
+<<unc_tab, results = 'asis', echo = F>>=
+library(reshape2)
+library(plyr)
+
+# uncertainty data
+load(file = 'indic_unc.RData')
+
+# indicator data
+dat<-read.csv('120703wGDD.csv')
+dat<-subset(dat, select=c('LakeName','Year','PlantIBI','FQI','FreqCLPspr','FreqChara','FreqAnchored','MaxVegDepth','TotalTaxa','NumGT10perc','Ave_Taxa_Site','GDD5','lnTP','STRATIFY'))
+
+old.indic<-c('PlantIBI','FQI','FreqChara','FreqAnchored','MaxVegDepth','TotalTaxa','NumGT10perc','Ave_Taxa_Site')
+new.indic<-c('IBI','FQI','Chara','Rooted','MaxDepth','RichTot','RichCom','MeanPt')
+names(dat)[names(dat) %in% old.indic]<-new.indic
+col.sort<-c('IBI','FQI','MaxDepth','RichTot','RichCom','MeanPt','Rooted','Chara')
+dat<-cbind(dat[,1:2],dat[,col.sort])
+dat<-dat[!dat$LakeName %in% c('Hill North', 'Hill South'),]
+
+#convert MaxDepth to meters
+dat$MaxDepth<-0.3048*dat$MaxDepth
+
+# indicator means by year and grand mean (mean of means)
+indic_mean <- aggregate(value ~ LakeName + variable, 
+	melt(dat, id.var = 'LakeName'), function(x) mean(x, na.rm = T)
+	)
+indic_mean <- dcast(indic_mean, LakeName ~ variable)
+grand_mean <- apply(
+	indic_mean[, !names(indic_mean) %in% c('LakeName', 'Year')], 2, 
+	function(x) mean(x, na.rm = T))
+
+# reorder rows for indicator uncertainty table
+indic_unc <- indic.unc[['undist']]
+indic_unc <- indic_unc[match(names(grand_mean), indic_unc$indic),]
+
+# table for combined data
+tab <- merge(indic_unc, data.frame(indic = names(grand_mean), grand_mean), 
+	by = 'indic')
+tab <- melt(tab, id.var = c('indic', 'grand_mean'))
+tab$value <- with(tab, paste0(
+	as.character(round(100 * value/grand_mean, 1)), 
+	' (', as.character(round(value, 1)), ')'))
+
+# final 
+tab <- dcast(tab[,!names(tab) %in% 'grand_mean'], indic ~ variable)
+tab <- tab[match(names(grand_mean), tab$indic),]
+
+names(tab) <- c('Indicator', 'Total', 'Sampling', 'Temporal')
+
+# new factor labels for plotting
+tab$Indicator <- factor(as.character(tab$Indicator), 
+	levels= c('IBI', 'FQI', 'MaxDepth', 'RichTot', 'RichCom', 'MeanPt', 'Rooted',
+		'Chara'),
+	labels = c('Biotic Integrity', 'Floristic Quality', 'Maximum Plant Depth', 
+		'Total Richness', 'Common Richness', 'Species Per Point', 
+		'Frequency Rooted', 'Frequency Chara')
+)
+
+library(xtable)
+
+cap <- '\\footnotesize Uncertainty of each indicator as total, sampling, and temporal.  Values are percentages of the grand mean (standard deviation in parentheses) across four years.  Total uncertainty was estimated from residual variance in random-effects models for each indicator.' 
+suppressWarnings(print.xtable(xtable(tab, caption = cap, align = 'llRRR'), type = 'latex', 
+	include.rownames = F, caption.placement = 'top', size = '\\small', 
+	tabular.environment = 'tabularx',
+	booktabs = T, width = '\\textwidth'))
+@	
+			
+			\vspace{1cm}
+			Indicators had \alert{varying power} to detect declines after twenty years at different \alert{annual sampling intervals}
+			
+<<pow_fig, echo = F, eval = F, include = F, fig = F>>=
+######
+#plot
+load('C:/Projects/Manuscripts/Veg_indicators/revision_dnr/figs_and_tabs/power_analyses/boot_res.RData')
+
+#reorder indicator factors
+new.indic<-c('IBI','FQI','MaxDepth','RichTot','RichCom','MeanPt','Rooted','Chara')
+boot.res$resp<-factor(boot.res$resp,levels=new.indic,labels=new.indic)
+boot.res$resp <- factor(as.character(boot.res$resp), 
+	levels= new.indic,
+	labels = c('Biotic Integrity', 'Floristic Quality', 'Maximum Plant Depth', 
+		'Total Richness', 'Common Richness', 'Species Per Point', 
+		'Frequency Rooted', 'Frequency Chara')
+)
+
+library(ggplot2)
+
+col_vals <- colorRampPalette(c('orange', 'blue'))(length(unique(boot.res$a)))
+col_vals <- data.frame(
+	a = unique(boot.res$a), 
+	col_vals = col_vals)
+boot.res <- merge(boot.res, col_vals, by = 'a')
+# windows()
+p<-ggplot(boot.res,aes(x=s.freq,y=pow.out,group=factor(a),colour=factor(a))) + 
+	geom_line(alpha = 0.8) + 
+	geom_point(size = 3.5) + 
+	facet_wrap(~resp,ncol=4, scales = 'free_y') +
+	scale_y_continuous(name='Power') + 
+	scale_x_continuous(name='Years between sampling') +
+	scale_colour_manual(
+		name='Proportion decline',
+		limits = factor(boot.res$a),
+		values = as.character(boot.res$col_vals)) +
+	theme_bw() + 
+	theme(legend.position = 'top', legend.key = element_blank())
+print(p)
+
+pdf('C:/Projects/Presentations/JAsm_2014/Beck_etal_poster-pow_fig.pdf',height=4.5,width=9,family='serif')
+print(p)
+dev.off()
+@
+      			% power figure
+      			\begin{figure}
+      				\centerline{\includegraphics[width=1\linewidth, trim = 0cm 0cm 0cm 0.5cm, clip = true]{Beck_etal_poster-pow_fig.pdf}}
+      				\caption{\footnotesize Estimated power for detecting indicator changes after twenty years at different sampling frequencies and rates of decline.  Sampling frequencies were evaluated from once a year to every five years.  Proportion decline indicates the change in the initial indicator value after twenty years.}
+	      		\end{figure}	
+	    
+	    \vspace{-2cm}
+      \end{block}
+      
+      %%%%%%
+      % Conclusions
+      %%%%%%
+      \begin{block}{Conclusions}
+      \begin{itemize} 
+      \item Biotic integrity, floristic quality, and frequency rooted were least variable and had the highest estimated power
+      \item Species-specific indicators, such as Chara, were highly variable and had lower power  
+      \item All indicators were related to growing degree days, whereas total phosphorus was a significant predictor for maximum depth and frequency rooted 
+      \end{itemize}
+      \end{block}
+      \vspace{0.7cm}
+			\footnotesize \textit{\textbf{Acknowledgments}: Thanks to Pete Jacobson for providing suggestions which improved earlier versions of the analysis.  We also acknowledge the extensive efforts of area managers and field crews for obtaining the data used in our analyses.  The contents are solely the views of the authors and do not represent endorsement by any state or federal agency.\\
+			\textbf{Cite as}: Beck MW, Tomcko CM, Valley RD, Staples DF. In review. Analysis of macrophyte indicator variation as a function of sampling, temporal, and stressor effects. Ecological Indicators.}
+    
+    \end{column}
+  
+  \end{columns}
+
+\end{frame}
+
+\end{document}
