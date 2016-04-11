@@ -65,7 +65,6 @@ delt_map <- fortify(delt_map)
 # base delta map
 pbase <- ggplot(delt_map, aes(x = long, y = lat)) + 
   geom_polygon(aes(group = group, fill = hole)) +
-  scale_fill_manual(values=c("cornflowerblue", "#FFFFFF"), guide="none") +  
   theme_bw() +
   theme(
     axis.title.x=element_blank(),
@@ -79,7 +78,7 @@ pbase <- ggplot(delt_map, aes(x = long, y = lat)) +
 # globals for plot and legend
 cols <- brewer.pal(9, 'Set1') %>% 
   .[c(1, 3)]
-sz_rng <- c(3, 12)
+sz_rng <- c(2, 11)
 shps <- c(24, 25)
 res <- 'no23'
 
@@ -87,10 +86,20 @@ res <- 'no23'
 toplo <- filter(trnds, resvar == res)
 toplo$shp <- shps[1]
 toplo[toplo$chg < 0, 'shp'] <- shps[2]
+toplo$shp <- factor(toplo$shp)
 toplo$sz <- rescale(abs(toplo$chg), to = sz_rng)
-toplo$col <- cols[1]
-toplo[toplo$chg < 0, 'col'] <- cols[2]
 toplo[!toplo$cat %in% yrlabs[1] , 'Site_Code'] <- NA
+
+# barplots
+toplobr <- filter(trnds, resvar == res)
+toplobr$cat_grp <- 'yr'
+toplobr$cat_grp[grepl('[A-Z]', toplobr$cat)] <- 'mo'
+toplobr$cat_grp <- factor(toplobr$cat_grp, levels  = c('yr', 'mo'))
+
+ggplot(toplobr, aes(x = Site_Code, y = chg, fill = cat)) + 
+  geom_bar(stat = 'identity', position = 'dodge') + 
+  facet_wrap(~ cat_grp, ncol = 1) +
+  theme_bw()
 
 ptrnd <- pbase +
   geom_label_repel(
@@ -103,9 +112,12 @@ ptrnd <- pbase +
     fill = 'lightgrey'
   ) +
   geom_point(data = toplo, 
-    aes(x = Longitude, y = Latitude), 
-    pch = toplo$shp, size = toplo$sz, fill = toplo$col, alpha = 0.8
+    aes(x = Longitude, y = Latitude, size = sz, fill = shp, shape = shp),
+    alpha = 0.8, size = toplo$sz
   )  + 
+  scale_shape_manual(values = shps) + 
+  scale_size(range = sz_rng) + 
+  scale_fill_manual(values=c(cols, "cornflowerblue", "#FFFFFF"), guide="none") +
   facet_wrap( ~ cat, ncol = 3)
 
 ## manual changes to legend
