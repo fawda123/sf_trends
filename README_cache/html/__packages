@@ -7,3 +7,7 @@ gridExtra
 lubridate
 purrr
 GGally
+ggrepel
+scales
+RColorBrewer
+sp

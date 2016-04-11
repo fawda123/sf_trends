@@ -43,6 +43,9 @@ library(gridExtra)
 library(lubridate)
 library(purrr)
 library(GGally)
+library(ggrepel)
+library(scales)
+library(RColorBrewer)
 source('R/funcs.R')
 ```
 
@@ -512,6 +515,37 @@ grid.arrange(
 ```
 
 ![](README_files/figure-html/unnamed-chunk-15-1.png)
+
+### Trend maps {.tabset}
+
+Trends are reported as percent changes of annual averages from the beginning to the end of each period. For monthly trends, percent changes are based on an average of the first three and last three annual averages to reduce the effects of odd years at the beginning and end of each period. For example, percent changes for January throughout the time series from 1980 to 2000 would be the change of the average from January in 1980-1982 to the average from January in 1998-2000. Annual trends, e.g., percent changes from 1980-1986, 1987-1993, etc. do not average by the first and last three years in each grouping because the values are already based on annual averages.  All trends are based on back-transformed, flow-normalized results.
+
+#### DIN
+
+
+```r
+trnd_map(res = 'din')
+```
+
+![](README_files/figure-html/unnamed-chunk-16-1.png)
+
+#### NH4
+
+
+```r
+trnd_map(res = 'nh')
+```
+
+![](README_files/figure-html/unnamed-chunk-17-1.png)
+
+#### NO23
+
+
+```r
+trnd_map(res = 'no23')
+```
+
+![](README_files/figure-html/unnamed-chunk-18-1.png)
 
 ### To do 
 
