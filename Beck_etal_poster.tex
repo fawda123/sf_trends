@@ -82,10 +82,19 @@
 
 \newcolumntype{R}{>{\raggedleft\arraybackslash}X}
 
+\newenvironment<>{varblock}[2][.9\textwidth]{%
+  \setlength{\textwidth}{#1}
+  \begin{actionenv}#3%
+    \def\insertblocktitle{#2}%
+    \par%
+    \usebeamertemplate{block begin}}
+  {\par%
+    \usebeamertemplate{block end}%
+  \end{actionenv}}
 
 \title{\LARGE Trend analysis of four decades of water quality data in the upper San Francisco Estuary}
-\author[Beck et al.]{Marcus W. Beck\textsuperscript{1}, David Senn, Emily Novick, Phil Bresnahan, James D. Hagy III, Thomas Jabusch}
-\institute[USEPA GED]{\textsuperscript{1}US Environmental Protection Agency ORD NHEERL, Gulf Ecology Division, Gulf Breeze, FL}
+\author[Beck et al.]{Marcus W. Beck\textsuperscript{1}, David Senn\textsuperscript{2}, Emily Novick\textsuperscript{2}, Phil Bresnahan\textsuperscript{2}, James D. Hagy III\textsuperscript{1}, Thomas Jabusch\textsuperscript{2}}
+\institute[USEPA GED]{\textsuperscript{1}US Environmental Protection Agency ORD NHEERL, Gulf Ecology Division, Gulf Breeze, FL\\\textsuperscript{2}San Francisco Estuary Institute, Richmond, CA}
 \date[April 20, 2016]{April 20, 2016}
 
 
@@ -117,53 +126,73 @@
       \begin{block}{Analysis components}
     	\begin{itemize}
     	\item WRTDS trend analysis method applied to \alert{nine stations} in SFE
-    	\item Models were developed for three \alert{nitrogen analytes} 
+    	\item Models were developed for three \alert{nitrogen analytes}: DIN, NO$_{2}^{-}$/NO$_{3}^{2-}$, NH$_{4}^{+}$
     	\item Results were evaluated as \alert{flow-normalized trends}
     	\end{itemize}
     	
       \end{block}
       		
       %%%%%%
-      % Data
+      % Water Quality and Flow Data
       %%%%%%
 
-			\begin{block}{Data and WRTDS model}
-	    Nine nutrient stations with bimonthly samples and daily flow estimates from major inflows
-	    
+			\begin{block}{Water Quality and Flow Data}
+			\begin{itemize}
+	    \item Nine nutrient stations with bimonthly samples and daily flow estimates from major inflows
+	    \end{itemize}
 	    \begin{figure}
       \centerline{\includegraphics[width=0.75\linewidth]{posterfigs/stations.png}}
       \caption{\footnotesize Locations of nutrient stations in SFE, sampled bimonthly.}
 	    \end{figure}
-	    \vspace{-1.5cm}
-	    WRTDS models for DIN, NO$_{2}^{-}$/NO$_{3}^{2-}$, NH$_{4}^{2+}$
+	    \vspace{-2cm}
 			\end{block}
 
     \end{column}
     
   	%%%%%%%%%%%%%%
-  	% CENTER
+  	% CENTER, RIGHT, TOP BLOCKS
   	%%%%%%%%%%%%%%    
     \begin{column}{.62\linewidth}
 
     
       %%%%%%
-      % model application
+      % Applying Weighted Regression
       %%%%%%
-      \begin{block}{Model Applications}
+      \begin{block}{Applying Weighted Regression (WRTDS)}
       
-      \begin{columns}
+      \begin{columns}[t]
+  
+      %%
+      \begin{column}{0.35\linewidth}
       
-      \begin{column}{0.45\linewidth}
-      \small
-      \centerline{$\ln\left(N\right) = \beta_0 + \beta_1 t + \beta_2 \ln\left(Q\right) + \beta_3 \sin\left(2\pi t\right) + \beta_4 \cos\left(2\pi t\right) + \epsilon$}
-	    \begin{figure}
-      \centerline{\includegraphics[width=\linewidth]{posterfigs/rawdat.png}}
-      \caption{\footnotesize Example of flow data (top) and nitrogen data (bottom) at C10 used for trend analysis.}
-	    \end{figure}		
+        \footnotesize
+        \centerline{$\ln\left(N\right) = \beta_0 + \beta_1 t + \beta_2 \ln\left(Q\right) + \beta_3 \sin\left(2\pi t\right) + \beta_4 \cos\left(2\pi t\right)$}
+      
+  	    \begin{figure}
+        \centerline{\includegraphics[width=\linewidth]{posterfigs/rawdat.png}}
+        \caption{\footnotesize Example of flow data (top) and nitrogen data (bottom) at C10 used for trend analysis.}
+  	    \end{figure}		
+	    
 	    \end{column}
 	    
-	    \begin{column}{0.45\linewidth}
-	    test
+	    %%
+	    \begin{column}{0.425\linewidth}
+	    
+	      \begin{figure}
+        \centerline{\includegraphics[width=1.05\linewidth]{posterfigs/mopanels.png}}
+        \caption{\footnotesize caption.}
+	      \end{figure}		
+
+	    \end{column}
+	    
+	    %%
+	    \begin{column}{0.175\linewidth}
+	    
+	      \begin{figure}
+        \centerline{\includegraphics[width=\linewidth]{posterfigs/prdseas.png}}
+        \caption{\footnotesize caption.}
+	      \end{figure}		
+
 	    \end{column}
 	    
 	    \end{columns}
@@ -171,16 +200,150 @@
       \end{block}
 
    		%%%%%%
-			% Second Objective
+			% Trend analyses
 			%%%%%%
+			
+% maps
+
+			
       \begin{block}{Trend Analyses}
-				
+      \vspace{-2cm}				
+      \begin{columns}[t]
+  
+        %%
+        \begin{column}{0.32\linewidth}
+% table din
+% latex table generated in R 3.2.3 by xtable 1.8-2 package
+% Tue Apr 12 13:22:32 2016
+\begin{table}[ht]
+\centering
+\caption{\footnotesize Trend summary DIN.} 
+\begingroup\scriptsize
+\begin{tabularx}{0.95\textwidth}{lRRRRRR}
+  \toprule
+Site & 1976-1988 & 1989-2000 & 2001-2012 & JFMA & MJJA & SOND \\ 
+  \midrule
+C10 & \it{\bf{\footnotesize 28.3}} & \it{\bf{\footnotesize 17.4}} & -41.7 & -25.7 & -10.1 & \it{\bf{\footnotesize 1.7}} \\ 
+  C3 & \it{\bf{\footnotesize 23.9}} & \it{\bf{\footnotesize 26.8}} & -13.9 & \it{\bf{\footnotesize 30.7}} & \it{\bf{\footnotesize 54.8}} & \it{\bf{\footnotesize 42.8}} \\ 
+  D19 & -19.8 & \it{\bf{\footnotesize 3.3}} & -15.3 & -28.6 & -35.1 & -15.6 \\ 
+  D26 & -5.2 & \it{\bf{\footnotesize 10.9}} & -19.4 & -10.9 & -3.4 & -2.6 \\ 
+  D28 & -21.7 & \it{\bf{\footnotesize 3.9}} & -37.3 & -32.9 & -53.3 & -48.8 \\ 
+  D4 & -10.9 & \it{\bf{\footnotesize 20.3}} & -7.1 & \it{\bf{\footnotesize 11.4}} & \it{\bf{\footnotesize 4.8}} & \it{\bf{\footnotesize 10.7}} \\ 
+  D6 & -7.4 & \it{\bf{\footnotesize 21.6}} & -8.5 & -4.7 & \it{\bf{\footnotesize 45.6}} & \it{\bf{\footnotesize 34.7}} \\ 
+  D7 & -24.2 & \it{\bf{\footnotesize 17}} & -6.1 & -6.9 & \it{\bf{\footnotesize 19}} & \it{\bf{\footnotesize 21.4}} \\ 
+  P8 & \it{\bf{\footnotesize 49.9}} & \it{\bf{\footnotesize 38.4}} & -35.7 & \it{\bf{\footnotesize 31.6}} & \it{\bf{\footnotesize 52.8}} & \it{\bf{\footnotesize 45.4}} \\ 
+   \bottomrule
+\end{tabularx}
+\endgroup
+\end{table}
+
+    	    \begin{figure}
+          \centerline{\includegraphics[width=\linewidth]{posterfigs/dinmap.png}}
+          \caption{\footnotesize caption}
+    	    \end{figure}		
+  	    \end{column}
+
+        %%
+        \begin{column}{0.32\linewidth}
+% table nh4
+% latex table generated in R 3.2.3 by xtable 1.8-2 package
+% Tue Apr 12 13:22:32 2016
+\begin{table}[ht]
+\centering
+\caption{\footnotesize Trend summary ammonium.} 
+\begingroup\scriptsize
+\begin{tabularx}{0.95\textwidth}{lRRRRRR}
+  \toprule
+Site & 1976-1988 & 1989-2000 & 2001-2012 & JFMA & MJJA & SOND \\ 
+  \midrule
+C10 & -39 & -54.1 & -46.5 & -77.1 & -88.7 & -90.9 \\ 
+  C3 & \it{\bf{\footnotesize 53.6}} & \it{\bf{\footnotesize 41.6}} & -18.1 & \it{\bf{\footnotesize 81.8}} & \it{\bf{\footnotesize 95.8}} & \it{\bf{\footnotesize 74.6}} \\ 
+  D19 & \it{\bf{\footnotesize 8.8}} & -5.6 & -7.5 & -16 & -21.8 & -4.8 \\ 
+  D26 & \it{\bf{\footnotesize 22.8}} & \it{\bf{\footnotesize 8.4}} & -20.9 & -0.9 & \it{\bf{\footnotesize 7.9}} & \it{\bf{\footnotesize 18.7}} \\ 
+  D28 & -11.8 & -16.9 & -18.2 & -42.3 & -24.7 & -34.7 \\ 
+  D4 & \it{\bf{\footnotesize 5.3}} & \it{\bf{\footnotesize 46.8}} & -5.1 & \it{\bf{\footnotesize 66.9}} & \it{\bf{\footnotesize 33.6}} & \it{\bf{\footnotesize 68.3}} \\ 
+  D6 & \it{\bf{\footnotesize 11.8}} & \it{\bf{\footnotesize 33}} & -9.7 & \it{\bf{\footnotesize 36}} & \it{\bf{\footnotesize 56.4}} & \it{\bf{\footnotesize 45.3}} \\ 
+  D7 & -20.8 & \it{\bf{\footnotesize 25.2}} & -11.6 & \it{\bf{\footnotesize 21.2}} & -16 & \it{\bf{\footnotesize 34}} \\ 
+  P8 & \it{\bf{\footnotesize 143.1}} & \it{\bf{\footnotesize 46.7}} & -86.5 & -52.7 & -23.9 & -61.1 \\ 
+   \bottomrule
+\end{tabularx}
+\endgroup
+\end{table}
+
+    	    \begin{figure}
+          \centerline{\includegraphics[width=\linewidth]{posterfigs/nh4map.png}}
+          \caption{\footnotesize caption}
+    	    \end{figure}		
+	      \end{column}
+	    
+	      %%
+        \begin{column}{0.32\linewidth}
+% table no23      
+% latex table generated in R 3.2.3 by xtable 1.8-2 package
+% Tue Apr 12 13:22:32 2016
+\begin{table}[ht]
+\centering
+\caption{\footnotesize Trend summary no23.} 
+\begingroup\scriptsize
+\begin{tabularx}{0.95\textwidth}{lRRRRRR}
+  \toprule
+Site & 1976-1988 & 1989-2000 & 2001-2012 & JFMA & MJJA & SOND \\ 
+  \midrule
+C10 & \it{\bf{\footnotesize 38.7}} & \it{\bf{\footnotesize 23.7}} & -40.8 & -12.5 & -0.2 & \it{\bf{\footnotesize 20.4}} \\ 
+  C3 & -7.2 & \it{\bf{\footnotesize 11.9}} & -3.6 & -2.3 & \it{\bf{\footnotesize 29.4}} & \it{\bf{\footnotesize 3.3}} \\ 
+  D19 & -21.8 & \it{\bf{\footnotesize 8.7}} & -16.5 & -28.6 & -34 & -16.3 \\ 
+  D26 & -11 & \it{\bf{\footnotesize 12.9}} & -18.9 & -13.4 & -11.8 & -4.7 \\ 
+  D28 & -30.2 & \it{\bf{\footnotesize 7.9}} & -39.1 & -34.5 & -59.1 & -53.8 \\ 
+  D4 & -9.2 & \it{\bf{\footnotesize 15.9}} & -6.0 & \it{\bf{\footnotesize 5.4}} & \it{\bf{\footnotesize 6.6}} & \it{\bf{\footnotesize 7.3}} \\ 
+  D6 & -7.8 & \it{\bf{\footnotesize 16.7}} & -8.8 & -17.9 & \it{\bf{\footnotesize 42.6}} & \it{\bf{\footnotesize 27.6}} \\ 
+  D7 & -6 & \it{\bf{\footnotesize 18}} & -9.9 & -12.7 & \it{\bf{\footnotesize 41.9}} & \it{\bf{\footnotesize 24.4}} \\ 
+  P8 & \it{\bf{\footnotesize 39.1}} & \it{\bf{\footnotesize 33.9}} & -18.8 & \it{\bf{\footnotesize 52.2}} & \it{\bf{\footnotesize 60.6}} & \it{\bf{\footnotesize 67.3}} \\ 
+   \bottomrule
+\end{tabularx}
+\endgroup
+\end{table}
+
+    	    \begin{figure}
+          \centerline{\includegraphics[width=\linewidth]{posterfigs/no23map.png}}
+          \caption{\footnotesize caption}
+    	    \end{figure}		
+	      \end{column}
+
+	    \end{columns}
+	    \vspace{-2cm}				
 			\end{block}
 
+    %%%%%%%%%%%%%%
+  	% CENTER, RIGHT, BOTTOM BLOCKS
+  	%%%%%%%%%%%%%%    
+  	
+      \vspace{-1.5cm}
+      \begin{columns}[t, totalwidth=\linewidth]
+  
+        \begin{column}{.5\linewidth}
+    
+        \begin{varblock}[0.96\textwidth]{Further Evaluation}
+        awsfasdf
+        \end{varblock}
+    
+        \end{column}
+        
+        \begin{column}{.5\linewidth}
+    
+        \begin{varblock}[\textwidth]{Conclusions}
+        awsfasdf
+        \end{varblock}
+    
+        \end{column}
+        
+      \end{columns}
+  
+  
+    %%  
     \end{column}
- 
+  
   \end{columns}
-
+  
 \end{frame}
 
 \end{document}

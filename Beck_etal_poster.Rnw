@@ -33,10 +33,19 @@
 
 \newcolumntype{R}{>{\raggedleft\arraybackslash}X}
 
+\newenvironment<>{varblock}[2][.9\textwidth]{%
+  \setlength{\textwidth}{#1}
+  \begin{actionenv}#3%
+    \def\insertblocktitle{#2}%
+    \par%
+    \usebeamertemplate{block begin}}
+  {\par%
+    \usebeamertemplate{block end}%
+  \end{actionenv}}
 
 \title{\LARGE Trend analysis of four decades of water quality data in the upper San Francisco Estuary}
-\author[Beck et al.]{Marcus W. Beck\textsuperscript{1}, David Senn, Emily Novick, Phil Bresnahan, James D. Hagy III, Thomas Jabusch}
-\institute[USEPA GED]{\textsuperscript{1}US Environmental Protection Agency ORD NHEERL, Gulf Ecology Division, Gulf Breeze, FL}
+\author[Beck et al.]{Marcus W. Beck\textsuperscript{1}, David Senn\textsuperscript{2}, Emily Novick\textsuperscript{2}, Phil Bresnahan\textsuperscript{2}, James D. Hagy III\textsuperscript{1}, Thomas Jabusch\textsuperscript{2}}
+\institute[USEPA GED]{\textsuperscript{1}US Environmental Protection Agency ORD NHEERL, Gulf Ecology Division, Gulf Breeze, FL\\\textsuperscript{2}San Francisco Estuary Institute, Richmond, CA}
 \date[April 20, 2016]{April 20, 2016}
 
 <<echo = F, message = F, warning = F>>=
@@ -53,6 +62,9 @@ library(scales)
 library(RColorBrewer)
 library(grid)
 source('R/funcs.R')
+
+cols <- c('#D53E4F', '#4DAF4A', '#377EB8') # red, green, blue
+
 @
 
 \begin{document}
@@ -81,14 +93,14 @@ source('R/funcs.R')
       \begin{block}{Analysis components}
     	\begin{itemize}
     	\item WRTDS trend analysis method applied to \alert{nine stations} in SFE
-    	\item Models were developed for three \alert{nitrogen analytes} 
+    	\item Models were developed for three \alert{nitrogen analytes}: DIN, NO$_{2}^{-}$/NO$_{3}^{2-}$, NH$_{4}^{+}$
     	\item Results were evaluated as \alert{flow-normalized trends}
     	\end{itemize}
     	
       \end{block}
       		
       %%%%%%
-      % Data
+      % Water Quality and Flow Data
       %%%%%%
 <<map, echo = F, eval = F, fig = F, include = F>>=
 # load required data
@@ -142,7 +154,7 @@ pinset <- ggplot(sf_bay, aes(x = long, y = lat)) +
           plot.background=element_blank(),
           panel.border = element_rect(colour = "black", fill = NA, size = 0.5)
     ) + 
-  geom_point(data = data.frame(x = -121.94, y = 38.07), aes(x, y), fill = 'lightgreen', size = 5, pch = 21) +
+  geom_point(data = data.frame(x = -121.94, y = 38.07), aes(x, y), fill = cols[2], size = 5, pch = 21) +
   scale_x_continuous(expand = c(0, 0)) +
   scale_y_continuous(expand = c(0, 0))
 
@@ -155,27 +167,27 @@ print(pinset, vp = v2)
 dev.off()
 
 @	    
-			\begin{block}{Data and WRTDS model}
-	    Nine nutrient stations with bimonthly samples and daily flow estimates from major inflows
-	    
+			\begin{block}{Water Quality and Flow Data}
+			\begin{itemize}
+	    \item Nine nutrient stations with bimonthly samples and daily flow estimates from major inflows
+	    \end{itemize}
 	    \begin{figure}
       \centerline{\includegraphics[width=0.75\linewidth]{posterfigs/stations.png}}
       \caption{\footnotesize Locations of nutrient stations in SFE, sampled bimonthly.}
 	    \end{figure}
-	    \vspace{-1.5cm}
-	    WRTDS models for DIN, NO$_{2}^{-}$/NO$_{3}^{2-}$, NH$_{4}^{2+}$
+	    \vspace{-2cm}
 			\end{block}
 
     \end{column}
     
   	%%%%%%%%%%%%%%
-  	% CENTER
+  	% CENTER, RIGHT, TOP BLOCKS
   	%%%%%%%%%%%%%%    
     \begin{column}{.62\linewidth}
 <<modapp, echo = F, eval = F, fig = F, include = F>>=
 data(mods_nolag)   
 
-toplo <- mods_nolag$mod[[1]]
+toplo <- filter(mods_nolag, Site_Code == 'P8' & resvar == 'nh')$mod[[1]]
 
 pflo <- ggplot(toplo, aes(x = date, y = flo)) + 
   geom_line() +
@@ -184,7 +196,7 @@ pflo <- ggplot(toplo, aes(x = date, y = flo)) +
   theme(axis.title.x = element_blank())
 pres <- ggplot(toplo, aes(x = date, y = res)) + 
   geom_point() +
-  scale_y_continuous(expression(paste("ln-DIN (mg ", L^-1, ")"))) +
+  scale_y_continuous(attr(toplo, 'reslab')) +
   theme_bw() +
   theme(axis.title.x = element_blank())
 
@@ -195,30 +207,104 @@ maxWidth = unit.pmax(pA$widths[2:3], pB$widths[2:3])
 pA$widths[2:3] <- maxWidth
 pB$widths[2:3] <- maxWidth
 
-png('posterfigs/rawdat.png', height = 3, width = 9, units = 'in', res = 600, family = 'serif')
+png('posterfigs/rawdat.png', height = 5, width = 10, units = 'in', res = 600, family = 'serif')
 grid.arrange(pA, pB, ncol = 1)
+dev.off()
+
+# dynaplots and fitmoplots
+mos <- c(1, 4, 7, 10)
+pdyna <- dynaplot(toplo, month = mos, ncol = length(mos), col_vec = cols, alpha = 0.8) +
+  theme(
+    strip.background = element_rect(fill = alpha(cols[length(cols)], 0.5)),
+    axis.title.y = element_blank()
+    ) 
+pfitm <- fitmoplot(toplo, month = mos, ncol = length(mos), predicted = F, col_vec = cols) +
+  theme(strip.background = element_rect(fill = alpha(cols[length(cols)], 0.5)),
+    axis.title.y = element_blank(), axis.title.x = element_text()
+    ) +
+  scale_x_date('Year')
+pdynaleg <- g_legend(pdyna)
+pdyna <- pdyna + theme(legend.position = 'none')
+pfitmleg <- g_legend(pfitm)
+pfitm <- pfitm + theme(legend.position = 'none')
+
+ylab <- attr(toplo, 'reslab')
+
+png('posterfigs/mopanels.png', height = 5, width = 10.5, units = 'in', res = 600, family = 'serif')
+grid.arrange(
+  arrangeGrob(pdynaleg, pfitmleg, ncol = 2), 
+  pdyna, pfitm, left = textGrob(ylab, rot = 90), 
+  heights = c(0.2, 1.1, 1)
+  )
+dev.off()
+
+# prdnrmplot and seasplot
+pprdn <- prdnrmplot(toplo, col_vec = cols) +
+  theme(legend.position = 'top', axis.title.y = element_blank(), axis.title.x = element_text()) +
+  scale_x_continuous('Year')
+pseas <- seasyrplot(toplo, predicted = F, col_vec = cols, lwd = 1.5, alpha = 0.8) +
+  theme(axis.title.y = element_blank(), axis.title.x = element_text()) +
+  scale_x_date('Day of year')
+pprdnleg <- g_legend(pprdn)
+pprdn <- pprdn + theme(legend.position = 'none')
+pseasleg <- g_legend(pseas)
+pseas <- pseas + theme(legend.position = 'none')
+
+# Set the widths
+pA <- ggplot_gtable(ggplot_build(pprdn))
+pB <- ggplot_gtable(ggplot_build(pseas))
+maxWidth = unit.pmax(pA$widths[2:3], pB$widths[2:3])
+pA$widths[2:3] <- maxWidth
+pB$widths[2:3] <- maxWidth
+
+png('posterfigs/prdseas.png', height = 6, width = 5, units = 'in', res = 600, family = 'serif')
+grid.arrange(
+  arrangeGrob(pprdnleg, pseasleg, ncol = 2), 
+  pA, pB, left = textGrob(ylab, rot = 90), 
+  heights = c(0.2, 1, 1.1)
+  )
 dev.off()
 
 @   
     
       %%%%%%
-      % model application
+      % Applying Weighted Regression
       %%%%%%
-      \begin{block}{Model Applications}
+      \begin{block}{Applying Weighted Regression (WRTDS)}
       
-      \begin{columns}
+      \begin{columns}[t]
+  
+      %%
+      \begin{column}{0.35\linewidth}
       
-      \begin{column}{0.45\linewidth}
-      \small
-      \centerline{$\ln\left(N\right) = \beta_0 + \beta_1 t + \beta_2 \ln\left(Q\right) + \beta_3 \sin\left(2\pi t\right) + \beta_4 \cos\left(2\pi t\right) + \epsilon$}
-	    \begin{figure}
-      \centerline{\includegraphics[width=\linewidth]{posterfigs/rawdat.png}}
-      \caption{\footnotesize Example of flow data (top) and nitrogen data (bottom) at C10 used for trend analysis.}
-	    \end{figure}		
+        \footnotesize
+        \centerline{$\ln\left(N\right) = \beta_0 + \beta_1 t + \beta_2 \ln\left(Q\right) + \beta_3 \sin\left(2\pi t\right) + \beta_4 \cos\left(2\pi t\right)$}
+      
+  	    \begin{figure}
+        \centerline{\includegraphics[width=\linewidth]{posterfigs/rawdat.png}}
+        \caption{\footnotesize Example of flow data (top) and nitrogen data (bottom) at C10 used for trend analysis.}
+  	    \end{figure}		
+	    
 	    \end{column}
 	    
-	    \begin{column}{0.45\linewidth}
-	    test
+	    %%
+	    \begin{column}{0.425\linewidth}
+	    
+	      \begin{figure}
+        \centerline{\includegraphics[width=1.05\linewidth]{posterfigs/mopanels.png}}
+        \caption{\footnotesize caption.}
+	      \end{figure}		
+
+	    \end{column}
+	    
+	    %%
+	    \begin{column}{0.175\linewidth}
+	    
+	      \begin{figure}
+        \centerline{\includegraphics[width=\linewidth]{posterfigs/prdseas.png}}
+        \caption{\footnotesize caption.}
+	      \end{figure}		
+
 	    \end{column}
 	    
 	    \end{columns}
@@ -226,16 +312,149 @@ dev.off()
       \end{block}
 
    		%%%%%%
-			% Second Objective
+			% Trend analyses
 			%%%%%%
+			
+% maps
+<<trndmap, echo = F, eval = F, fig = F, include = F>>=
+
+arrow_cols <- cols[c(1, 2)]
+strip_col <- alpha(cols[3], 0.5)
+
+png('posterfigs/dinmap.png', height = 6, width = 9, units = 'in', res = 600, family = 'serif')
+trnd_map(res = 'din', col = arrow_cols, strp_fl = strip_col, leg = F)
+dev.off()
+
+png('posterfigs/nh4map.png', height = 6, width = 9, units = 'in', res = 600, family = 'serif')
+trnd_map(res = 'nh', col = arrow_cols, strp_fl = strip_col, leg = F)
+dev.off()
+
+png('posterfigs/no23map.png', height = 6, width = 9, units = 'in', res = 600, family = 'serif')
+trnd_map(res = 'no23', col = arrow_cols, strp_fl = strip_col, leg = F)
+dev.off()
+
+@
+			
       \begin{block}{Trend Analyses}
-				
+      \vspace{-2cm}				
+      \begin{columns}[t]
+  
+        %%
+        \begin{column}{0.32\linewidth}
+% table din
+<<results = 'asis', echo = F>>=
+library(xtable)
+
+data(trnds)
+tab <- filter(trnds, resvar == 'din') %>% 
+  select(-resvar) %>% 
+  rename(Site = Site_Code)
+
+# increase in bold italic
+tab[, -1] <- round(tab[, -1], 1)
+tab[, -1][sign(tab[, -1]) != -1] <- paste0('\\it{\\bf{\\footnotesize ', tab[, -1][sign(tab[, -1]) != -1], '}}')
+
+cap <- '\\footnotesize Trend summary DIN.' 
+suppressWarnings(print.xtable(xtable(tab, caption = cap, align = 'llRRRRRR', digits = 1), type = 'latex', 
+	include.rownames = F, caption.placement = 'top', size = '\\scriptsize', sanitize.text.function = function(x){x},
+	tabular.environment = 'tabularx',
+	booktabs = T, width = '0.95\\textwidth'))
+@
+    	    \begin{figure}
+          \centerline{\includegraphics[width=\linewidth]{posterfigs/dinmap.png}}
+          \caption{\footnotesize caption}
+    	    \end{figure}		
+  	    \end{column}
+
+        %%
+        \begin{column}{0.32\linewidth}
+% table nh4
+<<results = 'asis', echo = F>>=
+library(xtable)
+
+data(trnds)
+tab <- filter(trnds, resvar == 'nh') %>% 
+  select(-resvar) %>% 
+  rename(Site = Site_Code)
+
+# increase in bold italic
+tab[, -1] <- round(tab[, -1], 1)
+tab[, -1][sign(tab[, -1]) != -1] <- paste0('\\it{\\bf{\\footnotesize ', tab[, -1][sign(tab[, -1]) != -1], '}}')
+
+cap <- '\\footnotesize Trend summary ammonium.' 
+suppressWarnings(print.xtable(xtable(tab, caption = cap, align = 'llRRRRRR', digits = 1), type = 'latex', 
+	include.rownames = F, caption.placement = 'top', size = '\\scriptsize', sanitize.text.function = function(x){x},
+	tabular.environment = 'tabularx',
+	booktabs = T, width = '0.95\\textwidth'))
+@
+    	    \begin{figure}
+          \centerline{\includegraphics[width=\linewidth]{posterfigs/nh4map.png}}
+          \caption{\footnotesize caption}
+    	    \end{figure}		
+	      \end{column}
+	    
+	      %%
+        \begin{column}{0.32\linewidth}
+% table no23      
+<<results = 'asis', echo = F>>=
+library(xtable)
+
+data(trnds)
+tab <- filter(trnds, resvar == 'no23') %>% 
+  select(-resvar) %>% 
+  rename(Site = Site_Code)
+
+# increase in bold italic
+tab[, -1] <- round(tab[, -1], 1)
+tab[, -1][sign(tab[, -1]) != -1] <- paste0('\\it{\\bf{\\footnotesize ', tab[, -1][sign(tab[, -1]) != -1], '}}')
+
+cap <- '\\footnotesize Trend summary no23.' 
+suppressWarnings(print.xtable(xtable(tab, caption = cap, align = 'llRRRRRR', digits = 1), type = 'latex', 
+	include.rownames = F, caption.placement = 'top', size = '\\scriptsize', sanitize.text.function = function(x){x},
+	tabular.environment = 'tabularx',
+	booktabs = T, width = '0.95\\textwidth'))
+@
+    	    \begin{figure}
+          \centerline{\includegraphics[width=\linewidth]{posterfigs/no23map.png}}
+          \caption{\footnotesize caption}
+    	    \end{figure}		
+	      \end{column}
+
+	    \end{columns}
+	    \vspace{-2cm}				
 			\end{block}
 
+    %%%%%%%%%%%%%%
+  	% CENTER, RIGHT, BOTTOM BLOCKS
+  	%%%%%%%%%%%%%%    
+  	
+      \vspace{-1.5cm}
+      \begin{columns}[t, totalwidth=\linewidth]
+  
+        \begin{column}{.5\linewidth}
+    
+        \begin{varblock}[0.96\textwidth]{Further Evaluation}
+        awsfasdf
+        \end{varblock}
+    
+        \end{column}
+        
+        \begin{column}{.5\linewidth}
+    
+        \begin{varblock}[\textwidth]{Conclusions}
+        awsfasdf
+        \end{varblock}
+    
+        \end{column}
+        
+      \end{columns}
+  
+  
+    %%  
     \end{column}
- 
+  
   \end{columns}
-
+  
 \end{frame}
 
 \end{document}

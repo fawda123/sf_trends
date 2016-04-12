@@ -232,6 +232,8 @@ div.tocify {
 <li><p><code>nutcor.RData</code> results of ccf analysis of selected delta and suisun stations comparing nitrogen species</p></li>
 <li><p><code>mods_lag.RData</code> dataset for wrtds, including model results. This is a nested data frame with identifiers. All response, flow values are ln + 1 transformed, flow (or salinity) records for each nutrient variable and station are combined based on the monthly lag ided from <code>bests.RData</code></p></li>
 <li><p><code>mods_nolag.RData</code> dataset for wrtds, including model results. This is the same file as <code>mods_lag.RData</code> except the matched flow variables are not lagged.</p></li>
+<li><p><code>sf_bay.RData</code> SpatialPolygonsDataFrame object of all of SF Bay</p></li>
+<li><p><code>trnds.RData</code> trend summary of percent changes by annual, monthly categories, used in poster</p></li>
 </ul>
 <p><strong><em>R/</em></strong> Supporting R scripts</p>
 <p><strong><em>text/</em></strong> Summary text of analyses</p>
@@ -676,7 +678,7 @@ grid.arrange(
 </div>
 <div id="trend-maps" class="section level3 tabset">
 <h3>Trend maps</h3>
-<p>Trends are reported as percent changes of annual averages from the beginning to the end of each period. For monthly trends, percent changes are based on an average of the first three and last three annual averages to reduce the effects of odd years at the beginning and end of each period. For example, percent changes for January throughout the time series from 1980 to 2000 would be the change of the average from January in 1980-1982 to the average from January in 1998-2000. Annual trends, e.g., percent changes from 1980-1986, 1987-1993, etc. do not average by the first and last three years in each grouping because the values are already based on annual averages. All trends are based on back-transformed, flow-normalized results.</p>
+<p>Trends are reported as percent changes of annual averages from the beginning to the end of each period. For monthly trends, percent changes are based on an average of the first three and last three annual averages to reduce the effects of odd years at the beginning and end of each period. For example, percent changes for January throughout a time series from 1980 to 2000 would be the change of the average from January in 1980-1982 to the average from January in 1998-2000. Annual trends, e.g., percent changes from 1980-1986, 1987-1993, etc. do not average by the first and last three years in each grouping because the values are already based on annual averages. All trends are based on back-transformed, flow-normalized results.</p>
 <div id="din-3" class="section level4">
 <h4>DIN</h4>
 <pre class="r"><code>trnd_map(res = 'din')</code></pre>

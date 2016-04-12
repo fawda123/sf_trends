@@ -37,6 +37,8 @@ Content available at [https://github.com/fawda123/sf_trends](https://github.com/
 
 * `sf_bay.RData` SpatialPolygonsDataFrame object of all of SF Bay
 
+* `trnds.RData` trend summary of percent changes by annual, monthly categories, used in poster
+
 **_R/_** Supporting R scripts
 
 **_text/_** Summary text of analyses

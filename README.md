@@ -27,6 +27,10 @@ Content available at [https://github.com/fawda123/sf_trends](https://github.com/
 
 * `mods_nolag.RData` dataset for wrtds, including model results.  This is the same file as `mods_lag.RData` except the matched flow variables are not lagged.
 
+* `sf_bay.RData` SpatialPolygonsDataFrame object of all of SF Bay
+
+* `trnds.RData` trend summary of percent changes by annual, monthly categories, used in poster
+
 **_R/_** Supporting R scripts
 
 **_text/_** Summary text of analyses
@@ -518,7 +522,7 @@ grid.arrange(
 
 ### Trend maps {.tabset}
 
-Trends are reported as percent changes of annual averages from the beginning to the end of each period. For monthly trends, percent changes are based on an average of the first three and last three annual averages to reduce the effects of odd years at the beginning and end of each period. For example, percent changes for January throughout the time series from 1980 to 2000 would be the change of the average from January in 1980-1982 to the average from January in 1998-2000. Annual trends, e.g., percent changes from 1980-1986, 1987-1993, etc. do not average by the first and last three years in each grouping because the values are already based on annual averages.  All trends are based on back-transformed, flow-normalized results.
+Trends are reported as percent changes of annual averages from the beginning to the end of each period. For monthly trends, percent changes are based on an average of the first three and last three annual averages to reduce the effects of odd years at the beginning and end of each period. For example, percent changes for January throughout a time series from 1980 to 2000 would be the change of the average from January in 1980-1982 to the average from January in 1998-2000. Annual trends, e.g., percent changes from 1980-1986, 1987-1993, etc. do not average by the first and last three years in each grouping because the values are already based on annual averages.  All trends are based on back-transformed, flow-normalized results.
 
 #### DIN
 

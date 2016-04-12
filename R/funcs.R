@@ -34,7 +34,9 @@ trnd_map <- function(res,
   sz_rng = c(2, 11),
   shps = c(24, 25),
   ndivs = 6,
-  bar = FALSE){
+  strp_fl = 'lightgrey',
+  bar = FALSE, 
+  leg = TRUE){
 
   # load required data
   data(delt_dat)
@@ -111,6 +113,7 @@ trnd_map <- function(res,
     pbar <- ggplot(toplobr, aes(x = Site_Code, y = chg, fill = cat)) + 
       geom_bar(stat = 'identity', position = 'dodge') + 
       facet_wrap(~ cat_grp, ncol = 1) +
+      theme(strip.background=element_rect(fill = strp_fl)) +
       theme_bw()
     
     return(pbar)
@@ -126,7 +129,7 @@ trnd_map <- function(res,
       box.padding = unit(1, "lines"), 
       point.padding = unit(0, "lines"), 
       force = 2, size = 2,
-      fill = 'lightgrey'
+      fill = strp_fl
     ) +
     geom_point(data = toplo, 
       aes(x = Longitude, y = Latitude, size = sz, fill = shp, shape = shp),
@@ -135,56 +138,69 @@ trnd_map <- function(res,
     scale_shape_manual(values = shps) + 
     scale_size(range = sz_rng) + 
     scale_fill_manual(values=c(cols, "cornflowerblue", "#FFFFFF"), guide="none") +
-    facet_wrap( ~ cat, ncol = 3)
+    facet_wrap( ~ cat, ncol = 3) +
+    theme(strip.background=element_rect(fill = strp_fl))
   
-  ## manual legend
+  # add legend if true
+  if(leg){
+    
+    ## manual legend
+    
+    legtitle <- 'Percent change'
+    legcols <- rep(cols, each = ndivs/2)
+    legshps <- rep(shps, each = ndivs/2)
+    
+    # sizes 
+    negs <- with(toplo, sign(chg) == -1)
+    dec <- toplo$sz[negs]
+    dec <- seq(min(dec), max(dec), length = ndivs/2)
+    inc <- toplo$sz[!negs]
+    inc <- seq(min(inc), max(inc), length = ndivs/2)
+    legszs <- rev(c(rev(dec), inc))
+    
+    # labels
+    dec <- toplo$chg[negs]
+    dec <- seq(min(dec), max(dec), length = ndivs/2)
+    inc <- toplo$chg[!negs]
+    inc <- seq(min(inc), max(inc), length = ndivs/2)
+    leglab <- round(c(dec, inc), 1)
+    
+    # fake legend data to make the plot
+    fakedat<- data.frame(
+      shp = leglab,
+      sz = leglab,
+      col = leglab
+    )
+    
+    # legend plot to get legend
+    pleg <- ggplot(fakedat, aes(x = shp, y = sz, fill = factor(col), size = factor(sz), shape = factor(shp))) +
+      geom_point() +
+      scale_fill_manual(legtitle, values = rev(legcols), labels = leglab) +
+      scale_size_manual(legtitle, values = rev(legszs), labels = leglab) +
+      scale_shape_manual(legtitle, values = rev(legshps), labels = leglab) +
+      guides(
+        fill = guide_legend(title = legtitle, nrow = 1), 
+        size = guide_legend(title = legtitle), 
+        shape = guide_legend(title = legtitle)
+        ) +
+      theme_minimal() + 
+      theme(legend.position = 'top')
+    pleg <- g_legend(pleg)
+    
+    # combine the legend and trends map
+    out <- grid.arrange(
+      arrangeGrob(
+        pleg, ptrnd, ncol = 1, 
+        heights = c(0.12, 1))
+    )
+   
+  # no legend 
+  } else {
+    
+    out <- ptrnd
+    
+  }
   
-  legtitle <- 'Percent change'
-  legcols <- rep(cols, each = ndivs/2)
-  legshps <- rep(shps, each = ndivs/2)
-  
-  # sizes 
-  negs <- with(toplo, sign(chg) == -1)
-  dec <- toplo$sz[negs]
-  dec <- seq(min(dec), max(dec), length = ndivs/2)
-  inc <- toplo$sz[!negs]
-  inc <- seq(min(inc), max(inc), length = ndivs/2)
-  legszs <- rev(c(rev(dec), inc))
-  
-  # labels
-  dec <- toplo$chg[negs]
-  dec <- seq(min(dec), max(dec), length = ndivs/2)
-  inc <- toplo$chg[!negs]
-  inc <- seq(min(inc), max(inc), length = ndivs/2)
-  leglab <- round(c(dec, inc), 1)
-  
-  # fake legend data to make the plot
-  fakedat<- data.frame(
-    shp = leglab,
-    sz = leglab,
-    col = leglab
-  )
-  
-  # legend plot to get legend
-  pleg <- ggplot(fakedat, aes(x = shp, y = sz, fill = factor(col), size = factor(sz), shape = factor(shp))) +
-    geom_point() +
-    scale_fill_manual(legtitle, values = rev(legcols), labels = leglab) +
-    scale_size_manual(legtitle, values = rev(legszs), labels = leglab) +
-    scale_shape_manual(legtitle, values = rev(legshps), labels = leglab) +
-    guides(
-      fill = guide_legend(title = legtitle, nrow = 1), 
-      size = guide_legend(title = legtitle), 
-      shape = guide_legend(title = legtitle)
-      ) +
-    theme_minimal() + 
-    theme(legend.position = 'top')
-  pleg <- g_legend(pleg)
-  
-  # combine the legend and trends map
-  grid.arrange(
-    arrangeGrob(
-      pleg, ptrnd, ncol = 1, 
-      heights = c(0.12, 1))
-  )
+  return(out)
   
 }

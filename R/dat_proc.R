@@ -1055,3 +1055,28 @@ file.remove(fls)
 
 # save output
 save(diat_dat, file = 'data/diat_dat.RData', compress = 'xz')
+
+
+######
+# trend summary for stations
+data(mods_nolag)
+
+mobrks <- c(-Inf, 4, 8, Inf)
+yrbrks <- c(-Inf, 1988, 2000, Inf)
+molabs <- c('JFMA', 'MJJA', 'SOND')
+yrlabs <- c('1976-1988', '1989-2000', '2001-2012')
+
+trnds <- mutate(mods_nolag, 
+  trnd = map(mod, function(x){
+    wrtdstrnd(x, mobrks, yrbrks, molabs, yrlabs, tau = 0.5)
+    })
+  ) %>% 
+  select(-data, -mod) %>% 
+  unnest %>% 
+  left_join(., statmeta, by = 'Site_Code') %>% 
+  data.frame %>% 
+  select(-flovar, -Latitude, -Longitude, -Location) %>% 
+  spread(cat, chg) %>% 
+  arrange(resvar)
+
+save(trnds, file = 'data/trnds.RData')
