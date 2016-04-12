@@ -33,6 +33,8 @@
 
 \newcolumntype{R}{>{\raggedleft\arraybackslash}X}
 
+% for lining up blocks within a column to a single block/column above
+% http://tex.stackexchange.com/questions/74808/how-to-line-up-blocks-in-columns-with-full-width-blocks-in-beamer-beamerposter
 \newenvironment<>{varblock}[2][.9\textwidth]{%
   \setlength{\textwidth}{#1}
   \begin{actionenv}#3%
@@ -354,7 +356,7 @@ tab <- filter(trnds, resvar == 'din') %>%
 tab[, -1] <- round(tab[, -1], 1)
 tab[, -1][sign(tab[, -1]) != -1] <- paste0('\\it{\\bf{\\footnotesize ', tab[, -1][sign(tab[, -1]) != -1], '}}')
 
-cap <- '\\footnotesize Trend summary DIN.' 
+cap <- '\\footnotesize Percent changes in \\alert{DIN} by annual and monthly periods.' 
 suppressWarnings(print.xtable(xtable(tab, caption = cap, align = 'llRRRRRR', digits = 1), type = 'latex', 
 	include.rownames = F, caption.placement = 'top', size = '\\scriptsize', sanitize.text.function = function(x){x},
 	tabular.environment = 'tabularx',
@@ -381,7 +383,7 @@ tab <- filter(trnds, resvar == 'nh') %>%
 tab[, -1] <- round(tab[, -1], 1)
 tab[, -1][sign(tab[, -1]) != -1] <- paste0('\\it{\\bf{\\footnotesize ', tab[, -1][sign(tab[, -1]) != -1], '}}')
 
-cap <- '\\footnotesize Trend summary ammonium.' 
+cap <- '\\footnotesize Percent changes in \\alert{ammonium} by annual and monthly periods.'
 suppressWarnings(print.xtable(xtable(tab, caption = cap, align = 'llRRRRRR', digits = 1), type = 'latex', 
 	include.rownames = F, caption.placement = 'top', size = '\\scriptsize', sanitize.text.function = function(x){x},
 	tabular.environment = 'tabularx',
@@ -408,7 +410,7 @@ tab <- filter(trnds, resvar == 'no23') %>%
 tab[, -1] <- round(tab[, -1], 1)
 tab[, -1][sign(tab[, -1]) != -1] <- paste0('\\it{\\bf{\\footnotesize ', tab[, -1][sign(tab[, -1]) != -1], '}}')
 
-cap <- '\\footnotesize Trend summary no23.' 
+cap <- '\\footnotesize Percent changes in \\alert{nitrite/nitrate} by annual and monthly periods.' 
 suppressWarnings(print.xtable(xtable(tab, caption = cap, align = 'llRRRRRR', digits = 1), type = 'latex', 
 	include.rownames = F, caption.placement = 'top', size = '\\scriptsize', sanitize.text.function = function(x){x},
 	tabular.environment = 'tabularx',

@@ -968,8 +968,7 @@ strt <- Sys.time()
 # get predictions from obs time series of salinity or flow
 mods_out <- foreach(i = 1:nrow(diat_dat)) %dopar% {
   
-  data(flow_dat)
-  data(diat_dat)
+  data(delt_dat)
   
   library(dplyr)
   library(WRTDStidal)
@@ -988,40 +987,26 @@ mods_out <- foreach(i = 1:nrow(diat_dat)) %dopar% {
   flolab <- with(stalk, shrt[lngs == flovar])
   
   # prep data as tidal object
-  tomod <- select(dat, Date, resval, flolag, lim) %>% 
+  tomod <- select(dat, Date, resval, floval, lim) %>% 
     rename(
       res = resval, 
-      flo = flolag
+      flo = floval
     ) %>% 
     data.frame %>% 
     tidal(., 
       reslab = reslab, 
       flolab = expression(paste('ln-flow (standardized)'))
     )
-
-  # get flo or salinity variable to predict 
-  if(flolab == 'sal'){
-    
-    topred <- filter(diat_dat, Site_Code == sta) %>% 
+  
+  # salinity data at D7 to pred
+  topred <- filter(delt_dat, Site_Code == 'D7') %>% 
       mutate(flo = log(1 + sal)) %>% # salinity is only variable with zeroes
       rename(date = Date) %>% 
       select(date, flo) %>% 
       filter(date >= min(tomod$date) & date <= max(tomod$date)) %>% 
       na.omit %>% 
       data.frame
-    
-  } else {
-    
-    topred <- filter(flow_dat, station == flolab) %>% 
-      mutate(flo = log(q)) %>% 
-      rename(date = Date) %>% 
-      select(date, flo) %>% 
-      filter(date >= min(tomod$date) & date <= max(tomod$date)) %>% 
-      na.omit %>% 
-      data.frame
-    
-  }
-  
+
   # create model and exit
   mod <- wrtds(tomod, tau = c(0.1, 0.5, 0.9), wins = list(0.5, 10, 0.5), flo_div = 30, min_obs = 150)
   
@@ -1046,16 +1031,22 @@ dat <- lapply(fls, load, .GlobalEnv)
 names(dat) <- unlist(dat)
 dat <- lapply(dat, get)
 
+# add model data to nested data frame
 diat_dat <- unite(diat_dat, 'tmp', Site_Code, resvar, remove = F) %>% 
   mutate(mod = dat[match(tmp, names(dat))]) %>% 
   select(-tmp)
+
+# add the nitrogen mods from before
+data(mods_nolag)
+diat_dat <- select(mods_nolag, -Location) %>% 
+  filter(., Site_Code == 'D7') %>% 
+  rbind(diat_dat)
 
 # remove the individual files
 file.remove(fls)
 
 # save output
 save(diat_dat, file = 'data/diat_dat.RData', compress = 'xz')
-
 
 ######
 # trend summary for stations
