@@ -2,6 +2,7 @@
 library(WRTDStidal)
 library(ggplot2)
 library(dplyr)
+library(tidyr)
 
 # raw data
 load(file = 'mods_nolag.RData')
@@ -17,6 +18,7 @@ shinyServer(function(input, output) {
 
     stat <- input$stat
     res <- input$res
+    scl <- input$scl
     
     out <- filter(mods_nolag, Site_Code == stat & resvar == res) %>% 
       .$mod
@@ -47,17 +49,45 @@ shinyServer(function(input, output) {
     
     # inputs
     dt_rng <- input$dt_rng
-
+    scl <- input$scl
+    stat <- input$stat
+    
+    # data
     flo <- dat()
     florng <- attr(flo, 'floobs_rng')
     flolab <- attr(flo, 'flolab')
     flo <- dplyr::select(flo, date, flo) %>% 
       mutate(flo = flo * abs(diff(florng)) + florng[1]) %>% 
       na.omit
-    
+  
+    # change scale/labels depending on station and scale
+    if(stat %in% c('D4', 'D6', 'D7')){
+      
+      ylab <- 'ln-salinity'
+      
+      if(scl == 'linear'){
+        
+        flo$flo <- exp(flo$flo) - 1
+        ylab <- 'salinity'
+          
+        }
+          
+    } else {
+     
+      ylab <- 'ln-flow'
+      
+      if(scl == 'linear'){
+      
+        flo$flo <- exp(flo$flo)
+        ylab <- 'flow'
+        
+      }
+      
+    }
+  
     ggplot(flo, aes(x = date, y = flo)) + 
       geom_line() +
-      scale_y_continuous('ln - flow') +
+      scale_y_continuous(ylab) +
       theme_minimal() +
       theme(axis.title.x = element_blank()) +
       scale_x_date(limits = dt_rng)
@@ -70,13 +100,17 @@ shinyServer(function(input, output) {
     # inputs
     dt_rng <- input$dt_rng
     taus <- input$tau
-
+    
+    # scale argument
+    logspace <- TRUE
+    if(input$scl == 'linear') logspace <- FALSE
+    
     # aggregation period
     annuals <- TRUE
     if(input$annuals == 'observed') annuals <- FALSE
-    
+
     # create plot
-    fitplot(dat(), annuals = annuals, tau = taus, dt_rng = dt_rng, size = 3, alpha = 0.8) +
+    fitplot(dat(), annuals = annuals, tau = taus, dt_rng = dt_rng, size = 3, alpha = 0.8, logspace= logspace) +
       theme_minimal() +
       theme(legend.position = 'none',
         axis.title.x = element_blank()
@@ -92,12 +126,16 @@ shinyServer(function(input, output) {
     dt_rng <- input$dt_rng
     taus <- input$tau
 
+    # scale argument
+    logspace <- TRUE
+    if(input$scl == 'linear') logspace <- FALSE
+   
     # aggregation period
     annuals <- TRUE
     if(input$annuals == 'observed') annuals <- FALSE
     
     # create plot
-    fitplot(dat(), annuals = annuals, predicted = F, tau = taus, dt_rng = dt_rng, size = 3, alpha = 0.8) + 
+    fitplot(dat(), annuals = annuals, predicted = F, tau = taus, dt_rng = dt_rng, size = 3, alpha = 0.8, logspace = logspace) + 
       theme_minimal() +
       theme(legend.position = 'none', 
         axis.title.x = element_blank()

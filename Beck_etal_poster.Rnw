@@ -135,7 +135,6 @@ pdelta <- ggplot(delt_map, aes(x = long, y = lat)) +
   theme(
     axis.title.x=element_blank(),
     axis.title.y=element_blank(),
-    panel.background=element_blank(),
     plot.background=element_blank(), 
     legend.position = 'none',
     panel.border = element_rect(colour = "black", fill = NA, size = 0.5), 
@@ -171,7 +170,7 @@ dev.off()
 @	    
 			\begin{block}{Water Quality and Flow Data}
 			\begin{itemize}
-	    \item Nine nutrient stations with bimonthly samples and daily flow estimates from major inflows
+	    \item \alert{Nine nutrient stations} with bimonthly samples and daily \alert{flow estimates} from major inflows
 	    \end{itemize}
 	    \begin{figure}
       \centerline{\includegraphics[width=0.75\linewidth]{posterfigs/stations.png}}
@@ -195,12 +194,16 @@ pflo <- ggplot(toplo, aes(x = date, y = flo)) +
   geom_line() +
   scale_y_continuous('ln-flow') +
   theme_bw() +
-  theme(axis.title.x = element_blank())
+  theme(axis.title.x = element_blank(),
+    panel.background = element_rect(fill = alpha(cols[3], 0.07)))
+    )
 pres <- ggplot(toplo, aes(x = date, y = res)) + 
   geom_point() +
   scale_y_continuous(attr(toplo, 'reslab')) +
   theme_bw() +
-  theme(axis.title.x = element_blank())
+  theme(axis.title.x = element_blank(),
+    panel.background = element_rect(fill = alpha(cols[3], 0.07)))
+    )
 
 # Set the widths
 pA <- ggplot_gtable(ggplot_build(pflo))
@@ -218,11 +221,13 @@ mos <- c(1, 4, 7, 10)
 pdyna <- dynaplot(toplo, month = mos, ncol = length(mos), col_vec = cols, alpha = 0.8) +
   theme(
     strip.background = element_rect(fill = alpha(cols[length(cols)], 0.5)),
-    axis.title.y = element_blank()
-    ) 
+    axis.title.y = element_blank(),
+    panel.background = element_rect(fill = alpha(cols[3], 0.07)))
+    )
 pfitm <- fitmoplot(toplo, month = mos, ncol = length(mos), predicted = F, col_vec = cols) +
   theme(strip.background = element_rect(fill = alpha(cols[length(cols)], 0.5)),
-    axis.title.y = element_blank(), axis.title.x = element_text()
+    axis.title.y = element_blank(), axis.title.x = element_text(),
+    panel.background = element_rect(fill = alpha(cols[3], 0.07)))
     ) +
   scale_x_date('Year')
 pdynaleg <- g_legend(pdyna)
@@ -242,10 +247,14 @@ dev.off()
 
 # prdnrmplot and seasplot
 pprdn <- prdnrmplot(toplo, col_vec = cols) +
-  theme(legend.position = 'top', axis.title.y = element_blank(), axis.title.x = element_text()) +
+  theme(legend.position = 'top', axis.title.y = element_blank(), axis.title.x = element_text(),
+    panel.background = element_rect(fill = alpha(cols[3], 0.07)))
+    ) +
   scale_x_continuous('Year')
 pseas <- seasyrplot(toplo, predicted = F, col_vec = cols, lwd = 1.5, alpha = 0.8) +
-  theme(axis.title.y = element_blank(), axis.title.x = element_text()) +
+  theme(axis.title.y = element_blank(), axis.title.x = element_text(),
+    panel.background = element_rect(fill = alpha(cols[3], 0.07))
+    ) +
   scale_x_date('Day of year')
 pprdnleg <- g_legend(pprdn)
 pprdn <- pprdn + theme(legend.position = 'none')
@@ -266,7 +275,6 @@ grid.arrange(
   heights = c(0.2, 1, 1.1)
   )
 dev.off()
-
 @   
     
       %%%%%%
@@ -278,20 +286,20 @@ dev.off()
   
       %%
       \begin{column}{0.35\linewidth}
-      
+      WRTDS is applied to \alert{nutrient} observations in relation to \alert{time, discharge, and season}
         \footnotesize
         \centerline{$\ln\left(N\right) = \beta_0 + \beta_1 t + \beta_2 \ln\left(Q\right) + \beta_3 \sin\left(2\pi t\right) + \beta_4 \cos\left(2\pi t\right)$}
       
   	    \begin{figure}
         \centerline{\includegraphics[width=\linewidth]{posterfigs/rawdat.png}}
-        \caption{\footnotesize Example of flow data (top) and nitrogen data (bottom) at C10 used for trend analysis.}
+        \caption{\footnotesize Example of flow and nitrogen data at C10.}
   	    \end{figure}		
 	    
 	    \end{column}
 	    
 	    %%
 	    \begin{column}{0.425\linewidth}
-	    
+	      WRTDS output monthly variation to flow changes and for different quantile distributions of nitrogen.
 	      \begin{figure}
         \centerline{\includegraphics[width=1.05\linewidth]{posterfigs/mopanels.png}}
         \caption{\footnotesize caption.}
@@ -356,7 +364,7 @@ tab <- filter(trnds, resvar == 'din') %>%
 tab[, -1] <- round(tab[, -1], 1)
 tab[, -1][sign(tab[, -1]) != -1] <- paste0('\\it{\\bf{\\footnotesize ', tab[, -1][sign(tab[, -1]) != -1], '}}')
 
-cap <- '\\footnotesize Percent changes in \\alert{DIN} by annual and monthly periods.' 
+cap <- '\\footnotesize Percent changes in \\alert{DIN} by years/months.' 
 suppressWarnings(print.xtable(xtable(tab, caption = cap, align = 'llRRRRRR', digits = 1), type = 'latex', 
 	include.rownames = F, caption.placement = 'top', size = '\\scriptsize', sanitize.text.function = function(x){x},
 	tabular.environment = 'tabularx',
@@ -364,7 +372,6 @@ suppressWarnings(print.xtable(xtable(tab, caption = cap, align = 'llRRRRRR', dig
 @
     	    \begin{figure}
           \centerline{\includegraphics[width=\linewidth]{posterfigs/dinmap.png}}
-          \caption{\footnotesize caption}
     	    \end{figure}		
   	    \end{column}
 
@@ -383,7 +390,7 @@ tab <- filter(trnds, resvar == 'nh') %>%
 tab[, -1] <- round(tab[, -1], 1)
 tab[, -1][sign(tab[, -1]) != -1] <- paste0('\\it{\\bf{\\footnotesize ', tab[, -1][sign(tab[, -1]) != -1], '}}')
 
-cap <- '\\footnotesize Percent changes in \\alert{ammonium} by annual and monthly periods.'
+cap <- '\\footnotesize Percent changes in \\alert{ammonium} by years/months.'
 suppressWarnings(print.xtable(xtable(tab, caption = cap, align = 'llRRRRRR', digits = 1), type = 'latex', 
 	include.rownames = F, caption.placement = 'top', size = '\\scriptsize', sanitize.text.function = function(x){x},
 	tabular.environment = 'tabularx',
@@ -391,7 +398,6 @@ suppressWarnings(print.xtable(xtable(tab, caption = cap, align = 'llRRRRRR', dig
 @
     	    \begin{figure}
           \centerline{\includegraphics[width=\linewidth]{posterfigs/nh4map.png}}
-          \caption{\footnotesize caption}
     	    \end{figure}		
 	      \end{column}
 	    
@@ -410,7 +416,7 @@ tab <- filter(trnds, resvar == 'no23') %>%
 tab[, -1] <- round(tab[, -1], 1)
 tab[, -1][sign(tab[, -1]) != -1] <- paste0('\\it{\\bf{\\footnotesize ', tab[, -1][sign(tab[, -1]) != -1], '}}')
 
-cap <- '\\footnotesize Percent changes in \\alert{nitrite/nitrate} by annual and monthly periods.' 
+cap <- '\\footnotesize Percent changes in \\alert{nitrite/nitrate} by years/months.' 
 suppressWarnings(print.xtable(xtable(tab, caption = cap, align = 'llRRRRRR', digits = 1), type = 'latex', 
 	include.rownames = F, caption.placement = 'top', size = '\\scriptsize', sanitize.text.function = function(x){x},
 	tabular.environment = 'tabularx',
@@ -418,7 +424,6 @@ suppressWarnings(print.xtable(xtable(tab, caption = cap, align = 'llRRRRRR', dig
 @
     	    \begin{figure}
           \centerline{\includegraphics[width=\linewidth]{posterfigs/no23map.png}}
-          \caption{\footnotesize caption}
     	    \end{figure}		
 	      \end{column}
 
@@ -432,11 +437,52 @@ suppressWarnings(print.xtable(xtable(tab, caption = cap, align = 'llRRRRRR', dig
   	
       \vspace{-1.5cm}
       \begin{columns}[t, totalwidth=\linewidth]
-  
+<<d7trnds, echo = F, eval = F, fig = F, include = F>>=
+data(diat_dat)   
+
+ylab1 <- expression(paste("ln-DIN (mg ", L^-1, ")"))
+ylab2 <- expression(paste("ln-Chl-", italic(a), "(", italic(mu), "g ", L^-1, ")"))
+ylab3 <- expression(paste("ln-Si", O^2, " (mg ", L^-1, ")"))
+
+pdin <- prdnrmplot(diat_dat$mod[[1]], col_vec = cols[2], tau = 0.5) +
+  theme(legend.position = 'none', axis.text.x = element_blank(),
+    panel.background = element_rect(fill = alpha(cols[3], 0.07)))) +
+  scale_y_continuous(ylab1)
+
+pchl <- prdnrmplot(diat_dat$mod[[4]], col_vec = cols[2], tau = 0.5) +
+  theme(legend.position = 'none', axis.text.x = element_blank(),
+    panel.background = element_rect(fill = alpha(cols[3], 0.07)))) + 
+  scale_y_continuous(ylab2)
+
+psio <- prdnrmplot(diat_dat$mod[[5]], col_vec = cols[2], tau = 0.5) +
+  theme(legend.position = 'none', axis.title.x = element_text(),
+    panel.background = element_rect(fill = alpha(cols[3], 0.07)))) +
+  scale_x_continuous('Year') +
+  scale_y_continuous(ylab3)
+
+
+# Set the widths
+pA <- ggplot_gtable(ggplot_build(pdin))
+pB <- ggplot_gtable(ggplot_build(pchl))
+pC <- ggplot_gtable(ggplot_build(psio))
+maxWidth = unit.pmax(pA$widths[2:3], pB$widths[2:3], pC$widths[2:3])
+pA$widths[2:3] <- maxWidth
+pB$widths[2:3] <- maxWidth
+pC$widths[2:3] <- maxWidth
+
+png('posterfigs/d7trnds.png', height = 5, width = 8, units = 'in', res = 600, family = 'serif')
+grid.arrange(pA, pB, pC, ncol = 1, heights = c(0.85, 0.85, 1))
+dev.off()
+
+@
         \begin{column}{.5\linewidth}
     
         \begin{varblock}[0.96\textwidth]{Further Evaluation}
-        awsfasdf
+          \alert{Covariation} among indicators can provide \alert{mechanistic clues}
+          \begin{figure}
+          \centerline{\includegraphics[width=0.95\linewidth]{posterfigs/d7trnds.png}}
+          \caption{\footnotesize Flow-normalized trends of DIN, Chl-{\it\footnotesize a}, and SiO$^2$ at D7 (Suisun Bay).}
+    	    \end{figure}	
         \end{varblock}
     
         \end{column}
@@ -444,7 +490,11 @@ suppressWarnings(print.xtable(xtable(tab, caption = cap, align = 'llRRRRRR', dig
         \begin{column}{.5\linewidth}
     
         \begin{varblock}[\textwidth]{Conclusions}
-        awsfasdf
+        \begin{itemize}
+        \item one
+        \item two 
+        \item Interactive data app of full results: https://beckmw.shinyapps.io/sf\_trends/
+        \end{itemize}
         \end{varblock}
     
         \end{column}

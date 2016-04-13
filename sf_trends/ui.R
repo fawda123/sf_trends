@@ -39,6 +39,16 @@ shinyUI(fluidPage(
     
     column(2, 
       
+      selectInput(inputId = 'scl', 
+        label = h4('Scale type'), 
+        choices = c('natural log', 'linear'), 
+        selected = 'natural log'
+        )
+      
+    ),
+    
+    column(2, 
+      
       uiOutput("daterng")
       
     ),

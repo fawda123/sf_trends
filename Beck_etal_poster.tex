@@ -82,6 +82,8 @@
 
 \newcolumntype{R}{>{\raggedleft\arraybackslash}X}
 
+% for lining up blocks within a column to a single block/column above
+% http://tex.stackexchange.com/questions/74808/how-to-line-up-blocks-in-columns-with-full-width-blocks-in-beamer-beamerposter
 \newenvironment<>{varblock}[2][.9\textwidth]{%
   \setlength{\textwidth}{#1}
   \begin{actionenv}#3%
@@ -138,7 +140,7 @@
 
 			\begin{block}{Water Quality and Flow Data}
 			\begin{itemize}
-	    \item Nine nutrient stations with bimonthly samples and daily flow estimates from major inflows
+	    \item \alert{Nine nutrient stations} with bimonthly samples and daily \alert{flow estimates} from major inflows
 	    \end{itemize}
 	    \begin{figure}
       \centerline{\includegraphics[width=0.75\linewidth]{posterfigs/stations.png}}
@@ -164,20 +166,20 @@
   
       %%
       \begin{column}{0.35\linewidth}
-      
+      WRTDS is applied to \alert{nutrient} observations in relation to \alert{time, discharge, and season}
         \footnotesize
         \centerline{$\ln\left(N\right) = \beta_0 + \beta_1 t + \beta_2 \ln\left(Q\right) + \beta_3 \sin\left(2\pi t\right) + \beta_4 \cos\left(2\pi t\right)$}
       
   	    \begin{figure}
         \centerline{\includegraphics[width=\linewidth]{posterfigs/rawdat.png}}
-        \caption{\footnotesize Example of flow data (top) and nitrogen data (bottom) at C10 used for trend analysis.}
+        \caption{\footnotesize Example of flow and nitrogen data at C10.}
   	    \end{figure}		
 	    
 	    \end{column}
 	    
 	    %%
 	    \begin{column}{0.425\linewidth}
-	    
+	      WRTDS output monthly variation to flow changes and for different quantile distributions of nitrogen.
 	      \begin{figure}
         \centerline{\includegraphics[width=1.05\linewidth]{posterfigs/mopanels.png}}
         \caption{\footnotesize caption.}
@@ -214,10 +216,10 @@
         \begin{column}{0.32\linewidth}
 % table din
 % latex table generated in R 3.2.3 by xtable 1.8-2 package
-% Tue Apr 12 13:22:32 2016
+% Tue Apr 12 16:23:27 2016
 \begin{table}[ht]
 \centering
-\caption{\footnotesize Trend summary DIN.} 
+\caption{\footnotesize Percent changes in \alert{DIN} by years/months.} 
 \begingroup\scriptsize
 \begin{tabularx}{0.95\textwidth}{lRRRRRR}
   \toprule
@@ -239,7 +241,6 @@ C10 & \it{\bf{\footnotesize 28.3}} & \it{\bf{\footnotesize 17.4}} & -41.7 & -25.
 
     	    \begin{figure}
           \centerline{\includegraphics[width=\linewidth]{posterfigs/dinmap.png}}
-          \caption{\footnotesize caption}
     	    \end{figure}		
   	    \end{column}
 
@@ -247,10 +248,10 @@ C10 & \it{\bf{\footnotesize 28.3}} & \it{\bf{\footnotesize 17.4}} & -41.7 & -25.
         \begin{column}{0.32\linewidth}
 % table nh4
 % latex table generated in R 3.2.3 by xtable 1.8-2 package
-% Tue Apr 12 13:22:32 2016
+% Tue Apr 12 16:23:27 2016
 \begin{table}[ht]
 \centering
-\caption{\footnotesize Trend summary ammonium.} 
+\caption{\footnotesize Percent changes in \alert{ammonium} by years/months.} 
 \begingroup\scriptsize
 \begin{tabularx}{0.95\textwidth}{lRRRRRR}
   \toprule
@@ -272,7 +273,6 @@ C10 & -39 & -54.1 & -46.5 & -77.1 & -88.7 & -90.9 \\
 
     	    \begin{figure}
           \centerline{\includegraphics[width=\linewidth]{posterfigs/nh4map.png}}
-          \caption{\footnotesize caption}
     	    \end{figure}		
 	      \end{column}
 	    
@@ -280,10 +280,10 @@ C10 & -39 & -54.1 & -46.5 & -77.1 & -88.7 & -90.9 \\
         \begin{column}{0.32\linewidth}
 % table no23      
 % latex table generated in R 3.2.3 by xtable 1.8-2 package
-% Tue Apr 12 13:22:32 2016
+% Tue Apr 12 16:23:27 2016
 \begin{table}[ht]
 \centering
-\caption{\footnotesize Trend summary no23.} 
+\caption{\footnotesize Percent changes in \alert{nitrite/nitrate} by years/months.} 
 \begingroup\scriptsize
 \begin{tabularx}{0.95\textwidth}{lRRRRRR}
   \toprule
@@ -305,7 +305,6 @@ C10 & \it{\bf{\footnotesize 38.7}} & \it{\bf{\footnotesize 23.7}} & -40.8 & -12.
 
     	    \begin{figure}
           \centerline{\includegraphics[width=\linewidth]{posterfigs/no23map.png}}
-          \caption{\footnotesize caption}
     	    \end{figure}		
 	      \end{column}
 
@@ -319,11 +318,15 @@ C10 & \it{\bf{\footnotesize 38.7}} & \it{\bf{\footnotesize 23.7}} & -40.8 & -12.
   	
       \vspace{-1.5cm}
       \begin{columns}[t, totalwidth=\linewidth]
-  
+
         \begin{column}{.5\linewidth}
     
         \begin{varblock}[0.96\textwidth]{Further Evaluation}
-        awsfasdf
+          \alert{Covariation} among indicators can provide \alert{mechanistic clues}
+          \begin{figure}
+          \centerline{\includegraphics[width=0.95\linewidth]{posterfigs/d7trnds.png}}
+          \caption{\footnotesize Flow-normalized trends of DIN, Chl-{\it\footnotesize a}, and SiO$^2$ at D7 (Suisun Bay).}
+    	    \end{figure}	
         \end{varblock}
     
         \end{column}
@@ -331,7 +334,11 @@ C10 & \it{\bf{\footnotesize 38.7}} & \it{\bf{\footnotesize 23.7}} & -40.8 & -12.
         \begin{column}{.5\linewidth}
     
         \begin{varblock}[\textwidth]{Conclusions}
-        awsfasdf
+        \begin{itemize}
+        \item one
+        \item two 
+        \item Interactive data app of full results: https://beckmw.shinyapps.io/sf\_trends/
+        \end{itemize}
         \end{varblock}
     
         \end{column}
