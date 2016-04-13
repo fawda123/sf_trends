@@ -115,15 +115,23 @@ data(sf_bay)
 statmeta <- select(delt_dat, Site_Code, Latitude, Longitude) %>% 
   unique
 
+# flo variable locations
+sacsjr <- data.frame(
+  flovar = c('Sacramento R.', 'San Joaquin R.'), 
+  Latitude = c(38.45602, 37.67604), 
+  Longitude = c(-121.5013, -121.2663)
+  )
+
 # bounding box
 buffx <- 0
 buffy <- 0
 lims<- select(statmeta, -Site_Code) %>% 
+  rbind(sacsjr[, !names(sacsjr) %in% 'flovar']) %>% 
   apply(., 2, function(x) range(x, na.rm = TRUE))
 lims <- c(
   (1 + buffx) * lims[1, 2], 
   (1 - buffy) * lims[1, 1], 
-  (1 - buffx) * lims[2, 2], 
+  (0.9995 - buffx) * lims[2, 2], 
   (1 + buffy) * lims[2, 1]
   )    
 names(lims) <- c('left', 'bottom', 'right', 'top')
@@ -142,7 +150,10 @@ pdelta <- ggplot(delt_map, aes(x = long, y = lat)) +
     ) +  
   coord_fixed(ratio = 1, xlim = lims[c(1, 3)], ylim = lims[c(2, 4)]) +
   scale_fill_manual(values = c("cornflowerblue", "#FFFFFF"), guide = "none") +
-  geom_label(data = statmeta, aes(x = Longitude, y = Latitude, label = Site_Code), fill = 'lightgreen') 
+  geom_label(data = sacsjr[1, ], aes(x = Longitude, y = Latitude, label = flovar), fill = cols[1]) +
+  geom_label_repel(data = sacsjr[2, ], aes(x = Longitude, y = Latitude, label = flovar), fill = cols[1],
+    point.padding = unit1, "lines")) +
+  geom_label(data = statmeta, aes(x = Longitude, y = Latitude, label = Site_Code), fill = cols[2])
 
 # inset
 sf_bay <- fortify(sf_bay)
@@ -155,26 +166,24 @@ pinset <- ggplot(sf_bay, aes(x = long, y = lat)) +
           plot.background=element_blank(),
           panel.border = element_rect(colour = "black", fill = NA, size = 0.5)
     ) + 
-  geom_point(data = data.frame(x = -121.94, y = 38.07), aes(x, y), fill = cols[2], size = 5, pch = 21) +
+  geom_point(data = data.frame(x = -121.94, y = 38.07), aes(x, y), fill = cols[2], size = 10, pch = 21) +
   scale_x_continuous(expand = c(0, 0)) +
-  scale_y_continuous(expand = c(0, 0))
+  scale_y_continuous(expand = c(0, 0)) + 
+  coord_fixed(ratio = 1)
 
-grid.newpage()
-v1 <- viewport(width = 1, height = 1, x = 0.5, y = 0.5) 
-v2 <- viewport(width = 0.3, height = 0.4, x = 0.22, y = 0.29)
-png('posterfigs/stations.png', height = 4.75, width = 5.75, units = 'in', res = 600, family = 'serif')
-print(pdelta, vp = v1) 
-print(pinset, vp = v2)
+png('posterfigs/stations.png', height = 4, width = 7.75, units = 'in', res = 600, family = 'serif')
+grid.arrange(pdelta, pinset, ncol = 2, widths = c(1, 0.78))
+# grid.draw(cbind(ggplotGrob(pdelta), ggplotGrob(pinset), size = 'last'))
 dev.off()
 
 @	    
 			\begin{block}{Water Quality and Flow Data}
 			\begin{itemize}
-	    \item \alert{Nine nutrient stations} with bimonthly samples and daily \alert{flow estimates} from major inflows
+	    \item \alert{Nine nutrient stations} with bimonthly samples and daily \alert{flow estimates} from major inflows used for analysis
 	    \end{itemize}
 	    \begin{figure}
-      \centerline{\includegraphics[width=0.75\linewidth]{posterfigs/stations.png}}
-      \caption{\footnotesize Locations of nutrient stations in SFE, sampled bimonthly.}
+      \centerline{\includegraphics[width=0.95\linewidth]{posterfigs/stations.png}}
+      \caption{\footnotesize Locations of bimonthly nutrient (green) and daily flow (red) stations in SFE.}
 	    \end{figure}
 	    \vspace{-2cm}
 			\end{block}
@@ -440,26 +449,25 @@ suppressWarnings(print.xtable(xtable(tab, caption = cap, align = 'llRRRRRR', dig
 <<d7trnds, echo = F, eval = F, fig = F, include = F>>=
 data(diat_dat)   
 
-ylab1 <- expression(paste("ln-DIN (mg ", L^-1, ")"))
-ylab2 <- expression(paste("ln-Chl-", italic(a), "(", italic(mu), "g ", L^-1, ")"))
-ylab3 <- expression(paste("ln-Si", O^2, " (mg ", L^-1, ")"))
+ylab1 <- expression(paste("DIN (mg ", L^-1, ")"))
+ylab2 <- expression(paste("Chl-", italic(a), " (", italic(mu), "g ", L^-1, ")"))
+ylab3 <- expression(paste("Si", O^2, " (mg ", L^-1, ")"))
 
-pdin <- prdnrmplot(diat_dat$mod[[1]], col_vec = cols[2], tau = 0.5) +
+pdin <- prdnrmplot(diat_dat$mod[[1]], col_vec = cols, logspace = F) + #, tau = 0.5) +
   theme(legend.position = 'none', axis.text.x = element_blank(),
-    panel.background = element_rect(fill = alpha(cols[3], 0.07)))) +
+    panel.background = element_rect(fill = alpha(cols[3], 0.07))) +
   scale_y_continuous(ylab1)
 
-pchl <- prdnrmplot(diat_dat$mod[[4]], col_vec = cols[2], tau = 0.5) +
+pchl <- prdnrmplot(diat_dat$mod[[4]], col_vec = cols, logspace = F) + #, tau = 0.5) +
   theme(legend.position = 'none', axis.text.x = element_blank(),
-    panel.background = element_rect(fill = alpha(cols[3], 0.07)))) + 
+    panel.background = element_rect(fill = alpha(cols[3], 0.07))) + 
   scale_y_continuous(ylab2)
 
-psio <- prdnrmplot(diat_dat$mod[[5]], col_vec = cols[2], tau = 0.5) +
+psio <- prdnrmplot(diat_dat$mod[[5]], col_vec = cols, logspace = F) + #, tau = 0.5) +
   theme(legend.position = 'none', axis.title.x = element_text(),
-    panel.background = element_rect(fill = alpha(cols[3], 0.07)))) +
+    panel.background = element_rect(fill = alpha(cols[3], 0.07))) +
   scale_x_continuous('Year') +
   scale_y_continuous(ylab3)
-
 
 # Set the widths
 pA <- ggplot_gtable(ggplot_build(pdin))
@@ -480,7 +488,7 @@ dev.off()
         \begin{varblock}[0.96\textwidth]{Further Evaluation}
           \alert{Covariation} among indicators can provide \alert{mechanistic clues}
           \begin{figure}
-          \centerline{\includegraphics[width=0.95\linewidth]{posterfigs/d7trnds.png}}
+          \centerline{\includegraphics[width=0.85\linewidth]{posterfigs/d7trnds.png}}
           \caption{\footnotesize Flow-normalized trends of DIN, Chl-{\it\footnotesize a}, and SiO$^2$ at D7 (Suisun Bay).}
     	    \end{figure}	
         \end{varblock}

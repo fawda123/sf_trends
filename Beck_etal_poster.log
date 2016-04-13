@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.4-1.40.13 (MiKTeX 2.9 64-bit) (preloaded format=pdflatex 2013.8.29)  12 APR 2016 16:23
+This is pdfTeX, Version 3.1415926-2.4-1.40.13 (MiKTeX 2.9 64-bit) (preloaded format=pdflatex 2013.8.29)  13 APR 2016 17:46
 entering extended mode
 **Beck_etal_poster.tex
 (M:\docs\sf_trends\Beck_etal_poster.tex
@@ -1317,12 +1317,12 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <38.56> not available
 (Font)              Font shape `OT1/ptm/b/n' tried instead on input line 354.
 LaTeX Font Info:    Calculating math sizes for size <38.56> on input line 354.
 
-<posterfigs/stations.png, id=16, 415.5525pt x 343.2825pt>
+<posterfigs/stations.png, id=16, 560.0925pt x 289.08pt>
 File: posterfigs/stations.png Graphic file (type png)
 
 <use posterfigs/stations.png>
 Package pdftex.def Info: posterfigs/stations.png used on input line 354.
-(pdftex.def)             Requested size: 751.28986pt x 620.70512pt.
+(pdftex.def)             Requested size: 951.63077pt x 491.18687pt.
 LaTeX Font Info:    Calculating math sizes for size <26.78> on input line 354.
 
 <posterfigs/rawdat.png, id=17, 722.7pt x 361.35pt>
@@ -1371,7 +1371,7 @@ File: posterfigs/d7trnds.png Graphic file (type png)
 
 <use posterfigs/d7trnds.png>
 Package pdftex.def Info: posterfigs/d7trnds.png used on input line 354.
-(pdftex.def)             Requested size: 951.63077pt x 594.80128pt.
+(pdftex.def)             Requested size: 851.46796pt x 532.19817pt.
 
 Overfull \hbox (40.06207pt too wide) in paragraph at lines 354--354
 [] [] 
@@ -1383,7 +1383,7 @@ Overfull \hbox (26.02798pt too wide) detected at line 354
  []
 
 
-Overfull \vbox (103.8043pt too high) detected at line 354
+Overfull \vbox (41.20119pt too high) detected at line 354
  []
 
 File: posterfigs/titlegraphic.png Graphic file (type png)
@@ -1580,7 +1580,7 @@ Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 356.
 Here is how much of TeX's memory you used:
  19594 strings out of 493921
  366401 string characters out of 3147282
- 547404 words of memory out of 3000000
+ 547558 words of memory out of 3000000
  22391 multiletter control sequences out of 15000+200000
  53638 words of font info for 143 fonts, out of 3000000 for 9000
  841 hyphenation exceptions out of 8191
@@ -1592,7 +1592,7 @@ s/type1/public/amsfonts/cm/cmsy10.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/
 urw/times/utmb8a.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/urw/times/utmbi8a
 .pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/urw/times/utmr8a.pfb><C:/Program 
 Files/MiKTeX 2.9/fonts/type1/urw/times/utmri8a.pfb>
-Output written on Beck_etal_poster.pdf (1 page, 1938014 bytes).
+Output written on Beck_etal_poster.pdf (1 page, 1748041 bytes).
 PDF statistics:
  69 PDF objects out of 1000 (max. 8388607)
  3 named destinations out of 1000 (max. 500000)
