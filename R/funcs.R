@@ -137,9 +137,11 @@ trnd_map <- function(res,
     )  + 
     scale_shape_manual(values = shps) + 
     scale_size(range = sz_rng) + 
-    scale_fill_manual(values=c(cols, "cornflowerblue", "#FFFFFF"), guide="none") +
+    scale_fill_manual(values=c(cols, "cornflowerblue", "aliceblue"), guide="none") +
     facet_wrap( ~ cat, ncol = 3) +
-    theme(strip.background=element_rect(fill = strp_fl))
+    theme(strip.background=element_rect(fill = strp_fl),
+      panel.background=element_rect(fill = alpha("cornflowerblue", 0.1))
+      )
   
   # add legend if true
   if(leg){

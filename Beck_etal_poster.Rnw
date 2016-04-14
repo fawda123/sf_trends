@@ -122,6 +122,12 @@ sacsjr <- data.frame(
   Longitude = c(-121.5013, -121.2663)
   )
 
+baylab <- data.frame(
+  lab = c('Suisun Bay', 'San Pablo Bay', 'Central San\nFrancisco Bay', 'Lower San\nFrancisco Bay'),
+  Latitude = c(38.08, 38.06, 37.85, 37.65), 
+  Longitude = c(-122.05, -122.4, -122.4, -122.25)
+)
+
 # bounding box
 buffx <- 0
 buffy <- 0
@@ -146,33 +152,33 @@ pdelta <- ggplot(delt_map, aes(x = long, y = lat)) +
     plot.background=element_blank(), 
     legend.position = 'none',
     panel.border = element_rect(colour = "black", fill = NA, size = 0.5), 
-    plot.margin = unit(c(0, 0, 0, 0), 'cm')
+    plot.margin = unit(c(0, 0, 0, 0), 'cm'),
+    panel.background=element_rect(fill = alpha("cornflowerblue", 0.1))
     ) +  
   coord_fixed(ratio = 1, xlim = lims[c(1, 3)], ylim = lims[c(2, 4)]) +
-  scale_fill_manual(values = c("cornflowerblue", "#FFFFFF"), guide = "none") +
+  scale_fill_manual(values = c("cornflowerblue", "aliceblue"), guide = "none") +
   geom_label(data = sacsjr[1, ], aes(x = Longitude, y = Latitude, label = flovar), fill = cols[1]) +
   geom_label_repel(data = sacsjr[2, ], aes(x = Longitude, y = Latitude, label = flovar), fill = cols[1],
-    point.padding = unit1, "lines")) +
+    point.padding = unit(1, "lines")) +
   geom_label(data = statmeta, aes(x = Longitude, y = Latitude, label = Site_Code), fill = cols[2])
 
 # inset
 sf_bay <- fortify(sf_bay)
 pinset <- ggplot(sf_bay, aes(x = long, y = lat)) + 
-  geom_polygon(fill = 'white', colour = 'grey50') +
+  geom_polygon(fill = alpha('white', 0.8), colour = 'grey50') +
   theme(axis.title =element_blank(), 
-          panel.background=element_rect(fill = "cornflowerblue"),
-          panel.grid.major=element_blank(),
-          panel.grid.minor=element_blank(),
+          panel.background=element_rect(fill = alpha("cornflowerblue", 0.5)),
           plot.background=element_blank(),
           panel.border = element_rect(colour = "black", fill = NA, size = 0.5)
     ) + 
   geom_point(data = data.frame(x = -121.94, y = 38.07), aes(x, y), fill = cols[2], size = 10, pch = 21) +
+  geom_text(data = baylab, aes(x = Longitude, y = Latitude, label = lab), size = 3) +
   scale_x_continuous(expand = c(0, 0)) +
   scale_y_continuous(expand = c(0, 0)) + 
   coord_fixed(ratio = 1)
 
 png('posterfigs/stations.png', height = 4, width = 7.75, units = 'in', res = 600, family = 'serif')
-grid.arrange(pdelta, pinset, ncol = 2, widths = c(1, 0.78))
+grid.arrange(pinset, pdelta, ncol = 2, widths = c(0.78, 1))
 # grid.draw(cbind(ggplotGrob(pdelta), ggplotGrob(pinset), size = 'last'))
 dev.off()
 
@@ -203,16 +209,20 @@ pflo <- ggplot(toplo, aes(x = date, y = flo)) +
   geom_line() +
   scale_y_continuous('ln-flow') +
   theme_bw() +
-  theme(axis.title.x = element_blank(),
-    panel.background = element_rect(fill = alpha(cols[3], 0.07)))
-    )
+  theme(axis.title.x = element_text(), 
+    panel.background = element_rect(fill = alpha(cols[3], 0.07)), 
+    plot.margin = unit(c(6, 6, 10, 6), 'pt')
+    ) + 
+  scale_x_date('Year')
 pres <- ggplot(toplo, aes(x = date, y = res)) + 
   geom_point() +
   scale_y_continuous(attr(toplo, 'reslab')) +
   theme_bw() +
-  theme(axis.title.x = element_blank(),
-    panel.background = element_rect(fill = alpha(cols[3], 0.07)))
-    )
+  theme(axis.title.x = element_text(), 
+    panel.background = element_rect(fill = alpha(cols[3], 0.07)), 
+    plot.margin = unit(c(6, 6, 6, 6), 'pt')
+    ) + 
+  scale_x_date('Year')
 
 # Set the widths
 pA <- ggplot_gtable(ggplot_build(pflo))
@@ -231,12 +241,12 @@ pdyna <- dynaplot(toplo, month = mos, ncol = length(mos), col_vec = cols, alpha 
   theme(
     strip.background = element_rect(fill = alpha(cols[length(cols)], 0.5)),
     axis.title.y = element_blank(),
-    panel.background = element_rect(fill = alpha(cols[3], 0.07)))
+    panel.background = element_rect(fill = alpha(cols[3], 0.07))
     )
 pfitm <- fitmoplot(toplo, month = mos, ncol = length(mos), predicted = F, col_vec = cols) +
   theme(strip.background = element_rect(fill = alpha(cols[length(cols)], 0.5)),
     axis.title.y = element_blank(), axis.title.x = element_text(),
-    panel.background = element_rect(fill = alpha(cols[3], 0.07)))
+    panel.background = element_rect(fill = alpha(cols[3], 0.07))
     ) +
   scale_x_date('Year')
 pdynaleg <- g_legend(pdyna)
@@ -246,18 +256,11 @@ pfitm <- pfitm + theme(legend.position = 'none')
 
 ylab <- attr(toplo, 'reslab')
 
-png('posterfigs/mopanels.png', height = 5, width = 10.5, units = 'in', res = 600, family = 'serif')
-grid.arrange(
-  arrangeGrob(pdynaleg, pfitmleg, ncol = 2), 
-  pdyna, pfitm, left = textGrob(ylab, rot = 90), 
-  heights = c(0.2, 1.1, 1)
-  )
-dev.off()
-
 # prdnrmplot and seasplot
 pprdn <- prdnrmplot(toplo, col_vec = cols) +
   theme(legend.position = 'top', axis.title.y = element_blank(), axis.title.x = element_text(),
-    panel.background = element_rect(fill = alpha(cols[3], 0.07)))
+    panel.background = element_rect(fill = alpha(cols[3], 0.07)), 
+    plot.margin = unit(c(6, 6, 16, 6), 'pt')
     ) +
   scale_x_continuous('Year')
 pseas <- seasyrplot(toplo, predicted = F, col_vec = cols, lwd = 1.5, alpha = 0.8) +
@@ -277,12 +280,23 @@ maxWidth = unit.pmax(pA$widths[2:3], pB$widths[2:3])
 pA$widths[2:3] <- maxWidth
 pB$widths[2:3] <- maxWidth
 
-png('posterfigs/prdseas.png', height = 6, width = 5, units = 'in', res = 600, family = 'serif')
+png('posterfigs/prdseas.png', height = 6, width = 14, units = 'in', res = 600, family = 'serif')
 grid.arrange(
-  arrangeGrob(pprdnleg, pseasleg, ncol = 2), 
-  pA, pB, left = textGrob(ylab, rot = 90), 
-  heights = c(0.2, 1, 1.1)
-  )
+  arrangeGrob(pdynaleg, pfitmleg, pprdnleg, ncol = 3, widths = c(1, 1, 0.6)), 
+  arrangeGrob(
+    left = textGrob(ylab, rot = 90), ncol = 2,
+    arrangeGrob(
+      pdyna, pfitm,
+      heights = c(1, 1)
+    ),
+    arrangeGrob(
+      pA, pB, 
+      heights = c(1, 1)
+    ), 
+    widths = c(1, 0.3)
+  ),
+  heights = c(0.1, 1)
+)
 dev.off()
 @   
     
@@ -294,40 +308,30 @@ dev.off()
       \begin{columns}[t]
   
       %%
-      \begin{column}{0.35\linewidth}
-      WRTDS is applied to \alert{nutrient} observations in relation to \alert{time, discharge, and season}
-        \footnotesize
+      \begin{column}{0.42\linewidth}
+      WRTDS models were applied to \alert{nutrient} observations in relation to \alert{time, discharge, and season}: 
+        {\footnotesize \vspace{0.5cm}
         \centerline{$\ln\left(N\right) = \beta_0 + \beta_1 t + \beta_2 \ln\left(Q\right) + \beta_3 \sin\left(2\pi t\right) + \beta_4 \cos\left(2\pi t\right)$}
-      
+        }\vspace{-1.90cm}
   	    \begin{figure}
-        \centerline{\includegraphics[width=\linewidth]{posterfigs/rawdat.png}}
-        \caption{\footnotesize Example of flow and nitrogen data at C10.}
+        \centerline{\includegraphics[width=\linewidth]{posterfigs/rawdat.png} \vspace{-0.35cm}}
+        \caption{\footnotesize Example of raw flow and nitrogen data at P8 used with WRTDS.  The model was fit to matched flow and nutrient data at a bimonthly time step and then results were predicted at a daily time step.}
   	    \end{figure}		
 	    
 	    \end{column}
 	    
 	    %%
-	    \begin{column}{0.425\linewidth}
-	      WRTDS output monthly variation to flow changes and for different quantile distributions of nitrogen.
-	      \begin{figure}
-        \centerline{\includegraphics[width=1.05\linewidth]{posterfigs/mopanels.png}}
-        \caption{\footnotesize caption.}
-	      \end{figure}		
-
-	    \end{column}
-	    
-	    %%
-	    \begin{column}{0.175\linewidth}
-	    
+	    \begin{column}{0.53\linewidth}
+	      WRTDS output showed \alert{seasonal variation}, response to \alert{flow changes}, and different \alert{quantile distributions}
 	      \begin{figure}
         \centerline{\includegraphics[width=\linewidth]{posterfigs/prdseas.png}}
-        \caption{\footnotesize caption.}
+        \caption{\footnotesize Examples of model results at P8 showing monthly and annual response to flow changes (top left), monthly quantile ($\tau$) distributions of flow-normalized predictions (bottom left), quantile distributions of annual trends (top right), and annual changes in seasonal variation (bottom right).}
 	      \end{figure}		
 
 	    \end{column}
 	    
 	    \end{columns}
-	    
+	    \vspace{-1.75cm}
       \end{block}
 
    		%%%%%%
@@ -355,7 +359,8 @@ dev.off()
 @
 			
       \begin{block}{Trend Analyses}
-      \vspace{-2cm}				
+      Results for \alert{all Delta stations} and three \alert{nitrogen analytes} were used to evaluate \alert{annual and monthly trends} over time and space
+      \vspace{-1.5cm}	
       \begin{columns}[t]
   
         %%
@@ -379,6 +384,7 @@ suppressWarnings(print.xtable(xtable(tab, caption = cap, align = 'llRRRRRR', dig
 	tabular.environment = 'tabularx',
 	booktabs = T, width = '0.95\\textwidth'))
 @
+    	    \vspace{-0.75cm}
     	    \begin{figure}
           \centerline{\includegraphics[width=\linewidth]{posterfigs/dinmap.png}}
     	    \end{figure}		
@@ -405,6 +411,7 @@ suppressWarnings(print.xtable(xtable(tab, caption = cap, align = 'llRRRRRR', dig
 	tabular.environment = 'tabularx',
 	booktabs = T, width = '0.95\\textwidth'))
 @
+    	    \vspace{-0.75cm}
     	    \begin{figure}
           \centerline{\includegraphics[width=\linewidth]{posterfigs/nh4map.png}}
     	    \end{figure}		
@@ -431,13 +438,14 @@ suppressWarnings(print.xtable(xtable(tab, caption = cap, align = 'llRRRRRR', dig
 	tabular.environment = 'tabularx',
 	booktabs = T, width = '0.95\\textwidth'))
 @
+    	    \vspace{-0.75cm}
     	    \begin{figure}
           \centerline{\includegraphics[width=\linewidth]{posterfigs/no23map.png}}
     	    \end{figure}		
 	      \end{column}
 
 	    \end{columns}
-	    \vspace{-2cm}				
+	    \vspace{-2.5cm}				
 			\end{block}
 
     %%%%%%%%%%%%%%
@@ -453,21 +461,37 @@ ylab1 <- expression(paste("DIN (mg ", L^-1, ")"))
 ylab2 <- expression(paste("Chl-", italic(a), " (", italic(mu), "g ", L^-1, ")"))
 ylab3 <- expression(paste("Si", O^2, " (mg ", L^-1, ")"))
 
-pdin <- prdnrmplot(diat_dat$mod[[1]], col_vec = cols, logspace = F) + #, tau = 0.5) +
+pdin <- prdnrmplot(diat_dat$mod[[1]], col_vec = cols[2], logspace = F, tau = 0.5) +
   theme(legend.position = 'none', axis.text.x = element_blank(),
     panel.background = element_rect(fill = alpha(cols[3], 0.07))) +
   scale_y_continuous(ylab1)
 
-pchl <- prdnrmplot(diat_dat$mod[[4]], col_vec = cols, logspace = F) + #, tau = 0.5) +
+pdinsy <- seasyrplot(diat_dat$mod[[1]], col_vec = cols, logspace = F, predicted = F) +
+  theme(legend.position = 'none', axis.text.x = element_blank(), axis.title.y = element_blank(),
+    panel.background = element_rect(fill = alpha(cols[3], 0.07))) +
+  scale_y_continuous(ylab1)
+
+pchl <- prdnrmplot(diat_dat$mod[[4]], col_vec = cols[2], logspace = F, tau = 0.5) +
   theme(legend.position = 'none', axis.text.x = element_blank(),
     panel.background = element_rect(fill = alpha(cols[3], 0.07))) + 
   scale_y_continuous(ylab2)
 
-psio <- prdnrmplot(diat_dat$mod[[5]], col_vec = cols, logspace = F) + #, tau = 0.5) +
+pchlsy <- seasyrplot(diat_dat$mod[[4]], col_vec = cols, logspace = F, predicted = F) +
+  theme(legend.position = 'none', axis.text.x = element_blank(), axis.title.y = element_blank(),
+    panel.background = element_rect(fill = alpha(cols[3], 0.07))) +
+  scale_y_continuous(ylab1)
+
+psio <- prdnrmplot(diat_dat$mod[[5]], col_vec = cols[2], logspace = F, tau = 0.5) +
   theme(legend.position = 'none', axis.title.x = element_text(),
     panel.background = element_rect(fill = alpha(cols[3], 0.07))) +
   scale_x_continuous('Year') +
   scale_y_continuous(ylab3)
+
+psiosy <- seasyrplot(diat_dat$mod[[5]], col_vec = cols, logspace = F, predicted = F) + 
+  theme(legend.position = 'none', axis.title.x = element_text(), axis.title.y = element_blank(),
+    panel.background = element_rect(fill = alpha(cols[3], 0.07))) +
+  scale_x_date('Day of year', date_labels = "%m/%d") +
+  scale_y_continuous(ylab1)
 
 # Set the widths
 pA <- ggplot_gtable(ggplot_build(pdin))
@@ -478,8 +502,21 @@ pA$widths[2:3] <- maxWidth
 pB$widths[2:3] <- maxWidth
 pC$widths[2:3] <- maxWidth
 
-png('posterfigs/d7trnds.png', height = 5, width = 8, units = 'in', res = 600, family = 'serif')
-grid.arrange(pA, pB, pC, ncol = 1, heights = c(0.85, 0.85, 1))
+# Set the widths for seasyrplots
+pAsy <- ggplot_gtable(ggplot_build(pdinsy))
+pBsy <- ggplot_gtable(ggplot_build(pchlsy))
+pCsy <- ggplot_gtable(ggplot_build(psiosy))
+maxWidth = unit.pmax(pAsy$widths[2:3], pBsy$widths[2:3], pCsy$widths[2:3])
+pAsy$widths[2:3] <- maxWidth
+pBsy$widths[2:3] <- maxWidth
+pCsy$widths[2:3] <- maxWidth
+
+png('posterfigs/d7trnds.png', height = 4, width = 9, units = 'in', res = 600, family = 'serif')
+grid.arrange(
+  arrangeGrob(pA, pB, pC, ncol = 1, heights = c(0.85, 0.85, 1)),
+  arrangeGrob(pAsy, pBsy, pCsy, ncol = 1, heights = c(0.85, 0.85, 1)),
+  ncol = 2
+  )
 dev.off()
 
 @
@@ -488,8 +525,8 @@ dev.off()
         \begin{varblock}[0.96\textwidth]{Further Evaluation}
           \alert{Covariation} among indicators can provide \alert{mechanistic clues}
           \begin{figure}
-          \centerline{\includegraphics[width=0.85\linewidth]{posterfigs/d7trnds.png}}
-          \caption{\footnotesize Flow-normalized trends of DIN, Chl-{\it\footnotesize a}, and SiO$^2$ at D7 (Suisun Bay).}
+          \centerline{\includegraphics[width=0.95\linewidth]{posterfigs/d7trnds.png}}
+          \caption{\footnotesize Flow-normalized trends of annual (left) and seasonal (right) variation in DIN, Chl-{\it\footnotesize a}, and SiO$^2$ at D7.  RGB colors indicate a unique year from 1976 to 2012.}
     	    \end{figure}	
         \end{varblock}
     
@@ -499,12 +536,18 @@ dev.off()
     
         \begin{varblock}[\textwidth]{Conclusions}
         \begin{itemize}
-        \item one
-        \item two 
-        \item Interactive data app of full results: https://beckmw.shinyapps.io/sf\_trends/
+        \item WRTDS analyses on four decades of nutrient data in SFE can reveal \alert{undescribed spatiotemporal variation}
+        \item \alert{Flow-normalized results} can describe trends independent of confounding variables
+        \item Conditional quantile distributions can reveal changes over time in \alert{high or low nutrient events}
         \end{itemize}
         \end{varblock}
-    
+        \small{
+        We acknowledge the significant efforts of California DWR staff in providing access to quality nutrient and flow data. 
+        
+        Interactive data app of full results: https://beckmw.shinyapps.io/sf\_trends/
+        
+        WRTDStidal R package: https://github.com/fawda123/WRTDStidal
+        }
         \end{column}
         
       \end{columns}
