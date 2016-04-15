@@ -122,15 +122,15 @@ trnd_map <- function(res,
   
   # add trend data to base map
   ptrnd <- pbase +
-    geom_label_repel(
-      data = toplo, 
-      aes(x = Longitude, y = Latitude, label = Site_Code), 
-      label.r = unit(0, "lines"),
-      box.padding = unit(1, "lines"), 
-      point.padding = unit(0, "lines"), 
-      force = 2, size = 2,
-      fill = strp_fl
-    ) +
+#     geom_label_repel(
+#       data = toplo, 
+#       aes(x = Longitude, y = Latitude, label = Site_Code), 
+#       label.r = unit(0, "lines"),
+#       box.padding = unit(1, "lines"), 
+#       point.padding = unit(0, "lines"), 
+#       force = 2, size = 2,
+#       fill = strp_fl
+#     ) +
     geom_point(data = toplo, 
       aes(x = Longitude, y = Latitude, size = sz, fill = shp, shape = shp),
       alpha = 0.9
