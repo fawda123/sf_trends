@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.4-1.40.13 (MiKTeX 2.9 64-bit) (preloaded format=pdflatex 2013.8.29)  14 APR 2016 14:58
+This is pdfTeX, Version 3.1415926-2.4-1.40.13 (MiKTeX 2.9 64-bit) (preloaded format=pdflatex 2013.8.29)  15 APR 2016 10:44
 entering extended mode
 **Beck_etal_poster.tex
 (M:\docs\sf_trends\Beck_etal_poster.tex
@@ -1314,74 +1314,69 @@ File: posterfigs/titlegraphic.png Graphic file (type png)
 Package pdftex.def Info: posterfigs/titlegraphic.png used on input line 105.
 (pdftex.def)             Requested size: 493.23524pt x 240.24869pt.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <38.56> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 354.
-LaTeX Font Info:    Calculating math sizes for size <38.56> on input line 354.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 355.
 
-<posterfigs/stations.png, id=16, 560.0925pt x 289.08pt>
+<posterfigs/stations.png, id=16, 558.28575pt x 289.08pt>
 File: posterfigs/stations.png Graphic file (type png)
 
 <use posterfigs/stations.png>
-Package pdftex.def Info: posterfigs/stations.png used on input line 354.
-(pdftex.def)             Requested size: 951.63077pt x 491.18687pt.
-LaTeX Font Info:    Calculating math sizes for size <26.78> on input line 354.
+Package pdftex.def Info: posterfigs/stations.png used on input line 355.
+(pdftex.def)             Requested size: 951.63077pt x 492.78366pt.
+LaTeX Font Info:    Calculating math sizes for size <26.78> on input line 355.
 
 <posterfigs/rawdat.png, id=17, 722.7pt x 361.35pt>
 File: posterfigs/rawdat.png Graphic file (type png)
  <use posterfigs/rawdat.png>
-Package pdftex.def Info: posterfigs/rawdat.png used on input line 354.
+Package pdftex.def Info: posterfigs/rawdat.png used on input line 355.
 (pdftex.def)             Requested size: 841.44096pt x 420.72668pt.
 
 <posterfigs/prdseas.png, id=18, 1011.78pt x 433.62pt>
 File: posterfigs/prdseas.png Graphic file (type png)
 
 <use posterfigs/prdseas.png>
-Package pdftex.def Info: posterfigs/prdseas.png used on input line 354.
+Package pdftex.def Info: posterfigs/prdseas.png used on input line 355.
 (pdftex.def)             Requested size: 1061.82056pt x 455.07625pt.
 
 <posterfigs/dinmap.png, id=19, 650.43pt x 433.62pt>
 File: posterfigs/dinmap.png Graphic file (type png)
 
 <use posterfigs/dinmap.png>
-Package pdftex.def Info: posterfigs/dinmap.png used on input line 354.
+Package pdftex.def Info: posterfigs/dinmap.png used on input line 355.
 (pdftex.def)             Requested size: 641.11536pt x 427.43912pt.
 
 <posterfigs/nh4map.png, id=20, 650.43pt x 433.62pt>
 File: posterfigs/nh4map.png Graphic file (type png)
 
 <use posterfigs/nh4map.png>
-Package pdftex.def Info: posterfigs/nh4map.png used on input line 354.
+Package pdftex.def Info: posterfigs/nh4map.png used on input line 355.
 (pdftex.def)             Requested size: 641.11536pt x 427.43912pt.
 
 <posterfigs/no23map.png, id=21, 650.43pt x 433.62pt>
 File: posterfigs/no23map.png Graphic file (type png)
 
 <use posterfigs/no23map.png>
-Package pdftex.def Info: posterfigs/no23map.png used on input line 354.
+Package pdftex.def Info: posterfigs/no23map.png used on input line 355.
 (pdftex.def)             Requested size: 641.11536pt x 427.43912pt.
 
 <posterfigs/d7trnds.png, id=22, 650.43pt x 289.08pt>
 File: posterfigs/d7trnds.png Graphic file (type png)
 
 <use posterfigs/d7trnds.png>
-Package pdftex.def Info: posterfigs/d7trnds.png used on input line 354.
+Package pdftex.def Info: posterfigs/d7trnds.png used on input line 355.
 (pdftex.def)             Requested size: 951.63077pt x 422.97958pt.
 
-Overfull \hbox (40.06207pt too wide) in paragraph at lines 354--354
+Overfull \hbox (40.06207pt too wide) in paragraph at lines 355--355
 [] [] 
  []
 
 
-Overfull \hbox (26.02798pt too wide) detected at line 354
+Overfull \hbox (26.02798pt too wide) detected at line 355
 [][][][][][][][][][][] [][][][][][][]
- []
-
-
-Overfull \vbox (39.493pt too high) detected at line 354
  []
 
 File: posterfigs/titlegraphic.png Graphic file (type png)
 <use posterfigs/titlegraphic.png>
-Package pdftex.def Info: posterfigs/titlegraphic.png used on input line 354.
+Package pdftex.def Info: posterfigs/titlegraphic.png used on input line 355.
 (pdftex.def)             Requested size: 493.23524pt x 240.24869pt.
  [1{C:/Users/mbeck/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map}
 
@@ -1393,11 +1388,11 @@ cs/sf_trends/posterfigs/nh4map.png> <M:/docs/sf_trends/posterfigs/no23map.png>
 \tf@nav=\write6
 \tf@toc=\write7
 \tf@snm=\write8
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 356.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 356.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 357.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 357.
 
 (M:\docs\sf_trends\Beck_etal_poster.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 356.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 357.
 
 
  *File List*
@@ -1563,29 +1558,28 @@ posterfigs/d7trnds.png
 posterfigs/titlegraphic.png
  ***********
 
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 356.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 357.
 Package rerunfilecheck Info: File `Beck_etal_poster.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 356.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 357.
  ) 
 Here is how much of TeX's memory you used:
- 19588 strings out of 493921
- 366262 string characters out of 3147282
- 558729 words of memory out of 3000000
- 22386 multiletter control sequences out of 15000+200000
- 53638 words of font info for 143 fonts, out of 3000000 for 9000
+ 19561 strings out of 493921
+ 365801 string characters out of 3147282
+ 562093 words of memory out of 3000000
+ 22360 multiletter control sequences out of 15000+200000
+ 45494 words of font info for 117 fonts, out of 3000000 for 9000
  841 hyphenation exceptions out of 8191
  48i,20n,77p,1770b,1515s stack positions out of 5000i,500n,10000p,200000b,50000s
 {C:/Program Files/MiKTeX 2.9/fonts/enc/dvips/fontname/8r.enc}<C:/Program File
 s/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Program Files/MiKTeX
  2.9/fonts/type1/public/amsfonts/cm/cmr17.pfb><C:/Program Files/MiKTeX 2.9/font
-s/type1/public/amsfonts/cm/cmsy10.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/
-urw/times/utmb8a.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/urw/times/utmbi8a
-.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/urw/times/utmr8a.pfb><C:/Program 
-Files/MiKTeX 2.9/fonts/type1/urw/times/utmri8a.pfb>
-Output written on Beck_etal_poster.pdf (1 page, 2141031 bytes).
+s/type1/urw/times/utmb8a.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/urw/times
+/utmbi8a.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/urw/times/utmr8a.pfb><C:/
+Program Files/MiKTeX 2.9/fonts/type1/urw/times/utmri8a.pfb>
+Output written on Beck_etal_poster.pdf (1 page, 2068988 bytes).
 PDF statistics:
- 68 PDF objects out of 1000 (max. 8388607)
+ 64 PDF objects out of 1000 (max. 8388607)
  3 named destinations out of 1000 (max. 500000)
  89 words of extra memory for PDF output out of 10000 (max. 10000000)
 

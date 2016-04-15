@@ -81,7 +81,7 @@ trnd_map <- function(res,
   
   # base delta map
   pbase <- ggplot(delt_map, aes(x = long, y = lat)) + 
-    geom_polygon(aes(group = group, fill = hole)) +
+    geom_polygon(aes(group = group, fill = hole), colour = "cornflowerblue") +
     theme_bw() +
     theme(
       axis.title.x=element_blank(),
@@ -133,7 +133,7 @@ trnd_map <- function(res,
     ) +
     geom_point(data = toplo, 
       aes(x = Longitude, y = Latitude, size = sz, fill = shp, shape = shp),
-      alpha = 0.8
+      alpha = 0.9
     )  + 
     scale_shape_manual(values = shps) + 
     scale_size(range = sz_rng) + 

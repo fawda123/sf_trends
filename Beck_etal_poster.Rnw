@@ -73,7 +73,7 @@ cols <- c('#D53E4F', '#4DAF4A', '#377EB8') # red, green, blue
 
 \begin{frame}{}
 
-	\vspace{-0.6cm} %spacing for block distance from header
+	\vspace{-1cm} %spacing for block distance from header
   \begin{columns}[t]
   	\hspace{0.4cm}
   	
@@ -92,11 +92,11 @@ cols <- c('#D53E4F', '#4DAF4A', '#377EB8') # red, green, blue
       %%%%%%
       % Objectives
       %%%%%%
-      \begin{block}{Analysis components}
+      \begin{block}{Analysis Components}
     	\begin{itemize}
-    	\item WRTDS trend analysis method applied to \alert{nine stations} in SFE
-    	\item Models were developed for three \alert{nitrogen analytes}: DIN, NO$_{2}^{-}$/NO$_{3}^{2-}$, NH$_{4}^{+}$
-    	\item Results were evaluated as \alert{flow-normalized trends}
+    	\item Weighted Regressions on Time, Discharge, and Season (WRTDS) were applied to \alert{nine stations} in the upper SFE
+    	\item Models were developed for \alert{three nitrogen analytes}: dissolved inorganic nitrogen (DIN), nitrite/nitrate, and ammonium
+    	\item Trends were evaluated by monthly and annual periods using \alert{flow-normalized predictions} from WRTDS
     	\end{itemize}
     	
       \end{block}
@@ -144,7 +144,7 @@ names(lims) <- c('left', 'bottom', 'right', 'top')
 
 # base delta map
 pdelta <- ggplot(delt_map, aes(x = long, y = lat)) + 
-  geom_polygon(aes(group = group, fill = hole), colour = 'lightgrey') +
+  geom_polygon(aes(group = group, fill = hole), colour = 'cornflowerblue') +
   theme_bw() +
   theme(
     axis.title.x=element_blank(),
@@ -159,7 +159,7 @@ pdelta <- ggplot(delt_map, aes(x = long, y = lat)) +
   scale_fill_manual(values = c("cornflowerblue", "aliceblue"), guide = "none") +
   geom_label(data = sacsjr[1, ], aes(x = Longitude, y = Latitude, label = flovar), fill = cols[1]) +
   geom_label_repel(data = sacsjr[2, ], aes(x = Longitude, y = Latitude, label = flovar), fill = cols[1],
-    point.padding = unit(1, "lines")) +
+    point.padding = unit(2, "lines"), force = 2.5) +
   geom_label(data = statmeta, aes(x = Longitude, y = Latitude, label = Site_Code), fill = cols[2])
 
 # inset
@@ -177,19 +177,19 @@ pinset <- ggplot(sf_bay, aes(x = long, y = lat)) +
   scale_y_continuous(expand = c(0, 0)) + 
   coord_fixed(ratio = 1)
 
-png('posterfigs/stations.png', height = 4, width = 7.75, units = 'in', res = 600, family = 'serif')
-grid.arrange(pinset, pdelta, ncol = 2, widths = c(0.78, 1))
+png('posterfigs/stations.png', height = 4, width = 7.725, units = 'in', res = 600, family = 'serif')
+grid.arrange(pinset, pdelta, ncol = 2, widths = c(0.775, 1))
 # grid.draw(cbind(ggplotGrob(pdelta), ggplotGrob(pinset), size = 'last'))
 dev.off()
 
 @	    
 			\begin{block}{Water Quality and Flow Data}
 			\begin{itemize}
-	    \item \alert{Nine nutrient stations} with bimonthly samples and daily \alert{flow estimates} from major inflows used for analysis
+	    \item Data from 1976 to 2012 for \alert{nine nutrient stations} and \alert{daily flow estimates} from major inflows were modelled
 	    \end{itemize}
 	    \begin{figure}
       \centerline{\includegraphics[width=0.95\linewidth]{posterfigs/stations.png}}
-      \caption{\footnotesize Locations of bimonthly nutrient (green) and daily flow (red) stations in SFE.}
+      \caption{\footnotesize Locations of bimonthly nutrient (green) and daily flow (red) stations in upper SFE.}
 	    \end{figure}
 	    \vspace{-2cm}
 			\end{block}
@@ -267,7 +267,7 @@ pseas <- seasyrplot(toplo, predicted = F, col_vec = cols, lwd = 1.5, alpha = 0.8
   theme(axis.title.y = element_blank(), axis.title.x = element_text(),
     panel.background = element_rect(fill = alpha(cols[3], 0.07))
     ) +
-  scale_x_date('Day of year')
+  scale_x_date('Day of year', date_labels = "%m/%d")
 pprdnleg <- g_legend(pprdn)
 pprdn <- pprdn + theme(legend.position = 'none')
 pseasleg <- g_legend(pseas)
@@ -282,7 +282,7 @@ pB$widths[2:3] <- maxWidth
 
 png('posterfigs/prdseas.png', height = 6, width = 14, units = 'in', res = 600, family = 'serif')
 grid.arrange(
-  arrangeGrob(pdynaleg, pfitmleg, pprdnleg, ncol = 3, widths = c(1, 1, 0.6)), 
+  arrangeGrob(pdynaleg, pfitmleg, pprdnleg, ncol = 3, widths = c(1, 1, 0.65)), 
   arrangeGrob(
     left = textGrob(ylab, rot = 90), ncol = 2,
     arrangeGrob(
@@ -303,13 +303,13 @@ dev.off()
       %%%%%%
       % Applying Weighted Regression
       %%%%%%
-      \begin{block}{Applying Weighted Regression (WRTDS)}
+      \begin{block}{Applying Weighted Regression on Time, Discharge, and Season (WRTDS)}
       
       \begin{columns}[t]
   
       %%
       \begin{column}{0.42\linewidth}
-      WRTDS models were applied to \alert{nutrient} observations in relation to \alert{time, discharge, and season}: 
+      WRTDS models were applied to \alert{nutrient} observations in relation to \alert{time, discharge, and season} 
         {\footnotesize \vspace{0.5cm}
         \centerline{$\ln\left(N\right) = \beta_0 + \beta_1 t + \beta_2 \ln\left(Q\right) + \beta_3 \sin\left(2\pi t\right) + \beta_4 \cos\left(2\pi t\right)$}
         }\vspace{-1.90cm}
@@ -322,7 +322,7 @@ dev.off()
 	    
 	    %%
 	    \begin{column}{0.53\linewidth}
-	      WRTDS output showed \alert{seasonal variation}, response to \alert{flow changes}, and different \alert{quantile distributions}
+	      WRTDS output showed \alert{seasonal variation}, response to \alert{flow changes}, and different \alert{conditional quantile distributions} of nutrients
 	      \begin{figure}
         \centerline{\includegraphics[width=\linewidth]{posterfigs/prdseas.png}}
         \caption{\footnotesize Examples of model results at P8 showing monthly and annual response to flow changes (top left), monthly quantile ($\tau$) distributions of flow-normalized predictions (bottom left), quantile distributions of annual trends (top right), and annual changes in seasonal variation (bottom right).}
@@ -342,7 +342,7 @@ dev.off()
 <<trndmap, echo = F, eval = F, fig = F, include = F>>=
 
 arrow_cols <- cols[c(1, 2)]
-strip_col <- alpha(cols[3], 0.5)
+strip_col <- alpha(cols[3], 0.9)
 
 png('posterfigs/dinmap.png', height = 6, width = 9, units = 'in', res = 600, family = 'serif')
 trnd_map(res = 'din', col = arrow_cols, strp_fl = strip_col, leg = F)
@@ -358,8 +358,8 @@ dev.off()
 
 @
 			
-      \begin{block}{Trend Analyses}
-      Results for \alert{all Delta stations} and three \alert{nitrogen analytes} were used to evaluate \alert{annual and monthly trends} over time and space
+      \begin{block}{Trend Analyses with WRTDS Results}
+      Results for \alert{nine delta stations} and \alert{three nitrogen analytes} were used to evaluate \alert{annual and monthly trends} over time and space
       \vspace{-1.5cm}	
       \begin{columns}[t]
   
@@ -522,13 +522,14 @@ dev.off()
 @
         \begin{column}{.5\linewidth}
     
-        \begin{varblock}[0.96\textwidth]{Further Evaluation}
+        \begin{varblock}[0.96\textwidth]{Evaluation of Additional Indicators}
           \alert{Covariation} among indicators can provide \alert{mechanistic clues}
           \begin{figure}
           \centerline{\includegraphics[width=0.95\linewidth]{posterfigs/d7trnds.png}}
           \caption{\footnotesize Flow-normalized trends of annual (left) and seasonal (right) variation in DIN, Chl-{\it\footnotesize a}, and SiO$^2$ at D7.  RGB colors indicate a unique year from 1976 to 2012.}
     	    \end{figure}	
-        \end{varblock}
+    	    \vspace{-2.18cm}
+    	  \end{varblock}
     
         \end{column}
         
@@ -537,12 +538,12 @@ dev.off()
         \begin{varblock}[\textwidth]{Conclusions}
         \begin{itemize}
         \item WRTDS analyses on four decades of nutrient data in SFE can reveal \alert{undescribed spatiotemporal variation}
-        \item \alert{Flow-normalized results} can describe trends independent of confounding variables
-        \item Conditional quantile distributions can reveal changes over time in \alert{high or low nutrient events}
+        \item \alert{Flow-normalized results} can more clearly describe trends independent of confounding variables, e.g., water withdrawals, climatic variation, or management changes
+        \item Conditional quantile distributions can reveal changes over time in \alert{high or low nutrient events}, changes that often differ from the median response
         \end{itemize}
         \end{varblock}
         \small{
-        We acknowledge the significant efforts of California DWR staff in providing access to quality nutrient and flow data. 
+        We acknowledge the significant efforts of the California Department of Water Resources Environmental Monitoring Program in providing access to data. 
         
         Interactive data app of full results: https://beckmw.shinyapps.io/sf\_trends/
         
