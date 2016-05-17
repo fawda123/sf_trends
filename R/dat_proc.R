@@ -10,6 +10,7 @@ library(purrr)
 library(WRTDStidal)
 library(foreach)
 library(doParallel)
+library(purrr)
 
 ######
 # import ESRI shapefile, save as RData object
@@ -310,6 +311,8 @@ save(bests, file = 'data/bests.RData', compress = 'xz')
 ######
 # dataset for wrtds, all response, flow values are ln transformed, flow (or salinity) records for each nutrient variable and station are combined based on the monthly lag ided from bests.RData
 
+rm(list = ls())
+
 data(delt_dat)
 data(flow_dat)
 data(bests)
@@ -368,11 +371,13 @@ for(i in 1:nrow(bests)){
 out[out$flovar == 'Salinity', 'flolag'] <- 1 + out[out$flovar == 'Salinity', 'flolag']
 
 # log transform
+# add detection limits
 out <- select(out, -floval) %>% 
   mutate(
     resval = log(resval),
     flolag = log(flolag),
-    lim = -1e6
+    lim = log(0.01), 
+    resval = pmax(lim, resval)
   )
 
 mods_lag <- out
@@ -580,7 +585,8 @@ out <- select(out, -floval) %>%
   mutate(
     resval = log(resval),
     flolag = log(flolag),
-    lim = -1e6
+    lim = log(0.01), 
+    resval = pmax(lim, resval)
   )
 
 mods_nolag <- out
@@ -804,7 +810,8 @@ save(mods_nolag, file = 'data/mods_nolag.RData', compress = 'xz')
 #     mutate(
 #       resval = log(resval), 
 #       floval = log(floval), 
-#       lim = -1e6
+#       lim = log(0.01), 
+#       resval = pmax(lim, resval)
 #     ) %>% 
 #     data.frame %>% 
 #     tidal(., 
@@ -929,8 +936,12 @@ diat_dat <- select(dat, -Latitude, -Longitude) %>%
   mutate(
     resval = log(resval),
     floval = log(1 + floval),
-    lim = -1e6
+    lim = log(0.01) # for sio2
   )
+
+# fix separate limit for chl, floor
+diat_dat[diat_dat$resvar %in% 'chl', 'lim'] <- log(0.05)
+diat_dat$resval <- with(diat_dat, pmax(lim, resval))
 
 save(diat_dat, file = 'data/diat_dat.RData', compress = 'xz')
 
