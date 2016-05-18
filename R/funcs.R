@@ -36,13 +36,14 @@ trnd_map <- function(res,
   ndivs = 6,
   strp_fl = 'lightgrey',
   bar = FALSE, 
+  stat_labs = TRUE,
   leg = TRUE){
 
   # load required data
   data(delt_dat)
   data(delt_map)
   data(mods_nolag)
-  
+
   ##
   # get a bounding box for the stations
   statmeta <- select(delt_dat, Site_Code, Latitude, Longitude) %>% 
@@ -122,15 +123,6 @@ trnd_map <- function(res,
   
   # add trend data to base map
   ptrnd <- pbase +
-#     geom_label_repel(
-#       data = toplo, 
-#       aes(x = Longitude, y = Latitude, label = Site_Code), 
-#       label.r = unit(0, "lines"),
-#       box.padding = unit(1, "lines"), 
-#       point.padding = unit(0, "lines"), 
-#       force = 2, size = 2,
-#       fill = strp_fl
-#     ) +
     geom_point(data = toplo, 
       aes(x = Longitude, y = Latitude, size = sz, fill = shp, shape = shp),
       alpha = 0.9
@@ -143,7 +135,23 @@ trnd_map <- function(res,
       panel.background=element_rect(fill = alpha("cornflowerblue", 0.1))
       )
   
-  # add legend if true
+  # add station labels in first panel if T
+  if(stat_labs){
+    
+    ptrnd <- ptrnd +
+      geom_label_repel(
+        data = toplo, 
+        aes(x = Longitude, y = Latitude, label = Site_Code), 
+        label.r = unit(0, "lines"),
+        box.padding = unit(1, "lines"), 
+        point.padding = unit(0, "lines"), 
+        force = 2, size = 2,
+        fill = strp_fl
+      )
+    
+  }
+  
+  # add legend if T
   if(leg){
     
     ## manual legend
@@ -190,20 +198,19 @@ trnd_map <- function(res,
     pleg <- g_legend(pleg)
     
     # combine the legend and trends map
-    out <- grid.arrange(
+    grid.arrange(
       arrangeGrob(
         pleg, ptrnd, ncol = 1, 
-        heights = c(0.12, 1))
-    )
+        heights = c(0.12, 1)
+        )
+      )
    
   # no legend 
   } else {
     
-    out <- ptrnd
+    ptrnd
     
   }
-  
-  return(out)
   
 }
 

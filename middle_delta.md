@@ -34,7 +34,7 @@ for(tau in seq_along(taus)){
       legend.title = element_blank(), 
       legend.position = 'top'
       ) + 
-    scale_y_continuous(limits = c(0, 0.9)) + 
+    scale_y_continuous(limits = c(0, 1.3)) + 
     scale_fill_manual(values = cols)
   
   assign(paste0('p', tau), p)

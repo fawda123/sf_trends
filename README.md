@@ -19,7 +19,7 @@ Content available at [https://github.com/fawda123/sf_trends](https://github.com/
 
 * `flow_dat.RData` time series of daily flow estimates for the delta, input stations from Novick et al (Fig 2) were used
 
-* `midle_fits.RData` error estimates for middle delta models using three daily flow estimates
+* `middle_fits.RData` error estimates for middle delta models using three daily flow estimates
 
 * `nutcor.RData` results of ccf analysis of selected delta and suisun stations comparing nitrogen species
 
@@ -103,7 +103,7 @@ data(mods_lag)
 data(mods_nolag)
 data(bests)
 
-ylims <- c(-0.05, 1.4)
+ylims <- c(-0.05, 1.5)
 ytext <- -0.04
 
 ## get model performance from the data objects
@@ -152,7 +152,7 @@ ggplot(perfs[perfs$tau == 0.1,], aes(x = stat, y = rmse)) +
     legend.title = element_blank(), 
     axis.title.x= element_blank()
     ) + 
-  scale_y_continuous(limits = ylims) + 
+  # scale_y_continuous(limits = ylims) + 
   scale_fill_manual(values = cols)
 ```
 
@@ -550,8 +550,3 @@ trnd_map(res = 'no23')
 ```
 
 ![](README_files/figure-html/unnamed-chunk-18-1.png)
-
-### To do 
-
-* get detection limits
-

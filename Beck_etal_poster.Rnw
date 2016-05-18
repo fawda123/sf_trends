@@ -298,6 +298,7 @@ grid.arrange(
   heights = c(0.1, 1)
 )
 dev.off()
+
 @   
     
       %%%%%%
@@ -383,6 +384,7 @@ suppressWarnings(print.xtable(xtable(tab, caption = cap, align = 'llRRRRRR', dig
 	include.rownames = F, caption.placement = 'top', size = '\\scriptsize', sanitize.text.function = function(x){x},
 	tabular.environment = 'tabularx',
 	booktabs = T, width = '0.95\\textwidth'))
+
 @
     	    \vspace{-0.75cm}
     	    \begin{figure}
@@ -410,6 +412,7 @@ suppressWarnings(print.xtable(xtable(tab, caption = cap, align = 'llRRRRRR', dig
 	include.rownames = F, caption.placement = 'top', size = '\\scriptsize', sanitize.text.function = function(x){x},
 	tabular.environment = 'tabularx',
 	booktabs = T, width = '0.95\\textwidth'))
+
 @
     	    \vspace{-0.75cm}
     	    \begin{figure}
@@ -437,6 +440,7 @@ suppressWarnings(print.xtable(xtable(tab, caption = cap, align = 'llRRRRRR', dig
 	include.rownames = F, caption.placement = 'top', size = '\\scriptsize', sanitize.text.function = function(x){x},
 	tabular.environment = 'tabularx',
 	booktabs = T, width = '0.95\\textwidth'))
+
 @
     	    \vspace{-0.75cm}
     	    \begin{figure}
