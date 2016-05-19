@@ -24,7 +24,7 @@ dat <- rbind(dat1, dat2, dat3) %>%
 # unique detection limits by analyte, station, year  
 # note that these are only for those that were reported
 detlims <- select(dat, SampleDate, ConstituentName, ReportingLimit) %>% 
-  mutate(SampleDate = year(SampleDate)) %>% 
+  # mutate(SampleDate = year(SampleDate)) %>% 
   unique %>% 
   na.omit
 

@@ -42,7 +42,7 @@ Content available at [https://github.com/fawda123/sf_trends](https://github.com/
 library(ggplot2)
 library(dplyr)
 library(tidyr)
-library(WRTDStidal)
+# library(WRTDStidal)
 library(gridExtra)
 library(lubridate)
 library(purrr)
@@ -50,6 +50,7 @@ library(GGally)
 library(ggrepel)
 library(scales)
 library(RColorBrewer)
+devtools::load_all('M:/docs/wtreg_for_estuaries')
 source('R/funcs.R')
 ```
 
@@ -550,3 +551,104 @@ trnd_map(res = 'no23')
 ```
 
 ![](README_files/figure-html/unnamed-chunk-18-1.png)
+
+### Detection limits from raw data
+
+
+```r
+library(readxl)
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(lubridate)
+library(ggplot2)
+
+# raw data from http://www.water.ca.gov/bdma/meta/Discrete/data.cfm
+dat1 <- read_excel('ignore/Lab Data 1975-1984x.xlsx')
+dat2 <- read_excel('ignore/Lab Data 1985-1995x.xlsx')
+dat3 <- read_excel('ignore/Lab_Data_1996-2012.xlsx')
+
+stats <- c('C10', 'C3', 'P8', 'D19', 'D26', 'D28', 'D4', 'D6', 'D7')
+analytes <- c('Ammonia (Total)', 'Ammonia (Dissolved)', 'Nitrite + Nitrate (Dissolved)', 
+  'Silica (SiO2) (Dissolved)', 'Chlorophyll a')
+
+# combine data, filter by stations/analytes
+dat <- rbind(dat1, dat2, dat3) %>% 
+  select(StationCode, SampleDate, ConstituentName, Result, UnitName, ReportingLimit) %>% 
+  filter(ConstituentName %in% analytes & StationCode %in% stats) 
+  
+# unique detection limits by analyte, station, year  
+# note that these are only for those that were reported
+detlims <- select(dat, SampleDate, ConstituentName, ReportingLimit) %>% 
+  # mutate(SampleDate = year(SampleDate)) %>% 
+  unique %>% 
+  na.omit
+
+# detection limits by year
+ggplot(detlims, aes(x = SampleDate, y = ReportingLimit, group = ConstituentName, color = ConstituentName)) +
+  geom_line() + 
+  geom_point(size = 3) + 
+  facet_wrap(~ ConstituentName, ncol = 1, scales = 'free_y') + 
+  theme_minimal() + 
+  theme(legend.position = 'none')
+```
+
+![](README_files/figure-html/unnamed-chunk-19-1.png)
+
+```r
+# 
+# # distribution of analytes
+# ggplot(dat, aes(x = Result, fill = ConstituentName)) + 
+#   geom_histogram() +
+#   facet_wrap(~ ConstituentName, ncol = 1, scales = 'free') + 
+#   theme_minimal()
+
+# chl 0.05
+# sio2 0.01
+# no23 0.01
+# din 0.01
+# nh4 0.01 
+```
+
+### A GAM example
+
+
+```r
+# load packages
+library(mgcv)
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(WRTDStidal)
+
+# for plot function at bottom
+source('https://raw.githubusercontent.com/fawda123/sf_trends/master/R/funcs.R')
+  
+# load all model data
+# this is a nested data frame, https://blog.rstudio.org/2016/02/02/tidyr-0-4-0/
+# load(file = url('https://github.com/fawda123/sf_trends/blob/master/data/mods_nolag.RData?raw=true'))
+data(mods_nolag)
+
+# subset P8 station from all data
+# format columns similar to WRTDS
+tmp <- mods_nolag$data[[8]] %>% 
+  mutate(
+    dec_time = dec_time(Date)[['dec_time']],
+    doy = yday(Date)
+    ) %>% 
+  rename(
+    res = resval, 
+    flo = flolag,
+    date = Date
+  )
+
+# create gam 
+gamtmp <- gam(res ~ te(dec_time, doy, flo, bs = c("tp", "cc", "tp")), k = c(5, 8, 5), data = tmp, knots = list(doy = c(1, 366)))
+
+# make a plot
+# same function as dynaplot in WRTDStidal package but for GAMs
+dynagam(gamtmp, tmp)
+```
+
+![](README_files/figure-html/unnamed-chunk-20-1.png)
+
