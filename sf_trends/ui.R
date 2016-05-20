@@ -42,7 +42,7 @@ shinyUI(fluidPage(
       selectInput(inputId = 'scl', 
         label = h4('Scale type'), 
         choices = c('natural log', 'linear'), 
-        selected = 'natural log'
+        selected = 'linear'
         )
       
     ),

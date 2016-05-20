@@ -92,7 +92,7 @@ ggplot(nutcor, aes(x = lag, y = acf, colour = var2, group = var2)) +
 
 ### Effect of using lagged flow or salinity variables {.tabset}
 
-The above plots suggest that maximum correlations between flow and nutrient time series may be observed at specific monthly lags.  A logical expectation is that performance of weighted regression models could be improved if flow variables are matched with nutrient records at the lag with the maximum correlation.  The effect of using lagged or no lagged flow or salinity variables on model performance was evaluated with residual errors.  Models were fit using the 'optimal' lags from above and using no lags.  The plots below show root mean squared error for the different models fit for each of the conditional quantiles. The identified lag for each station/variable combination is below each bar. Interestingly, using lagged variables causes a slight increase in error, implying a reduction in performance.  All results below are for models that did not include a temporal lag for the flow or salinity variables.  Flow records matched to each station were based on physical proximity (e.g., C3 with Sacramento).
+The above plots suggest that maximum correlations between flow and nutrient time series may be observed at specific monthly lags.  A logical expectation is that performance of weighted regression models could be improved if flow variables are matched with nutrient records at the lag with the maximum correlation.  The effect of using lagged or no lagged flow or salinity variables on model performance was evaluated as quantile regression goodness of fit. Models were fit using the 'optimal' lags from above and using no lags.  The plots below show goodness of fit for each station and nutrient combination, with the 'optimal' lag in months appearing below each bar.  The fit metric varies from 0 to 1 with higher values suggesting the model explains a greater portion of the variation in the modelled quantile. Results from stations with with no fit metrics should not be used. Interestingly, using lagged variables does not substantially influence model fit.  The remaining analyses below are for models that did not include a temporal lag for the flow or salinity variables.  Flow records matched to each station were based on physical proximity (e.g., C3 with Sacramento).
 
 See [here](http://fawda123.github.io/sf_trends/middle_delta) for an evaluation of model fit for middle delta stations (D19, D26, D28) with Sacramento, San Joaquin, and East daily flow values.
 
@@ -104,13 +104,13 @@ data(mods_lag)
 data(mods_nolag)
 data(bests)
 
-ylims <- c(-0.05, 1.5)
+ylims <- c(-0.05, 1)
 ytext <- -0.04
 
 ## get model performance from the data objects
 
 # models w/ lagged flo variables
-wlag <- map(mods_lag$mod, wrtdsperf) %>% 
+wlag <- map(mods_lag$mod, wrtdsperf, logspace = F) %>% 
   do.call('rbind', .) %>% 
   mutate(
     lab = gsub('\\.[0-9]$', '', row.names(.)), 
@@ -119,7 +119,7 @@ wlag <- map(mods_lag$mod, wrtdsperf) %>%
   separate(lab, c('stat', 'var'), sep = '_')
 
 # models w/o no lagged variables
-nlag <- map(mods_nolag$mod, wrtdsperf) %>% 
+nlag <- map(mods_nolag$mod, wrtdsperf, logspace = F) %>% 
   do.call('rbind', .) %>% 
   mutate(
     lab = gsub('\\.[0-9]$', '', row.names(.)), 
@@ -141,7 +141,7 @@ txt <- rename(bests,
 cols <- RColorBrewer::brewer.pal(9, 'Set1')[c(2, 3)]
 
 # the plot
-ggplot(perfs[perfs$tau == 0.1,], aes(x = stat, y = rmse)) +
+ggplot(perfs[perfs$tau == 0.1,], aes(x = stat, y = gfit)) +
   geom_bar(aes(fill = typ), stat = 'identity', position = 'dodge', alpha = 0.75) + 
   geom_text(data = txt, aes(y = ytext, label = lag)) +
   facet_grid(~var) +
@@ -153,7 +153,7 @@ ggplot(perfs[perfs$tau == 0.1,], aes(x = stat, y = rmse)) +
     legend.title = element_blank(), 
     axis.title.x= element_blank()
     ) + 
-  # scale_y_continuous(limits = ylims) + 
+  scale_y_continuous('Goodness of fit', limits = ylims) + 
   scale_fill_manual(values = cols)
 ```
 
@@ -163,7 +163,7 @@ ggplot(perfs[perfs$tau == 0.1,], aes(x = stat, y = rmse)) +
 
 ```r
 # the plot
-ggplot(perfs[perfs$tau == 0.5,], aes(x = stat, y = rmse)) +
+ggplot(perfs[perfs$tau == 0.5,], aes(x = stat, y = gfit)) +
   geom_bar(aes(fill = typ), stat = 'identity', position = 'dodge', alpha = 0.75) + 
   geom_text(data = txt, aes(y = ytext, label = lag)) +
   facet_grid(~var) +
@@ -176,7 +176,7 @@ ggplot(perfs[perfs$tau == 0.5,], aes(x = stat, y = rmse)) +
     axis.title.x= element_blank()
     ) + 
   scale_fill_manual(values = cols) + 
-  scale_y_continuous(limits = ylims)
+  scale_y_continuous('Goodness of fit', limits = ylims)
 ```
 
 ![](README_files/figure-html/unnamed-chunk-5-1.png)
@@ -185,7 +185,7 @@ ggplot(perfs[perfs$tau == 0.5,], aes(x = stat, y = rmse)) +
 
 ```r
 # the plot
-ggplot(perfs[perfs$tau == 0.9,], aes(x = stat, y = rmse)) +
+ggplot(perfs[perfs$tau == 0.9,], aes(x = stat, y = gfit)) +
   geom_bar(aes(fill = typ), stat = 'identity', position = 'dodge', alpha = 0.75) + 
   geom_text(data = txt, aes(y = ytext, label = lag)) +
   facet_grid(~var) +
@@ -198,7 +198,7 @@ ggplot(perfs[perfs$tau == 0.9,], aes(x = stat, y = rmse)) +
     axis.title.x= element_blank()
     ) + 
   scale_fill_manual(values = cols) + 
-  scale_y_continuous(limits = ylims)
+  scale_y_continuous('Goodness of fit', limits = ylims)
 ```
 
 ![](README_files/figure-html/unnamed-chunk-6-1.png)
@@ -234,7 +234,7 @@ for(i in 1:nrow(mods_nolag)){
   locv <- as.character(mods_nolag[i, 'Location'])
   limy <- lims[resv, locv]
     
-  p <- prdnrmplot(toplo, logspace = F) +
+  p <- prdnrmplot(toplo, logspace = F, min_mo = 11) +
     ggtitle(lab) + 
     theme_minimal() +
     theme(
@@ -551,104 +551,3 @@ trnd_map(res = 'no23')
 ```
 
 ![](README_files/figure-html/unnamed-chunk-18-1.png)
-
-### Detection limits from raw data
-
-
-```r
-library(readxl)
-library(dplyr)
-library(tidyr)
-library(purrr)
-library(lubridate)
-library(ggplot2)
-
-# raw data from http://www.water.ca.gov/bdma/meta/Discrete/data.cfm
-dat1 <- read_excel('ignore/Lab Data 1975-1984x.xlsx')
-dat2 <- read_excel('ignore/Lab Data 1985-1995x.xlsx')
-dat3 <- read_excel('ignore/Lab_Data_1996-2012.xlsx')
-
-stats <- c('C10', 'C3', 'P8', 'D19', 'D26', 'D28', 'D4', 'D6', 'D7')
-analytes <- c('Ammonia (Total)', 'Ammonia (Dissolved)', 'Nitrite + Nitrate (Dissolved)', 
-  'Silica (SiO2) (Dissolved)', 'Chlorophyll a')
-
-# combine data, filter by stations/analytes
-dat <- rbind(dat1, dat2, dat3) %>% 
-  select(StationCode, SampleDate, ConstituentName, Result, UnitName, ReportingLimit) %>% 
-  filter(ConstituentName %in% analytes & StationCode %in% stats) 
-  
-# unique detection limits by analyte, station, year  
-# note that these are only for those that were reported
-detlims <- select(dat, SampleDate, ConstituentName, ReportingLimit) %>% 
-  # mutate(SampleDate = year(SampleDate)) %>% 
-  unique %>% 
-  na.omit
-
-# detection limits by year
-ggplot(detlims, aes(x = SampleDate, y = ReportingLimit, group = ConstituentName, color = ConstituentName)) +
-  geom_line() + 
-  geom_point(size = 3) + 
-  facet_wrap(~ ConstituentName, ncol = 1, scales = 'free_y') + 
-  theme_minimal() + 
-  theme(legend.position = 'none')
-```
-
-![](README_files/figure-html/unnamed-chunk-19-1.png)
-
-```r
-# 
-# # distribution of analytes
-# ggplot(dat, aes(x = Result, fill = ConstituentName)) + 
-#   geom_histogram() +
-#   facet_wrap(~ ConstituentName, ncol = 1, scales = 'free') + 
-#   theme_minimal()
-
-# chl 0.05
-# sio2 0.01
-# no23 0.01
-# din 0.01
-# nh4 0.01 
-```
-
-### A GAM example
-
-
-```r
-# load packages
-library(mgcv)
-library(dplyr)
-library(tidyr)
-library(lubridate)
-library(WRTDStidal)
-
-# for plot function at bottom
-source('https://raw.githubusercontent.com/fawda123/sf_trends/master/R/funcs.R')
-  
-# load all model data
-# this is a nested data frame, https://blog.rstudio.org/2016/02/02/tidyr-0-4-0/
-# load(file = url('https://github.com/fawda123/sf_trends/blob/master/data/mods_nolag.RData?raw=true'))
-data(mods_nolag)
-
-# subset P8 station from all data
-# format columns similar to WRTDS
-tmp <- mods_nolag$data[[8]] %>% 
-  mutate(
-    dec_time = dec_time(Date)[['dec_time']],
-    doy = yday(Date)
-    ) %>% 
-  rename(
-    res = resval, 
-    flo = flolag,
-    date = Date
-  )
-
-# create gam 
-gamtmp <- gam(res ~ te(dec_time, doy, flo, bs = c("tp", "cc", "tp")), k = c(5, 8, 5), data = tmp, knots = list(doy = c(1, 366)))
-
-# make a plot
-# same function as dynaplot in WRTDStidal package but for GAMs
-dynagam(gamtmp, tmp)
-```
-
-![](README_files/figure-html/unnamed-chunk-20-1.png)
-

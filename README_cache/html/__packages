@@ -10,7 +10,3 @@ ggrepel
 scales
 RColorBrewer
 WRTDStidal
-sp
-readxl
-nlme
-mgcv

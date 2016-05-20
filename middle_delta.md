@@ -23,7 +23,7 @@ for(tau in seq_along(taus)){
   
   toplo <- middle_fits[middle_fits$tau %in% taus[tau], ]
   
-  p <- ggplot(toplo, aes(x = resvar, y = rmse, fill = flovar)) + 
+  p <- ggplot(toplo, aes(x = resvar, y = gfit, fill = flovar)) + 
     geom_bar(stat = 'identity', position = 'dodge') + 
     facet_wrap( ~ Site_Code, ncol = 3) + 
     theme_minimal() + 
@@ -34,7 +34,7 @@ for(tau in seq_along(taus)){
       legend.title = element_blank(), 
       legend.position = 'top'
       ) + 
-    scale_y_continuous(limits = c(0, 1.3)) + 
+    scale_y_continuous('Goodness of fit', limits = c(0, 1)) + 
     scale_fill_manual(values = cols)
   
   assign(paste0('p', tau), p)

@@ -723,8 +723,9 @@ mods_nolag <- unite(mods_nolag, 'tmp', Site_Code, resvar, remove = F) %>%
 # remove the individual files
 file.remove(fls)
 
-# save output
+# save output, also to shiny app folder
 save(mods_nolag, file = 'data/mods_nolag.RData', compress = 'xz')
+save(mods_nolag, file = 'sf_trends/mods_nolag.RData', compress = 'xz')
 
 ######
 # evaluate model fit for middle delta stations with three different flow variables
@@ -831,7 +832,7 @@ out <- foreach(i = 1:nrow(grds)) %dopar% {
 # format output
 grds <- unite(grds, 'nms', sites:resps, sep = '_')
 names(out) <- grds$nms
-out <- lapply(out, wrtdsperf) %>% 
+out <- lapply(out, wrtdsperf, logspace = FALSE) %>% 
   reshape2::melt(id.vars = names(.[[1]])) %>% 
   separate(L1, c('Site_Code', 'flovar', 'resvar'), sep = '_')
 

@@ -20,7 +20,6 @@ library(lubridate)
 library(purrr)
 library(GGally)
 source('R/funcs.R')
-
 ```
 
 ### WRTDS predictions errors {.tabset}
@@ -40,7 +39,7 @@ for(tau in seq_along(taus)){
   
   toplo <- middle_fits[middle_fits$tau %in% taus[tau], ]
   
-  p <- ggplot(toplo, aes(x = resvar, y = rmse, fill = flovar)) + 
+  p <- ggplot(toplo, aes(x = resvar, y = gfit, fill = flovar)) + 
     geom_bar(stat = 'identity', position = 'dodge') + 
     facet_wrap( ~ Site_Code, ncol = 3) + 
     theme_minimal() + 
@@ -51,7 +50,7 @@ for(tau in seq_along(taus)){
       legend.title = element_blank(), 
       legend.position = 'top'
       ) + 
-    scale_y_continuous(limits = c(0, 1.3)) + 
+    scale_y_continuous('Goodness of fit', limits = c(0, 1)) + 
     scale_fill_manual(values = cols)
   
   assign(paste0('p', tau), p)
@@ -59,16 +58,19 @@ for(tau in seq_along(taus)){
 }
 
 print(p1)
+
 ```
 
 #### 0.5
 
 ```{r fig.height = 6, fig.width = 10, echo = T, warning = F}
 print(p2)
+
 ```
 
 #### 0.9
 
 ```{r fig.height = 6, fig.width = 10, echo = T, warning = F}
 print(p3)
+
 ```
