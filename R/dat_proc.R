@@ -726,6 +726,7 @@ file.remove(fls)
 # save output, also to shiny app folder
 save(mods_nolag, file = 'data/mods_nolag.RData', compress = 'xz')
 save(mods_nolag, file = 'sf_trends/mods_nolag.RData', compress = 'xz')
+save(mods_nolag, file = 'M:/docs/manuscripts/sftrends_manu/data/mods_nolag.RData', compress = 'xz')
 
 ######
 # evaluate model fit for middle delta stations with three different flow variables
