@@ -1086,3 +1086,8 @@ trnds <- mutate(mods_nolag,
   arrange(resvar)
 
 save(trnds, file = 'data/trnds.RData')
+
+######
+# processing clam data at D7 from Craduer et al. 2016 report
+
+

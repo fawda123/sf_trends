@@ -17,6 +17,8 @@ Content available at [https://github.com/fawda123/sf_trends](https://github.com/
 
 * `bests.RData` subset of `flocor.RData` for min or max cor of each nut parm with flow or sal time series, respectively.  Each site is matched with the flow or salinity record ided in figure 10 of Novick et al
 
+* `clams.RData` clam data for D7 from Crauder 2016, includes sample date, biomass in g/m2, clams per sample (`clams_smp`) in no/m2, depth (m), growth rate (`gr`) in m3/m2/d, mean size (mm), number of grabs (`no_grabs`), recruitment per unit area (`recruit_area`) in recruit/0.05 m2, and species as corbicula or potamocorbula.
+
 * `delt_dat.RData` Processed wq time series data `dwr_wq.RData`, includes all nitrogen analytes and current/active stations in the delta, also includes matched and smoothed flow records from `flocor.RData` results
 
 * `delt_map.RData` SpatialPolygonsDataFrame object of approximate map of Delta region
