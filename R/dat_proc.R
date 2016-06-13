@@ -1090,4 +1090,40 @@ save(trnds, file = 'data/trnds.RData')
 ######
 # processing clam data at D7 from Craduer et al. 2016 report
 
+# text files, taken manually from pdf conversion to text
+fls <- c('ignore/CrauderApp9.txt', 'ignore/CrauderApp10.txt')
+
+# function to process data from text files
+form_dat <- function(fl, spp){ 
+  
+  # read file
+  tmp <- readLines(fl) %>% 
+    grep('^$|^\\s*', ., invert = T, value = T)
+  
+  # put in wide format
+  heads <- tmp[1:16]
+  tmp <- tmp[!tmp %in% heads] %>% 
+    data.frame(col = rep(1:8, length.out = length(.)), row = rep(1:(length(.)/8), each = 8), val = .) %>% 
+    spread(col, val) %>% 
+    select(-row)
+  
+  # addl formatting, add species
+  names(tmp) <- c('date', 'clams_smp', 'biomass', 'recruit_area', 'mean_size', 'gr', 'depth', 'no_grabs')
+  tmp <- gather(tmp, 'var', 'val', -date) %>% 
+    mutate(val = as.numeric(val)) %>% 
+    spread(var, val) %>% 
+    mutate(date = as.Date(as.character(date), format = '%m/%d/%Y')) %>% 
+    arrange(date) %>% 
+    mutate(species = spp)
+  
+  return(tmp)
+  
+  }
+
+d7_corb <- form_dat(fls[1], 'corbicula')
+d7_pota <- form_dat(fls[2], 'potamocorbula')
+
+clams <- rbind(d7_corb, d7_pota)
+save(clams, file = 'data/clams.RData')
+
 
