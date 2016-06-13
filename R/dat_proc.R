@@ -946,6 +946,7 @@ diat_dat[diat_dat$resvar %in% 'chl', 'lim'] <- log(0.05)
 diat_dat$resval <- with(diat_dat, pmax(lim, resval))
 
 save(diat_dat, file = 'data/diat_dat.RData', compress = 'xz')
+save(diat_dat, file = 'M:/docs/manuscripts/sftrends_manu/data/diat_dat.RData', compress = 'xz')
 
 ##
 # fit models with default window widths
@@ -1094,7 +1095,11 @@ save(trnds, file = 'data/trnds.RData')
 fls <- c('ignore/CrauderApp9.txt', 'ignore/CrauderApp10.txt')
 
 # function to process data from text files
-form_dat <- function(fl, spp){ 
+#
+# fl is text file name
+# spp is chr string of species in the file
+# mo_strt is the starting month for the year, defaults to October for USGS water year
+form_dat <- function(fl, spp, mo_strt = 10){ 
   
   # read file
   tmp <- readLines(fl) %>% 
@@ -1112,18 +1117,23 @@ form_dat <- function(fl, spp){
   tmp <- gather(tmp, 'var', 'val', -date) %>% 
     mutate(val = as.numeric(val)) %>% 
     spread(var, val) %>% 
-    mutate(date = as.Date(as.character(date), format = '%m/%d/%Y')) %>% 
+    mutate(
+      date = as.Date(as.character(date), format = '%m/%d/%Y'),
+      mo = month(date),
+      yr = year(date), 
+      yr = ifelse(mo < mo_strt, yr, yr + 1)
+      ) %>%  
     arrange(date) %>% 
-    mutate(species = spp)
+    mutate(species = spp) %>% 
+    select(-mo)
   
   return(tmp)
   
   }
 
-d7_corb <- form_dat(fls[1], 'corbicula')
-d7_pota <- form_dat(fls[2], 'potamocorbula')
+d7_corb <- form_dat(fls[1], 'Corbicula')
+d7_pota <- form_dat(fls[2], 'Potamocorbula')
 
 clams <- rbind(d7_corb, d7_pota)
 save(clams, file = 'data/clams.RData')
-
-
+save(clams, file = 'M:/docs/manuscripts/sftrends_manu/data/clams.RData', compress = 'xz')
