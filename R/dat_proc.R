@@ -1137,3 +1137,30 @@ d7_pota <- form_dat(fls[2], 'Potamocorbula')
 clams <- rbind(d7_corb, d7_pota)
 save(clams, file = 'data/clams.RData')
 save(clams, file = 'M:/docs/manuscripts/sftrends_manu/data/clams.RData', compress = 'xz')
+
+######
+# potw loads from Tracy and Stockton
+# see Bresnahan email 6/20
+
+stockton <- read.csv('ignore/Stockton POTW.csv') %>% 
+  mutate(
+    date = as.Date(X, format = '%d-%b-%y'), 
+    loc = 'stock'
+    ) %>% 
+  select(-X) %>% 
+  gather('var', 'val', NH4:TN) %>% 
+  mutate(var = tolower(var))
+tracy <- read.csv('ignore/tracy POTW loads.csv') %>% 
+  mutate(
+    date = as.Date(X, format = '%d-%b-%y'), 
+    loc = 'tracy'
+    ) %>% 
+  select(-X) %>% 
+  gather('var', 'val', NH4:TN) %>% 
+  mutate(var = tolower(var))
+
+potw_load <- rbind(stockton, tracy) %>% 
+  arrange(date, loc, var)
+
+save(potw_load, file = 'data/potw_load.RData', compress = 'xz')
+save(potw_load, file = 'M:/docs/manuscripts/sftrends_manu/potw_load.RData', compress = 'xz')

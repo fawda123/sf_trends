@@ -21,7 +21,7 @@ Content available at [https://github.com/fawda123/sf_trends](https://github.com/
 
 * `flocor.RData` results of ccf analysis of selected delta and suisun stations comparing nitrogen and flow
 
-* `flow_dat.RData` time series of daily flow estimates for the delta, input stations from Novick et al (Fig 2) were used
+* `flow_dat.RData` time series of daily flow estimates for the delta (m3/s), input stations from Novick et al (Fig 2) were used
 
 * `middle_fits.RData` error estimates for middle delta models using three daily flow estimates
 
@@ -30,6 +30,8 @@ Content available at [https://github.com/fawda123/sf_trends](https://github.com/
 * `mods_lag.RData` dataset for wrtds, including model results. This is a nested data frame with identifiers.  All response, flow values are ln + 1 transformed, flow (or salinity) records for each nutrient variable and station are combined based on the monthly lag ided from `bests.RData`
 
 * `mods_nolag.RData` dataset for wrtds, including model results.  This is the same file as `mods_lag.RData` except the matched flow variables are not lagged.
+
+* `potw_load.RData` nutrient load data from Stockton and Tracy wwtp
 
 * `sf_bay.RData` SpatialPolygonsDataFrame object of all of SF Bay
 
@@ -161,7 +163,7 @@ ggplot(perfs[perfs$tau == 0.1,], aes(x = stat, y = gfit)) +
   scale_fill_manual(values = cols)
 ```
 
-![](README_files/figure-html/unnamed-chunk-4-1.png)
+![](README_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
 
 #### 0.5
 
@@ -183,7 +185,7 @@ ggplot(perfs[perfs$tau == 0.5,], aes(x = stat, y = gfit)) +
   scale_y_continuous('Goodness of fit', limits = ylims)
 ```
 
-![](README_files/figure-html/unnamed-chunk-5-1.png)
+![](README_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
 
 #### 0.9
 
@@ -205,7 +207,7 @@ ggplot(perfs[perfs$tau == 0.9,], aes(x = stat, y = gfit)) +
   scale_y_continuous('Goodness of fit', limits = ylims)
 ```
 
-![](README_files/figure-html/unnamed-chunk-6-1.png)
+![](README_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
 
 ### Annually-averaged results {.tabset}
 

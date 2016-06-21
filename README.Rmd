@@ -29,7 +29,7 @@ Content available at [https://github.com/fawda123/sf_trends](https://github.com/
 
 * `flocor.RData` results of ccf analysis of selected delta and suisun stations comparing nitrogen and flow
 
-* `flow_dat.RData` time series of daily flow estimates for the delta, input stations from Novick et al (Fig 2) were used
+* `flow_dat.RData` time series of daily flow estimates for the delta (m3/s), input stations from Novick et al (Fig 2) were used
 
 * `middle_fits.RData` error estimates for middle delta models using three daily flow estimates
 
@@ -38,6 +38,8 @@ Content available at [https://github.com/fawda123/sf_trends](https://github.com/
 * `mods_lag.RData` dataset for wrtds, including model results. This is a nested data frame with identifiers.  All response, flow values are ln + 1 transformed, flow (or salinity) records for each nutrient variable and station are combined based on the monthly lag ided from `bests.RData`
 
 * `mods_nolag.RData` dataset for wrtds, including model results.  This is the same file as `mods_lag.RData` except the matched flow variables are not lagged.
+
+* `potw_load.RData` nutrient load data from Stockton and Tracy wwtp
 
 * `sf_bay.RData` SpatialPolygonsDataFrame object of all of SF Bay
 
