@@ -31,7 +31,7 @@ Content available at [https://github.com/fawda123/sf_trends](https://github.com/
 
 * `mods_nolag.RData` dataset for wrtds, including model results.  This is the same file as `mods_lag.RData` except the matched flow variables are not lagged.
 
-* `potw_load.RData` nutrient load data from Stockton and Tracy wwtp
+* `potw_load.RData` nutrient load data from Stockton and Tracy wwtp, kg/day
 
 * `sf_bay.RData` SpatialPolygonsDataFrame object of all of SF Bay
 

@@ -1,8 +1,9 @@
 # packages to use
-library(WRTDStidal)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
+library(RColorBrewer)
+library(WRTDStidal)
 
 # raw data
 load(file = 'mods_nolag.RData')
