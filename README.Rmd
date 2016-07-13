@@ -31,6 +31,8 @@ Content available at [https://github.com/fawda123/sf_trends](https://github.com/
 
 * `flow_dat.RData` time series of daily flow estimates for the delta (m3/s), input stations from Novick et al (Fig 2) were used
 
+* `h3dat.RData` mean models to support third hypothesis/case study in manuscript, wrtds mean models for sio2, din, chla at c10, d7
+
 * `middle_fits.RData` error estimates for middle delta models using three daily flow estimates
 
 * `nutcor.RData` results of ccf analysis of selected delta and suisun stations comparing nitrogen species
