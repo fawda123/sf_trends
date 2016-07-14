@@ -1521,7 +1521,7 @@ mods_out <- foreach(i = 1:nrow(dat)) %dopar% {
   }
   
   # create model and exit
-  mod <- wrtds(tomod, wins = list(0.5, 10, 0.5), flo_div = 30, min_obs = 100)
+  mod <- wrtds(tomod, wins = list(0.5, 15, 0.5), flo_div = 30, min_obs = 150)
   
   # get predictions, norms from obs flow data
   out <- mod %>% 
