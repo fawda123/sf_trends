@@ -1296,7 +1296,7 @@ potw_load <- rbind(stockton, tracy) %>%
   arrange(date, loc, var)
 
 save(potw_load, file = 'data/potw_load.RData', compress = 'xz')
-save(potw_load, file = 'M:/docs/manuscripts/sftrends_manu/potw_load.RData', compress = 'xz')
+save(potw_load, file = 'M:/docs/manuscripts/sftrends_manu/data/potw_load.RData', compress = 'xz')
 
 ######
 # create mean models for third hypothesis in paper
