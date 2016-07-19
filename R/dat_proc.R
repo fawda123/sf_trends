@@ -1299,6 +1299,17 @@ save(potw_load, file = 'data/potw_load.RData', compress = 'xz')
 save(potw_load, file = 'M:/docs/manuscripts/sftrends_manu/data/potw_load.RData', compress = 'xz')
 
 ######
+# create mean models for second hypothesis in paper
+# wrtds mean models for nh4 and no3 at P8
+
+data(mods_nolag_mean)
+h2dat <- filter(mods_nolag_mean, Site_Code == 'P8' & resvar %in% c('nh', 'no23'))
+
+# save output
+save(h2dat, file = 'data/h2dat.RData', compress = 'xz')
+save(h2dat, file = 'M:/docs/manuscripts/sftrends_manu/data/h2dat.RData', compress = 'xz')
+
+######
 # create mean models for third hypothesis in paper
 # wrtds mean models for chl, din, sio2 at c10 and d7
 
