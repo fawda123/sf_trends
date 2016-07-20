@@ -1300,10 +1300,227 @@ save(potw_load, file = 'M:/docs/manuscripts/sftrends_manu/data/potw_load.RData',
 
 ######
 # create mean models for second hypothesis in paper
-# wrtds mean models for nh4 and no3 at P8
+# wrtds mean models for chl, din, nh, no23, and sio2 at P8
 
-data(mods_nolag_mean)
-h2dat <- filter(mods_nolag_mean, Site_Code == 'P8' & resvar %in% c('nh', 'no23'))
+rm(list = ls())
+
+load(file = 'ignore/dwr_wq.RData')
+
+statmeta <- read_excel('ignore/Discrete_Stations.xls')
+curr <- filter(statmeta, Historic_or_Current == 'Current') %>% 
+  .$Site_Code %>% 
+  unique
+hist <- filter(statmeta, Historic_or_Current == 'Historic') %>% 
+  .$Site_Code %>% 
+  unique
+
+## Combine C10 with C10A, C3 with C3A, P12 with P12A, P10 with P10A, MD10 with MD10A, MD7 with MD7A
+# the following three have to be added manually to curr because they were combined in original processing script from Novick
+curr <- c(curr, 'C10', 'C3', 'MD10')  
+
+# add lat/long from meta
+# only get current stations
+# remove EZ2/EZ6 (no lat/long data, TN record only back to 2010)
+# remove NZ stations, no nitrogen data   
+# select ammonia, nitrate, dissolved inorganic nitrogen, total nitrogen (all as mg/L), and salinity (psu probably)
+dat <- select(statmeta, Site_Code, Latitude, Longitude) %>% 
+  na.omit %>% 
+  right_join(., dwr_wq, by = c('Site_Code' = 'Station')) %>% 
+  filter(Site_Code %in% curr) %>% 
+  filter(!Site_Code %in% c('EZ2', 'EZ6', 'NZ002', 'NZ004', 'NZ032', 'NZ325', 'NZS42')) %>% 
+  select(Site_Code, Date, Latitude, Longitude, chl, din, no23, nh, sio2)
+
+# finally, subset by selected delta and suisun stations
+# make sure each date is unique
+dat <- filter(dat, Site_Code %in% c('P8')) %>% 
+  mutate(
+    year = year(Date), 
+    month = month(Date), 
+    day = day(Date)
+  ) %>% 
+  filter(year > 1975 & year < 2014) %>% 
+  gather('var', 'val', -Site_Code, -Date, -year, -month, -day) %>% 
+  group_by(Site_Code, year, month, day, var) %>% 
+  summarize(val = mean(val, na.rm = TRUE)) %>% 
+  spread(var, val) %>% 
+  ungroup %>% 
+  mutate(
+    Date = as.Date(paste(year, month, day, sep = '-'), format = '%Y-%m-%d'),
+    Site_Code = gsub('[A-Z]$', '', Site_Code)
+    ) %>% 
+  select(Site_Code, Date, Latitude, Longitude, chl, sio2, din, no23, nh)
+
+# # check for outliers at p8
+# # one for chlorophyll
+# data(flow_dat)
+# toplo <- tidyr::spread(flow_dat, station, q) %>% 
+#   select(-east) %>% 
+#   left_join(dat, ., by = 'Date') %>% 
+#   select(-Latitude, -Longitude) %>% 
+#   mutate(
+#     tmps = 1:nrow(.)
+#   ) %>% 
+#   gather('var', 'val', -Site_Code, -Date, -tmps) %>% 
+#   na.omit %>% 
+#   spread(var, val) %>% 
+#   select(Site_Code, sjr, din, chl, sio2, din, no23, nh)
+# GGally::ggpairs(toplo[, -1])
+
+# remove outliers
+# chl > 100
+dat[with(dat, which(chl > 100)), 'chl'] <- NA
+
+# add flow from sjr for c10, then prep for combining
+# have to get data as monthly averages for lag combos
+data(flow_dat)
+dat <- tidyr::spread(flow_dat, station, q) %>% 
+  select(-east, -sac) %>% 
+  left_join(dat, ., by = 'Date') %>% 
+  select(-Latitude, -Longitude) %>% 
+  tidyr::gather('resvar', 'resval', chl:nh) %>% 
+  tidyr::gather('flovar', 'floval', sjr) %>% 
+  mutate(
+    flovar = factor(flovar, levels = c('sjr'), labels = c('San Joaquin')), 
+    year = year(Date), 
+    month = month(Date)
+    ) %>% 
+  select(-Date) %>% 
+  group_by(Site_Code, resvar, flovar) %>% 
+  complete(year, month) %>% 
+  group_by(Site_Code, resvar, flovar, year, month) %>%   
+  summarize(
+    resval = mean(resval, na.rm = TRUE),
+    floval = mean(floval, na.rm = TRUE)
+    ) %>% 
+  mutate(
+    day = 1,
+    Date = paste(year, month, day, sep = '-'), 
+    Date = as.Date(Date)
+    ) %>% 
+  ungroup %>% 
+  select(Site_Code, Date, resvar, resval, flovar, floval)
+
+# log transform flo val, resval
+dat <-  mutate(dat,
+  floval = log(floval), 
+  resval = log(resval), 
+  lim = log(0.01) # limit for sio2 and din
+)
+
+# fix separate limit for chl, floor
+dat[dat$resvar %in% 'chl', 'lim'] <- log(0.05)
+dat$resval <- with(dat, pmax(lim, resval))
+
+##
+# fit models with default window widths
+# get predictions with daily flow records
+
+cl <- makeCluster(7)
+registerDoParallel(cl)
+
+dat <- group_by(dat, Site_Code, resvar, flovar) %>% 
+  nest 
+
+# resvar label lookup
+lablk <- list(
+  shrt = c('chl', 'din', 'nh', 'no23', 'sio2'),
+  lngs = c(
+    expression(paste('ln-chlorophyll a (ug ', L^-1, ')')),
+    expression(paste('ln-dissolved inorganic nitrogen (mg ', L^-1, ')')),
+    expression(paste('ln-ammonium (mg ', L^-1, ')')),
+    expression(paste('ln-nitrite/nitrate (mg ', L^-1, ')')),
+    expression(paste('ln-silicon dioxide (mg ', L^-1, ')'))
+    )
+  )
+
+# flovar label lookup
+stalk <- list(
+  shrt = c('San Joaquin'),
+  lngs = c(
+    expression(paste('ln-flow (', m^3, s^-1, ')'))
+    )
+  )
+
+strt <- Sys.time()
+
+# iterate through stations, res vars to model
+# get predictions from obs time series of salinity or flow
+mods_out <- foreach(i = 1:nrow(dat)) %dopar% {
+  
+  data(delt_dat)
+  data(flow_dat)
+  
+  library(dplyr)
+  library(WRTDStidal)
+  
+  sink('C:/Users/mbeck/Desktop/log.txt')
+  cat(i, 'of', nrow(dat), '\n')
+  print(Sys.time()-strt)
+  sink()
+  
+  # data, respons variable label
+  tomod <- dat[i, ]$data[[1]]
+  resvar <- dat[i, ]$resvar
+  flovar <- dat[i, ]$flovar
+  sta <- dat[i, ]$Site_Code
+  reslab <- with(lablk, lngs[shrt == resvar])
+  flolab <- with(stalk, lngs[shrt == flovar])
+  
+  # prep data as tidal object
+  tomod <- select(tomod, Date, resval, floval, lim) %>% 
+    rename(
+      res = resval, 
+      flo = floval
+    ) %>% 
+    data.frame %>% 
+    tidalmean(., 
+      reslab = reslab, 
+      flolab = flolab
+    )
+  
+  stasel <- 'sjr'
+  if(flovar == 'Sacramento')
+    stasel <- 'sac'
+  
+  topred <- filter(flow_dat, station == stasel) %>% 
+    mutate(flo = log(q)) %>% 
+    rename(date = Date) %>% 
+    select(date, flo) %>% 
+    filter(date >= min(tomod$date) & date <= max(tomod$date)) %>% 
+    na.omit %>% 
+    data.frame
+  
+  # create model and exit
+  mod <- wrtds(tomod, wins = list(0.5, 10, 0.5), flo_div = 30, min_obs = 150)
+  
+  # get predictions, norms from obs flow data
+  out <- mod %>% 
+    respred(dat_pred = topred) %>% 
+    resnorm
+
+  # assign to unique object, save in case of fuckery
+  outnm <- paste0(sta, '_', resvar)
+  assign(outnm, out)
+  save(list = outnm, file = paste0('data/', outnm, '.RData'), compress = 'xz')
+  
+  # out for list
+  out
+  
+}
+
+# import each file, add to nested dat dataframe
+fls <- list.files('data', pattern = '^P8', full.names = T)
+moddat <- lapply(fls, load, .GlobalEnv)
+names(moddat) <- unlist(moddat)
+moddat <- lapply(moddat, get)
+
+# add model data to nested data frame
+h2dat <- unite(dat, 'tmp', Site_Code, resvar, remove = F) %>% 
+  mutate(mod = moddat[match(tmp, names(moddat))]) %>% 
+  select(-tmp)
+
+# remove the individual files
+file.remove(fls)
 
 # save output
 save(h2dat, file = 'data/h2dat.RData', compress = 'xz')
