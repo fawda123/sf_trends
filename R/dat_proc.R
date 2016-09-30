@@ -1207,9 +1207,10 @@ yrbrks <- c(-Inf, 1988, 2000, Inf)
 molabs <- c('JFMA', 'MJJA', 'SOND')
 yrlabs <- c('1976-1988', '1989-2000', '2001-2012')
 
-trnds <- mutate(mods_nolag, 
+# % changes
+trnds_chg <- mutate(mods_nolag, 
   trnd = map(mod, function(x){
-    wrtdstrnd(x, mobrks, yrbrks, molabs, yrlabs, tau = 0.5)
+    wrtdstrnd(x, mobrks, yrbrks, molabs, yrlabs, tau = 0.5, aves = T)
     })
   ) %>% 
   select(-data, -mod) %>% 
@@ -1219,7 +1220,24 @@ trnds <- mutate(mods_nolag,
   spread(cat, chg) %>% 
   arrange(resvar)
 
-save(trnds, file = 'data/trnds.RData')
+save(trnds_chg, file = 'data/trnds_chg.RData')
+save(trnds_chg, file = 'M:/docs/manuscripts/sftrends_manu/trnds_chg.RData', compress = 'xz')
+
+# by averages
+trnds_ave <- mutate(mods_nolag, 
+  trnd = map(mod, function(x){
+    wrtdstrnd(x, mobrks, yrbrks, molabs, yrlabs, tau = 0.5, aves = T)
+    })
+  ) %>% 
+  select(-data, -mod) %>% 
+  unnest %>% 
+  data.frame %>% 
+  select(-flovar, -Location, -chg) %>% 
+  spread(cat, ave) %>% 
+  arrange(resvar)
+
+save(trnds_ave, file = 'data/trnds_ave.RData')
+save(trnds_ave, file = 'M:/docs/manuscripts/sftrends_manu/trnds_ave.RData', compress = 'xz')
 
 ######
 # processing clam data at D7 from Craduer et al. 2016 report
