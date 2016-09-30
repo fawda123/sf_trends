@@ -1221,7 +1221,7 @@ trnds_chg <- mutate(mods_nolag,
   arrange(resvar)
 
 save(trnds_chg, file = 'data/trnds_chg.RData')
-save(trnds_chg, file = 'M:/docs/manuscripts/sftrends_manu/trnds_chg.RData', compress = 'xz')
+save(trnds_chg, file = 'M:/docs/manuscripts/sftrends_manu/data/trnds_chg.RData', compress = 'xz')
 
 # by averages
 trnds_ave <- mutate(mods_nolag, 
@@ -1237,7 +1237,7 @@ trnds_ave <- mutate(mods_nolag,
   arrange(resvar)
 
 save(trnds_ave, file = 'data/trnds_ave.RData')
-save(trnds_ave, file = 'M:/docs/manuscripts/sftrends_manu/trnds_ave.RData', compress = 'xz')
+save(trnds_ave, file = 'M:/docs/manuscripts/sftrends_manu/data/trnds_ave.RData', compress = 'xz')
 
 ######
 # processing clam data at D7 from Craduer et al. 2016 report
