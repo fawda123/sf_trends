@@ -23,7 +23,7 @@ g_legend <- function(a.gplot){
 #
 # uses delt_dat, mods_nolag, delt_map
 #
-trnd_map <- function(res, 
+trnd_map <- function(res, mods,
   mobrks = c(-Inf, 4, 8, Inf),
   yrbrks = c(-Inf, 1988, 2000, Inf),
   molabs = c('JFMA', 'MJJA', 'SOND'),
@@ -42,7 +42,6 @@ trnd_map <- function(res,
   # load required data
   data(delt_dat)
   data(delt_map)
-  data(mods_nolag)
 
   ##
   # get a bounding box for the stations
@@ -64,12 +63,12 @@ trnd_map <- function(res,
   # get trends using wrtdstrnd function
   
   # get trends, merge with statmeta for lat/lon
-  trnds <- mutate(mods_nolag, 
-    trnd = map(mod, function(x){
+  trnds <- mutate(mods, 
+    trnd = map(data, function(x){
       wrtdstrnd(x, mobrks, yrbrks, molabs, yrlabs, tau = 0.5)
       })
     ) %>% 
-    select(-data, -mod) %>% 
+    select(-data) %>% 
     unnest %>% 
     left_join(., statmeta, by = 'Site_Code') %>% 
     data.frame

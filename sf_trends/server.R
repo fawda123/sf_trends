@@ -4,9 +4,7 @@ library(dplyr)
 library(tidyr)
 library(RColorBrewer)
 library(WRTDStidal)
-
-# raw data
-load(file = 'mods_nolag.RData')
+library(RCurl)
 
 # Define server logic required to generate and plot data
 shinyServer(function(input, output) {
@@ -19,12 +17,14 @@ shinyServer(function(input, output) {
 
     stat <- input$stat
     res <- input$res
-    scl <- input$scl
-    
-    out <- filter(mods_nolag, Site_Code == stat & resvar == res) %>% 
-      .$mod
-    out <- out[[1]]
-    
+
+    fl <- paste0(stat, '_', res)
+    downloadURL <- paste0('https://s3.amazonaws.com/sftrends/', fl, '.RData')
+    bin <- getBinaryURL(downloadURL)
+    writeBin(bin, "temp.rData")  
+    load("temp.rData")
+    out <- get(fl)
+
     return(out)
     
   })
@@ -60,27 +60,27 @@ shinyServer(function(input, output) {
     flo <- dplyr::select(flo, date, flo) %>% 
       mutate(flo = flo * abs(diff(florng)) + florng[1]) %>% 
       na.omit
-  
+
     # change scale/labels depending on station and scale
     if(stat %in% c('D4', 'D6', 'D7')){
       
-      ylab <- 'ln-salinity'
+      ylab <- 'ln-Salinity'
       
       if(scl == 'linear'){
         
         flo$flo <- exp(flo$flo) - 1
-        ylab <- 'salinity'
+        ylab <- 'Salinity'
           
         }
           
     } else {
      
-      ylab <- 'ln-flow'
+      ylab <- paste('ln-Flow', flolab, sep = ', ')
       
       if(scl == 'linear'){
       
         flo$flo <- exp(flo$flo)
-        ylab <- 'flow'
+        ylab <- paste('Flow', flolab, sep = ', ')
         
       }
       
@@ -89,11 +89,11 @@ shinyServer(function(input, output) {
     ggplot(flo, aes(x = date, y = flo)) + 
       geom_line() +
       scale_y_continuous(ylab) +
-      theme_minimal() +
+      theme_bw() +
       theme(axis.title.x = element_blank()) +
       scale_x_date(limits = dt_rng)
         
-    }, height = 250, width = 1200)
+    }, height = 240, width = 1200)
   
   # predictions and flow norms plot
   output$fitplot <- renderPlot({
@@ -113,12 +113,13 @@ shinyServer(function(input, output) {
     # create plot
     fitplot(dat(), annuals = annuals, tau = taus, dt_rng = dt_rng, size = 3, alpha = 0.8, min_mo = 11, 
         logspace = logspace) +
-      theme_minimal() +
+      theme_bw() +
       theme(legend.position = 'none',
         axis.title.x = element_blank()
-        )
+        ) + 
+      ggtitle('Predictions (lines) and observed (points)')
 
-    }, height = 250, width = 1200)
+    }, height = 255, width = 1200)
   
   # predictions and flow norms plot
   output$nrmplot <- renderPlot({
@@ -135,16 +136,17 @@ shinyServer(function(input, output) {
     # aggregation period
     annuals <- TRUE
     if(input$annuals == 'observed') annuals <- FALSE
-    
+ 
     # create plot
     fitplot(dat(), annuals = annuals, predicted = F, tau = taus, dt_rng = dt_rng, size = 3, alpha = 0.8, 
         min_mo = 11, logspace = logspace) + 
-      theme_minimal() +
+      theme_bw() +
       theme(legend.position = 'none', 
         axis.title.x = element_blank()
-        )
+        ) + 
+      ggtitle('Flow-normalized predictions (lines) and observed (points)')
 
-    }, height = 250, width = 1200)
+    }, height = 245, width = 1200)
 
   
 })

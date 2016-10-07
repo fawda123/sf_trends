@@ -22,7 +22,7 @@ shinyUI(fluidPage(
             
       selectInput(inputId = 'res', 
         label = h4('Variable'),
-        choices = c('din', 'nh', 'no23'), 
+        choices = c('din', 'nh', 'no23', 'sio2', 'tp', 'tss', 'chl'), 
         selected = 'din')
         
     ),
@@ -52,17 +52,6 @@ shinyUI(fluidPage(
       uiOutput("daterng")
       
     ),
-    
-    column(2, 
-      
-      checkboxGroupInput("tau", 
-        label = h4("Quantiles"),
-        choices = c("0.1" = "0.1", "0.5" = "0.5", "0.9" = "0.9"),
-        selected = c('0.1', '0.5', '0.9'), 
-        inline = T
-        )
-    
-      ),
     
     width = 12
     

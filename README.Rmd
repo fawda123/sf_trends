@@ -15,19 +15,13 @@ Content available at [https://github.com/fawda123/sf_trends](https://github.com/
 
 **_data/_** Supporting RData files, usually from data in ignore folder, unless otherwise noted all files were created in `R/dat_proc.R`
 
-* `bests.RData` subset of `flocor.RData` for min or max cor of each nut parm with flow or sal time series, respectively.  Each site is matched with the flow or salinity record ided in figure 10 of Novick et al
-
 * `clams.RData` clam data for D7 from Crauder 2016, includes sample date, water year (`yr` starting in October), biomass in g/m2, clams per sample (`clams_smp`) in no/m2, depth (m), growth rate (`gr`) in m3/m2/d, mean size (mm), number of grabs (`no_grabs`), recruitment per unit area (`recruit_area`) in recruit/0.05 m2, and species as corbicula or potamocorbula.
-
-* `diat_dat.RData` additional WRTDS models for D7, including chlorphyll and sio2
 
 * `delt_dat.RData` Processed wq time series data `dwr_wq.RData`, includes all nitrogen analytes and current/active stations in the delta, also includes matched and smoothed flow records from `flocor.RData` results
 
 * `delt_map.RData` SpatialPolygonsDataFrame object of approximate map of Delta region
 
-* `dwr_wq.RData` time series data of stations in the SF delta from California DWR-EMP (Department of Water Resources, Environmental Monitoring Program) , processed by E. Novick, all stations, analytes from 1975 to present.  Most analytes are measured as concentration, see original spreadsheet for values.  Unavailable in GitHub repo.
-
-* `flocor.RData` results of ccf analysis of selected delta and suisun stations comparing nitrogen and flow
+* `ignore/dwr_wq.RData` time series data of stations in the SF delta from California DWR-EMP (Department of Water Resources, Environmental Monitoring Program) , processed by E. Novick, all stations, analytes from 1975 to present.  Most analytes are measured as concentration, see original spreadsheet for values.  Unavailable in GitHub repo.
 
 * `flow_dat.RData` time series of daily flow estimates for the delta (m3/s), input stations from Novick et al (Fig 2) were used
 
@@ -35,13 +29,7 @@ Content available at [https://github.com/fawda123/sf_trends](https://github.com/
 
 * `h3dat.RData` mean models to support third hypothesis/case study in manuscript, wrtds mean models for sio2, din, chla at c10, d7
 
-* `middle_fits.RData` error estimates for middle delta models using three daily flow estimates
-
-* `nutcor.RData` results of ccf analysis of selected delta and suisun stations comparing nitrogen species
-
-* `mods_lag.RData` dataset for wrtds, including model results. This is a nested data frame with identifiers.  All response, flow values are ln + 1 transformed, flow (or salinity) records for each nutrient variable and station are combined based on the monthly lag ided from `bests.RData`
-
-* `mods_nolag.RData` dataset for wrtds, including model results.  This is the same file as `mods_lag.RData` except the matched flow variables are not lagged.
+* `mods.RData` dataset for wrtds, including model results. This is a nested data frame with identifiers. Nitrogen only.
 
 * `potw_load.RData` nutrient load data from Stockton and Tracy wwtp, kg/day
 
@@ -55,13 +43,10 @@ Content available at [https://github.com/fawda123/sf_trends](https://github.com/
 
 **_text/_** Summary text of analyses
 
-### Comparing time series of nutrients and flow for selected stations {.tabset}
-
 ```{r echo = T, message = F, warning = F}
 library(ggplot2)
 library(dplyr)
 library(tidyr)
-# library(WRTDStidal)
 library(gridExtra)
 library(lubridate)
 library(purrr)
@@ -69,75 +54,26 @@ library(GGally)
 library(ggrepel)
 library(scales)
 library(RColorBrewer)
-devtools::load_all('M:/docs/wtreg_for_estuaries')
 source('R/funcs.R')
-
 ```
 
-Monthly nutrient samples at selected stations were compared with flow estimates to characterize variation in time series correlations. Time series were compared using cross-correlation analysis with lags +/- 12 months.  Selected stations from the delta were C10, C3, and P8 and selected stations from Suisun were D4, D6, and D7.  Flow estimates from Novick et al. were the Sacramento River plus Yolo bypass (`sacyolo = sac + yolo`),  San Joaquin River (`sjr`).  Nutrient data were also compared with salinity observations at each station.  Nitrogen species evaluated included dissolved inorganic nitrogen (`din`), ammonium (`nh`), and nitrite/nitrate (`no23`). 
+### Model performance {.tabset}
 
-#### Nutrients to flow variables 
-
-```{r fig.height = 10, fig.width = 11, echo = T, cache = TRUE}
-data(flocor)
-
-ggplot(flocor, aes(x = lag, y = acf, colour = flovar, group = flovar)) +
-  facet_grid(Location + Site_Code ~ resvar) +
-  geom_line() + 
-  geom_point() + 
-  scale_x_continuous('lag (months)') +
-  theme_minimal() +
-  theme(legend.position = 'top', legend.title = element_blank())
-```
-  
-#### Nutrients to nutrients
-
-```{r fig.height = 10, fig.width = 11, echo = T, cache = TRUE}
-data(nutcor)
-
-ggplot(nutcor, aes(x = lag, y = acf, colour = var2, group = var2)) +
-  facet_grid(Location + Site_Code ~ var1) +
-  geom_line() + 
-  geom_point() + 
-  scale_x_continuous('lag (months)') +
-  theme_minimal() +
-  theme(legend.position = 'top', legend.title = element_blank())
-
-```
-
-### Effect of using lagged flow or salinity variables {.tabset}
-
-The above plots suggest that maximum correlations between flow and nutrient time series may be observed at specific monthly lags.  A logical expectation is that performance of weighted regression models could be improved if flow variables are matched with nutrient records at the lag with the maximum correlation.  The effect of using lagged or no lagged flow or salinity variables on model performance was evaluated as quantile regression goodness of fit. Models were fit using the 'optimal' lags from above and using no lags.  The plots below show goodness of fit for each station and nutrient combination, with the 'optimal' lag in months appearing below each bar.  The fit metric varies from 0 to 1 with higher values suggesting the model explains a greater portion of the variation in the modelled quantile. Results from stations with with no fit metrics should not be used. Interestingly, using lagged variables does not substantially influence model fit.  The remaining analyses below are for models that did not include a temporal lag for the flow or salinity variables.  Flow records matched to each station were based on physical proximity (e.g., C3 with Sacramento).
-
-See [here](http://fawda123.github.io/sf_trends/middle_delta) for an evaluation of model fit for middle delta stations (D19, D26, D28) with Sacramento, San Joaquin, and East daily flow values.
-
-#### 0.1
+#### RMSE fix this shit
 ```{r fig.height = 4.5, fig.width = 10, echo = T, warning = F, eval = T}
 # load the data
-data(mods_lag)
-data(mods_nolag)
-data(bests)
+data(mods)
 
 ylims <- c(-0.05, 1)
 ytext <- -0.04
 
 ## get model performance from the data objects
 
-# models w/ lagged flo variables
-wlag <- map(mods_lag$mod, wrtdsperf, logspace = F) %>% 
+# perfs
+perfss <- map(mods$data, wrtdsperf, logspace = F) %>% 
   do.call('rbind', .) %>% 
   mutate(
-    lab = gsub('\\.[0-9]$', '', row.names(.)), 
-    typ = 'With lag'
-    ) %>% 
-  separate(lab, c('stat', 'var'), sep = '_')
-
-# models w/o no lagged variables
-nlag <- map(mods_nolag$mod, wrtdsperf, logspace = F) %>% 
-  do.call('rbind', .) %>% 
-  mutate(
-    lab = gsub('\\.[0-9]$', '', row.names(.)), 
-    typ = 'No lag'
+    lab = gsub('\\.[0-9]$', '', row.names(.))
     ) %>% 
   separate(lab, c('stat', 'var'), sep = '_')
 
@@ -145,17 +81,11 @@ nlag <- map(mods_nolag$mod, wrtdsperf, logspace = F) %>%
 perfs <- rbind(wlag, nlag) %>% 
   mutate(stat  = factor(stat, levels = c('C10', 'C3', 'P8', 'D19', 'D26', 'D28', 'D4', 'D6', 'D7')))
 
-# txt to add to the plot showing lag
-txt <- rename(bests, 
-  var = resvar, 
-  stat = Site_Code
-)
-
 # color vector
 cols <- RColorBrewer::brewer.pal(9, 'Set1')[c(2, 3)]
 
 # the plot
-ggplot(perfs[perfs$tau == 0.1,], aes(x = stat, y = gfit)) +
+ggplot(perfs, aes(x = stat, y = rmse)) +
   geom_bar(aes(fill = typ), stat = 'identity', position = 'dodge', alpha = 0.75) + 
   geom_text(data = txt, aes(y = ytext, label = lag)) +
   facet_grid(~var) +
@@ -167,46 +97,7 @@ ggplot(perfs[perfs$tau == 0.1,], aes(x = stat, y = gfit)) +
     legend.title = element_blank(), 
     axis.title.x= element_blank()
     ) + 
-  scale_y_continuous('Goodness of fit', limits = ylims) + 
-  scale_fill_manual(values = cols)
-```
-
-#### 0.5
-```{r fig.height = 4.5, fig.width = 10, echo = T, eval = T}
-# the plot
-ggplot(perfs[perfs$tau == 0.5,], aes(x = stat, y = gfit)) +
-  geom_bar(aes(fill = typ), stat = 'identity', position = 'dodge', alpha = 0.75) + 
-  geom_text(data = txt, aes(y = ytext, label = lag)) +
-  facet_grid(~var) +
-  theme_minimal() +
-  theme(
-    axis.line.x = element_line(size = 0.5),
-    axis.line.y = element_line(size = 0.5),
-    legend.position = 'top',
-    legend.title = element_blank(), 
-    axis.title.x= element_blank()
-    ) + 
-  scale_fill_manual(values = cols) + 
-  scale_y_continuous('Goodness of fit', limits = ylims)
-```
-
-#### 0.9
-```{r fig.height = 4.5, fig.width = 10, echo = T, eval = T}
-# the plot
-ggplot(perfs[perfs$tau == 0.9,], aes(x = stat, y = gfit)) +
-  geom_bar(aes(fill = typ), stat = 'identity', position = 'dodge', alpha = 0.75) + 
-  geom_text(data = txt, aes(y = ytext, label = lag)) +
-  facet_grid(~var) +
-  theme_minimal() +
-  theme(
-    axis.line.x = element_line(size = 0.5),
-    axis.line.y = element_line(size = 0.5),
-    legend.position = 'top',
-    legend.title = element_blank(), 
-    axis.title.x= element_blank()
-    ) + 
-  scale_fill_manual(values = cols) + 
-  scale_y_continuous('Goodness of fit', limits = ylims)
+  scale_y_continuous('RMSE', limits = ylims) + 
 ```
 
 ### Annually-averaged results {.tabset}
@@ -224,20 +115,20 @@ See [here](https://beckmw.shinyapps.io/sf_trends/) for an interactive applicatio
 #### DIN
 ```{r, fig.height = 10, fig.width = 12, echo = T, message = F, warning = F, cache = TRUE}
 
-data(mods_nolag)
+data(mods)
 
 # y axis limits
 lims <- data.frame(Delta = c(3, 0.85, 2.6), Middle = c(0.9, 0.175, 0.8), Suisun = c(1, 0.2, 0.8))
 row.names(lims) <- c('din', 'nh', 'no23')
 
-for(i in 1:nrow(mods_nolag)){
+for(i in 1:nrow(mods)){
 
-  toplo <- mods_nolag$mod[[i]]
-  lab <- paste(mods_nolag[i, 'Location'], mods_nolag[i, 'Site_Code'], sep = ', ')
+  toplo <- mods$data[[i]]
+  lab <- paste(mods[i, 'Location'], mods[i, 'Site_Code'], sep = ', ')
   
   # axis limits by resp var and location var
-  resv <- as.character(mods_nolag[i, 'resvar'])
-  locv <- as.character(mods_nolag[i, 'Location'])
+  resv <- as.character(mods[i, 'resvar'])
+  locv <- as.character(mods[i, 'Location'])
   limy <- lims[resv, locv]
     
   p <- prdnrmplot(toplo, logspace = F, min_mo = 11) +
@@ -260,15 +151,15 @@ for(i in 1:nrow(mods_nolag)){
 }
 
 # # for ref
-# din <- which(mods_nolag$resvar == 'din')
-# nh <- which(mods_nolag$resvar == 'nh')
-# no23 <- which(mods_nolag$resvar == 'no23')
+# din <- which(mods$resvar == 'din')
+# nh <- which(mods$resvar == 'nh')
+# no23 <- which(mods$resvar == 'no23')
 
-ylab1 <- gsub('ln-', '', as.character(attr(mods_nolag$mod[[1]], 'reslab')))
+ylab1 <- gsub('ln-', '', as.character(attr(mods$data[[1]], 'reslab')))
 ylab1 <- parse(text = ylab1)
-ylab2 <- gsub('ln-', '', as.character(attr(mods_nolag$mod[[2]], 'reslab')))
+ylab2 <- gsub('ln-', '', as.character(attr(mods$data[[2]], 'reslab')))
 ylab2 <- parse(text = ylab2)
-ylab3 <- gsub('ln-', '', as.character(attr(mods_nolag$mod[[3]], 'reslab')))
+ylab3 <- gsub('ln-', '', as.character(attr(mods$data[[3]], 'reslab')))
 ylab3 <- parse(text = ylab3)
 
 grid.arrange(
@@ -276,7 +167,7 @@ grid.arrange(
   arrangeGrob(
   ncol = 2, widths = c(0.1, 1), 
     grid::textGrob(ylab1, rot = 90), 
-    arrangeGrob(p1, p4, p7, p19, p22, p25, p10, p13, p16, ncol = 3)
+    arrangeGrob(p3, p6, p9, p12, p15, p18, p21, p24, p27, ncol = 3)
   )
 )
 ```
@@ -288,7 +179,7 @@ grid.arrange(
   arrangeGrob(
   ncol = 2, widths = c(0.1, 1), 
     grid::textGrob(ylab2, rot = 90), 
-    arrangeGrob(p2, p5, p8, p20, p23, p26, p11, p14, p17, ncol = 3)
+    arrangeGrob(p1, p4, p7, p10, p13, p16, p19, p22, p25, ncol = 3)
   )
 )
 
@@ -301,7 +192,7 @@ grid.arrange(
   arrangeGrob(
   ncol = 2, widths = c(0.1, 1), 
     grid::textGrob(ylab3, rot = 90), 
-    arrangeGrob(p3, p6, p9, p21, p24, p27, p12, p15, p18, ncol = 3)
+    arrangeGrob(p2, p5, p8, p11, p14, p17, p20, p23, p26, ncol = 3)
   )
 )
 
@@ -321,20 +212,20 @@ The plots below show changes over time in the relationship between nutrients and
 #### DIN
 ```{r, fig.height = 24, fig.width = 12, echo = T, message = F, warning = F, eval = T, cache = TRUE}
 
-data(mods_nolag)
+data(mods)
 
 # y axis limits
 lims <- data.frame(Delta = c(3.2, 1.2, 3), Middle = c(1.5, 0.25, 1.4), Suisun = c(1, 0.25, 1))
 row.names(lims) <- c('din', 'nh', 'no23')
 
-for(i in 1:nrow(mods_nolag)){
+for(i in 1:nrow(mods)){
 
-  toplo <- mods_nolag$mod[[i]]
-  lab <- paste(mods_nolag[i, 'Location'], mods_nolag[i, 'Site_Code'], sep = ', ')
+  toplo <- mods$data[[i]]
+  lab <- paste(mods[i, 'Location'], mods[i, 'Site_Code'], sep = ', ')
   
   # axis limits by resp var and location var
-  resv <- as.character(mods_nolag[i, 'resvar'])
-  locv <- as.character(mods_nolag[i, 'Location'])
+  resv <- as.character(mods[i, 'resvar'])
+  locv <- as.character(mods[i, 'Location'])
   limy <- lims[resv, locv]
     
   p <- dynaplot(toplo, month = c(1, 4, 7, 10), ncol = 4, logspace = F) +
@@ -350,7 +241,7 @@ for(i in 1:nrow(mods_nolag)){
     scale_y_continuous(limits = c(0, limy))
 
   # flip if Suisun (salinity was used)
-  if(as.character(mods_nolag[i, 'Location']) == 'Suisun')
+  if(as.character(mods[i, 'Location']) == 'Suisun')
     p <- p + scale_x_reverse()
   
   # get legend
@@ -362,15 +253,15 @@ for(i in 1:nrow(mods_nolag)){
 }
 
 # # for ref
-# din <- which(mods_nolag$resvar == 'din')
-# nh <- which(mods_nolag$resvar == 'nh')
-# no23 <- which(mods_nolag$resvar == 'no23')
+# din <- which(mods$resvar == 'din')
+# nh <- which(mods$resvar == 'nh')
+# no23 <- which(mods$resvar == 'no23')
 
-ylab1 <- gsub('ln-', '', as.character(attr(mods_nolag$mod[[1]], 'reslab')))
+ylab1 <- gsub('ln-', '', as.character(attr(mods$data[[1]], 'reslab')))
 ylab1 <- parse(text = ylab1)
-ylab2 <- gsub('ln-', '', as.character(attr(mods_nolag$mod[[2]], 'reslab')))
+ylab2 <- gsub('ln-', '', as.character(attr(mods$data[[2]], 'reslab')))
 ylab2 <- parse(text = ylab2)
-ylab3 <- gsub('ln-', '', as.character(attr(mods_nolag$mod[[3]], 'reslab')))
+ylab3 <- gsub('ln-', '', as.character(attr(mods$data[[3]], 'reslab')))
 ylab3 <- parse(text = ylab3)
 
 grid.arrange(
@@ -378,7 +269,7 @@ grid.arrange(
   arrangeGrob(
   ncol = 2, widths = c(0.025, 1), 
     grid::textGrob(ylab1, rot = 90), 
-    arrangeGrob(p1, p4, p7, p19, p22, p25, p10, p13, p16, ncol = 1)
+    arrangeGrob(p3, p6, p9, p12, p15, p18, p21, p24, p27, ncol = 3)
   ), 
   grid::textGrob('Flow or Salinity (standardized)')
 )
@@ -392,7 +283,7 @@ grid.arrange(
   arrangeGrob(
   ncol = 2, widths = c(0.025, 1), 
     grid::textGrob(ylab2, rot = 90), 
-    arrangeGrob(p2, p5, p8, p20, p23, p26, p11, p14, p17, ncol = 1)
+    arrangeGrob(p1, p4, p7, p10, p13, p16, p19, p22, p25, ncol = 1)
   ), 
   grid::textGrob('Flow or Salinity (standardized)')
 )
@@ -405,7 +296,7 @@ grid.arrange(
   arrangeGrob(
   ncol = 2, widths = c(0.025, 1), 
     grid::textGrob(ylab3, rot = 90), 
-    arrangeGrob(p3, p6, p9, p21, p24, p27, p12, p15, p18, ncol = 1)
+    arrangeGrob(p2, p5, p8, p11, p14, p17, p20, p23, p26, ncol = 1)
   ), 
   grid::textGrob('Flow or Salinity (standardized)')
 )
@@ -424,7 +315,7 @@ The plots below show seasonal changes in flow-normalized results over time using
 #### DIN
 ```{r, fig.height = 9, fig.width = 10, echo = T, message = F, warning = F, eval = T, cache = TRUE}
 
-data(mods_nolag)
+data(mods)
 
 # y axis limits for each plot
 lims <- data.frame(
@@ -436,14 +327,14 @@ lims <- data.frame(
 lims <- data.frame(Delta = c(2.8, 0.9, 2.1), Middle = c(1, 0.175, 0.95), Suisun = c(0.75, 0.175, 0.6))
 row.names(lims) <- c('din', 'nh', 'no23')
 
-for(i in 1:nrow(mods_nolag)){
+for(i in 1:nrow(mods)){
 
-  toplo <- mods_nolag$mod[[i]]
-  lab <- paste(mods_nolag[i, 'Location'], mods_nolag[i, 'Site_Code'], sep = ', ')
+  toplo <- mods$data[[i]]
+  lab <- paste(mods[i, 'Location'], mods[i, 'Site_Code'], sep = ', ')
   
   # axis limits by resp var and location var
-  resv <- as.character(mods_nolag[i, 'resvar'])
-  locv <- as.character(mods_nolag[i, 'Location'])
+  resv <- as.character(mods[i, 'resvar'])
+  locv <- as.character(mods[i, 'Location'])
   limy <- lims[resv, locv]
     
   p <- seasyrplot(toplo, predicted = F, logspace = F) +
@@ -465,11 +356,11 @@ for(i in 1:nrow(mods_nolag)){
 
 }
 
-ylab1 <- gsub('ln-', '', as.character(attr(mods_nolag$mod[[1]], 'reslab')))
+ylab1 <- gsub('ln-', '', as.character(attr(mods$data[[1]], 'reslab')))
 ylab1 <- parse(text = ylab1)
-ylab2 <- gsub('ln-', '', as.character(attr(mods_nolag$mod[[2]], 'reslab')))
+ylab2 <- gsub('ln-', '', as.character(attr(mods$data[[2]], 'reslab')))
 ylab2 <- parse(text = ylab2)
-ylab3 <- gsub('ln-', '', as.character(attr(mods_nolag$mod[[3]], 'reslab')))
+ylab3 <- gsub('ln-', '', as.character(attr(mods$data[[3]], 'reslab')))
 ylab3 <- parse(text = ylab3)
 
 grid.arrange(
@@ -477,7 +368,7 @@ grid.arrange(
   arrangeGrob(
   ncol = 2, widths = c(0.1, 1), 
     grid::textGrob(ylab1, rot = 90), 
-    arrangeGrob(p1, p4, p7, p19, p22, p25, p10, p13, p16, ncol = 3)
+    arrangeGrob(p3, p6, p9, p12, p15, p18, p21, p24, p27, ncol = 3)
   )
 )
 ```
@@ -489,7 +380,7 @@ grid.arrange(
   arrangeGrob(
   ncol = 2, widths = c(0.1, 1), 
     grid::textGrob(ylab2, rot = 90), 
-    arrangeGrob(p2, p5, p8, p20, p23, p26, p11, p14, p17, ncol = 3)
+    arrangeGrob(p1, p4, p7, p10, p13, p16, p19, p22, p25, ncol = 3)
   )
 )
 ```
@@ -501,7 +392,7 @@ grid.arrange(
   arrangeGrob(
   ncol = 2, widths = c(0.1, 1), 
     grid::textGrob(ylab3, rot = 90), 
-    arrangeGrob(p3, p6, p9,  p21, p24, p27, p12, p15, p18, ncol = 3)
+    arrangeGrob(p2, p5, p8, p11, p14, p17, p20, p23, p26, ncol = 3)
   )
 )
 ```
@@ -513,17 +404,17 @@ Trends are reported as percent changes of annual averages from the beginning to 
 #### DIN
 
 ```{r, fig.height = 6, fig.width = 9, echo = T, message = F, warning = F, eval = T, cache = TRUE}
-trnd_map(res = 'din')
+trnd_map(res = 'din', mods = mods)
 ```
 
 #### NH4
 
 ```{r, fig.height = 6, fig.width = 9, echo = T, message = F, warning = F, eval = T, cache = TRUE}
-trnd_map(res = 'nh')
+trnd_map(res = 'nh', mods = mods)
 ```
 
 #### NO23
 
 ```{r, fig.height = 6, fig.width = 9, echo = T, message = F, warning = F, eval = T, cache = TRUE}
-trnd_map(res = 'no23')
+trnd_map(res = 'no23', mods = mods)
 ```
