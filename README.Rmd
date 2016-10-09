@@ -29,7 +29,7 @@ Content available at [https://github.com/fawda123/sf_trends](https://github.com/
 
 * `h3dat.RData` mean models to support third hypothesis/case study in manuscript, wrtds mean models for sio2, din, chla at c10, d7
 
-* `mods.RData` dataset for wrtds, including model results. This is a nested data frame with identifiers. Nitrogen only.
+* `mods.RData` dataset for wrtds, including model results. This is a nested data frame with identifiers, nitrogen only.
 
 * `potw_load.RData` nutrient load data from Stockton and Tracy wwtp, kg/day
 
@@ -54,41 +54,34 @@ library(GGally)
 library(ggrepel)
 library(scales)
 library(RColorBrewer)
+library(WRTDStidal)
 source('R/funcs.R')
 ```
 
 ### Model performance {.tabset}
 
-#### RMSE fix this shit
+#### RMSE
 ```{r fig.height = 4.5, fig.width = 10, echo = T, warning = F, eval = T}
 # load the data
 data(mods)
 
-ylims <- c(-0.05, 1)
+ylims <- c(0, 0.75)
 ytext <- -0.04
 
 ## get model performance from the data objects
 
 # perfs
-perfss <- map(mods$data, wrtdsperf, logspace = F) %>% 
-  do.call('rbind', .) %>% 
-  mutate(
-    lab = gsub('\\.[0-9]$', '', row.names(.))
-    ) %>% 
-  separate(lab, c('stat', 'var'), sep = '_')
-
-# combine for plotting, extract results for median mod
-perfs <- rbind(wlag, nlag) %>% 
-  mutate(stat  = factor(stat, levels = c('C10', 'C3', 'P8', 'D19', 'D26', 'D28', 'D4', 'D6', 'D7')))
-
-# color vector
-cols <- RColorBrewer::brewer.pal(9, 'Set1')[c(2, 3)]
+perfs <- mutate(mods,
+    rmse = map(data, function(x) wrtdsperf(x, logspace = F)[, 1]),
+    nmse = map(data, function(x) wrtdsperf(x, logspace = F)[, 2])
+  ) %>% 
+  select(-data) %>% 
+  unnest
 
 # the plot
-ggplot(perfs, aes(x = stat, y = rmse)) +
-  geom_bar(aes(fill = typ), stat = 'identity', position = 'dodge', alpha = 0.75) + 
-  geom_text(data = txt, aes(y = ytext, label = lag)) +
-  facet_grid(~var) +
+ggplot(perfs, aes(x = Site_Code, y = rmse)) +
+  geom_bar(stat = 'identity') + 
+  facet_grid(~resvar) +
   theme_minimal() +
   theme(
     axis.line.x = element_line(size = 0.5),
@@ -97,7 +90,24 @@ ggplot(perfs, aes(x = stat, y = rmse)) +
     legend.title = element_blank(), 
     axis.title.x= element_blank()
     ) + 
-  scale_y_continuous('RMSE', limits = ylims) + 
+  scale_y_continuous('RMSE', limits = ylims)
+```
+
+#### NMSE
+```{r fig.height = 4.5, fig.width = 10, echo = T, warning = F, eval = T}
+# the plot
+ggplot(perfs, aes(x = Site_Code, y = nmse)) +
+  geom_bar(stat = 'identity') + 
+  facet_grid(~resvar) +
+  theme_minimal() +
+  theme(
+    axis.line.x = element_line(size = 0.5),
+    axis.line.y = element_line(size = 0.5),
+    legend.position = 'top',
+    legend.title = element_blank(), 
+    axis.title.x= element_blank()
+    ) + 
+  scale_y_continuous('NMSE', limits = ylims)
 ```
 
 ### Annually-averaged results {.tabset}
@@ -269,7 +279,7 @@ grid.arrange(
   arrangeGrob(
   ncol = 2, widths = c(0.025, 1), 
     grid::textGrob(ylab1, rot = 90), 
-    arrangeGrob(p3, p6, p9, p12, p15, p18, p21, p24, p27, ncol = 3)
+    arrangeGrob(p3, p6, p9, p12, p15, p18, p21, p24, p27, ncol = 1)
   ), 
   grid::textGrob('Flow or Salinity (standardized)')
 )

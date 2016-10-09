@@ -97,7 +97,7 @@ trnd_map <- function(res, mods,
   toplo$shp <- shps[1]
   toplo[toplo$chg < 0, 'shp'] <- shps[2]
   toplo$shp <- factor(toplo$shp)
-  toplo$sz <- rescale(abs(toplo$chg), to = sz_rng)
+  toplo$sz <- scales::rescale(abs(toplo$chg), to = sz_rng)
   toplo[!toplo$cat %in% yrlabs[1] , 'Site_Code'] <- NA
   
   # barplots of true
