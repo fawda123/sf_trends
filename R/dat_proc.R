@@ -20,7 +20,8 @@ library(purrr)
 delt_map <- maptools::readShapeSpatial('M:/GIS/sf_delta.shp')
 
 save(delt_map, file = 'data/delt_map.RData', compress = 'xz')
-  
+save(delt_map, file = 'M:/docs/manuscripts/sftrends_manu/data/delt_map.RData', compress = 'xz')
+
 ######
 # wq data
 
@@ -75,6 +76,7 @@ dat$Location[dat$Site_Code %in% c('D19', 'D26', 'D28')] <- 'Middle'
 
 delt_dat <- dat
 save(delt_dat, file = 'data/delt_dat.RData')
+save(delt_dat, file = 'M:/docs/manuscripts/sftrends_manu/data/delt_dat.RData', compress = 'xz')
 
 ######
 # check outliers - none
@@ -138,6 +140,7 @@ flow_dat <- filter(flow_dat, var %in% c('sjr', 'sac', 'yolo', 'csmr', 'moke', 'm
   gather('station', 'q', sac:sjr)
 
 save(flow_dat, file = 'data/flow_dat.RData')
+save(flow_dat, file = 'M:/docs/manuscripts/sftrends_manu/data/flow_dat.RData', compress = 'xz')
 
 ######
 # dataset for wrtds, all response, response variables at each station matched to corresponding flow values in flomtch
@@ -317,7 +320,8 @@ mods <- unite(mods, 'tmp', Site_Code, resvar, remove = F) %>%
 
 # save output, also to shiny app folder
 save(mods, file = 'data/mods.RData', compress = 'xz')
-  
+save(mods, file = 'M:/docs/manuscripts/sftrends_manu/data/mods.RData', compress = 'xz')  
+
 ######
 # trend summary for stations
 
@@ -438,6 +442,20 @@ potw_load <- rbind(stockton, tracy) %>%
 
 save(potw_load, file = 'data/potw_load.RData', compress = 'xz')
 save(potw_load, file = 'M:/docs/manuscripts/sftrends_manu/data/potw_load.RData', compress = 'xz')
+
+######
+# create quantile models for first hypothesis in paper
+
+rm(list = ls())
+
+data(mods)
+
+# filter c10
+h1dat <- filter(mods, Site_Code %in% 'C10')
+
+# save output
+save(h1dat, file = 'data/h1dat.RData', compress = 'xz')
+save(h1dat, file = 'M:/docs/manuscripts/sftrends_manu/data/h1dat.RData', compress = 'xz')
 
 ######
 # create mean models for second hypothesis in paper

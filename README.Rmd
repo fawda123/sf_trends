@@ -25,6 +25,8 @@ Content available at [https://github.com/fawda123/sf_trends](https://github.com/
 
 * `flow_dat.RData` time series of daily flow estimates for the delta (m3/s), input stations from Novick et al (Fig 2) were used
 
+* `h1dat.RData` mean models to support first hypothesis/case study in manuscript, wrtds mean models for din, no23, nh at C10
+
 * `h2dat.RData` mean models to support second hypothesis/case study in manuscript, wrtds mean models for no23, nh at p8
 
 * `h3dat.RData` mean models to support third hypothesis/case study in manuscript, wrtds mean models for sio2, din, chla at c10, d7
