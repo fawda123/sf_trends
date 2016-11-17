@@ -24,7 +24,7 @@ g_legend <- function(a.gplot){
 # uses delt_dat, mods_nolag, delt_map
 #
 trnd_map <- function(res, mods,
-  mobrks = c(-Inf, 4, 8, Inf),
+  mobrks = list(c(1, 2, 3, 4), c(5, 6, 7, 8), c(9, 10, 11, 12)),
   yrbrks = c(-Inf, 1988, 2000, Inf),
   molabs = c('JFMA', 'MJJA', 'SOND'),
   yrlabs = c('1976-1988', '1989-2000', '2001-2012'),

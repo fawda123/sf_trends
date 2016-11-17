@@ -53,10 +53,18 @@ shinyUI(fluidPage(
       
     ),
     
+    column(width = 2,
+      radioButtons(inputId = 'remobs', 
+        label = h4('Remove observed?'),
+        choices = c(TRUE, FALSE),
+        selected = c(FALSE), 
+        inline = TRUE
+      )
+    ),
+    
     width = 12
     
   ),
-  
   
   # output tabs
   mainPanel(

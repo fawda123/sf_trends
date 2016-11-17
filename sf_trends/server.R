@@ -101,6 +101,9 @@ shinyServer(function(input, output) {
     # inputs
     dt_rng <- input$dt_rng
     taus <- input$tau
+    remobs <- input$remobs
+    if(remobs) size <- NA
+    else size <- 3
     
     # scale argument
     logspace <- TRUE
@@ -111,7 +114,7 @@ shinyServer(function(input, output) {
     if(input$annuals == 'observed') annuals <- FALSE
 
     # create plot
-    fitplot(dat(), annuals = annuals, tau = taus, dt_rng = dt_rng, size = 3, alpha = 0.8, min_mo = 11, 
+    fitplot(dat(), annuals = annuals, tau = taus, dt_rng = dt_rng, size = size, alpha = 0.8, min_mo = 11, 
         logspace = logspace) +
       theme_bw() +
       theme(legend.position = 'none',
@@ -128,6 +131,9 @@ shinyServer(function(input, output) {
     
     dt_rng <- input$dt_rng
     taus <- input$tau
+    remobs <- input$remobs
+    if(remobs) size <- NA
+    else size <- 3
 
     # scale argument
     logspace <- TRUE
@@ -138,7 +144,7 @@ shinyServer(function(input, output) {
     if(input$annuals == 'observed') annuals <- FALSE
  
     # create plot
-    fitplot(dat(), annuals = annuals, predicted = F, tau = taus, dt_rng = dt_rng, size = 3, alpha = 0.8, 
+    fitplot(dat(), annuals = annuals, predicted = F, tau = taus, dt_rng = dt_rng, size = size, alpha = 0.8, 
         min_mo = 11, logspace = logspace) + 
       theme_bw() +
       theme(legend.position = 'none', 

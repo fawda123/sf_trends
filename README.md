@@ -25,13 +25,13 @@ Content available at [https://github.com/fawda123/sf_trends](https://github.com/
 
 * `mods.RData` dataset for wrtds, including model results. This is a nested data frame with identifiers, nitrogen only.
 
-* `potw_load.RData` nutrient load data from Stockton and Tracy wwtp, kg/day
-
 * `sf_bay.RData` SpatialPolygonsDataFrame object of all of SF Bay
+
+* `stockton.RData` summarized effluent data from Stockton wwtp
 
 * `trnds_ave.RData` trend summary of averages by annual, monthly categories
 
-* `trnds_chg.RData` trend summary of percent changes by annual, monthly categories, used in poster
+* `trnds_chg.RData` trend summary of percent changes by annual, monthly categories
 
 **_R/_** Supporting R scripts
 

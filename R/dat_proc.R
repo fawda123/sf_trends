@@ -329,15 +329,15 @@ rm(list = ls())
 
 data(mods)
 
-mobrks <- c(-Inf, 4, 8, Inf)
-yrbrks <- c(-Inf, 1988, 2000, Inf)
-molabs <- c('JFMA', 'MJJA', 'SOND')
-yrlabs <- c('1976-1988', '1989-2000', '2001-2012')
+mobrks <- list(c(3, 4, 5), c(6, 7, 8), c(9, 10, 11), c(12, 1, 2))
+yrbrks <- c(-Inf, 1995, Inf)
+molabs <- c('Spring', 'Summer', 'Fall', 'Winter')
+yrlabs <- c('1976-1995', '1996-2014')
 
 # % changes
 trnds_chg <- mutate(mods, 
   trnd = map(data, function(x){
-    wrtdstrnd(x, mobrks, yrbrks, molabs, yrlabs, tau = 0.5, aves = T)
+    wrtdstrnd(x, mobrks, yrbrks, molabs, yrlabs, aves = T)
     })
   ) %>% 
   select(-data) %>% 
@@ -353,7 +353,7 @@ save(trnds_chg, file = 'M:/docs/manuscripts/sftrends_manu/data/trnds_chg.RData',
 # by averages
 trnds_ave <- mutate(mods, 
   trnd = map(data, function(x){
-    wrtdstrnd(x, mobrks, yrbrks, molabs, yrlabs, tau = 0.5, aves = T)
+    wrtdstrnd(x, mobrks, yrbrks, molabs, yrlabs, aves = T)
     })
   ) %>% 
   select(-data) %>% 
@@ -420,28 +420,63 @@ save(clams, file = 'M:/docs/manuscripts/sftrends_manu/data/clams.RData', compres
 # potw loads from Tracy and Stockton
 # see Bresnahan email 6/20
 
-stockton <- read.csv('ignore/Stockton POTW.csv') %>% 
-  mutate(
-    date = as.Date(X, format = '%d-%b-%y'), 
-    loc = 'stock'
-    ) %>% 
-  select(-X) %>% 
-  gather('var', 'val', NH4:TN) %>% 
-  mutate(var = tolower(var))
-tracy <- read.csv('ignore/tracy POTW loads.csv') %>% 
-  mutate(
-    date = as.Date(X, format = '%d-%b-%y'), 
-    loc = 'tracy'
-    ) %>% 
-  select(-X) %>% 
-  gather('var', 'val', NH4:TN) %>% 
-  mutate(var = tolower(var))
+# import all
+stockton <- read_excel('ignore/COS Receiving Water 1992-09 through 2009-03.xls') %>% 
+  as.data.frame(., stringsAsFactors = FALSE)
 
-potw_load <- rbind(stockton, tracy) %>% 
-  arrange(date, loc, var)
+# rows, columns to keep
+rowsel <- grep('STOCKTON WWTP', stockton[, 2]) %>% 
+  c(., which(is.na(stockton[, 2]))) %>% 
+  sort
+colsel <- paste0(c('NH3', 'Nitrite', 'Nitrate')) %>% 
+  paste(., collapse = '|') %>% 
+  grep(. , names(stockton)) %>% 
+  c(1, 2, .)
 
-save(potw_load, file = 'data/potw_load.RData', compress = 'xz')
-save(potw_load, file = 'M:/docs/manuscripts/sftrends_manu/data/potw_load.RData', compress = 'xz')
+# subset by rows, columns, fill date, rename variables
+dat <- stockton[-rowsel, colsel]
+names(dat)[is.na(names(dat))] <- 'date'
+names(dat)[grep('STOCKTON', names(dat))] <- 'dy'
+dat <- mutate(dat,
+    yr = year(date), 
+    yr = zoo::na.locf(yr, na.rm = F),
+    mo = month(date),
+    mo = zoo::na.locf(mo, na.rm = F),
+    dy = gsub('(^[0-9]*).*', '\\1', dy)
+  ) %>% 
+  select(-date) %>% 
+  unite('date', yr, mo, dy, sep = '-') %>% 
+  mutate(date = as.Date(date)) %>% 
+  gather('var', 'val', -date) %>% 
+  extract(var, c('site', 'var'), regex = '(^R[0-9].*) (\\n.*\\n.*)') %>% 
+  mutate(
+    var = gsub('.*(NH[3]).*', '\\1', var),
+    var = gsub('.*(NO[2]).*', '\\1', var),
+    var = gsub('.*(NO[3]).*', '\\1', var),
+    val = as.numeric(val)
+  ) %>% 
+  group_by(var) %>% 
+  mutate(val = zoo::na.approx(val, na.rm = F)) %>% 
+  group_by(date, var) %>% 
+  summarize(val = sum(val)) %>% 
+  ungroup %>% 
+  arrange(var, date) %>% 
+  group_by(var) %>% 
+  mutate(
+    val2 = stats::filter(val, rep(1/20, 20), sides = 2), 
+    val2 = as.numeric(val2)
+    ) %>% 
+  filter(date >= as.Date('2002-01-01')) %>%
+  data.frame
+
+# ggplot(dat, aes(x = date, y = val, colour = var)) + 
+#   geom_line() + 
+#   # geom_line(aes(y = val2), linetype = 'dashed') +
+#   theme_minimal()
+
+stoctkon <- dat
+save(stockton, file = 'data/stockton.RData', compress = 'xz')
+save(stockton, file = 'M:/docs/manuscripts/sftrends_manu/data/stockton.RData', compress = 'xz')
 
 ######
 # create quantile models for first hypothesis in paper
