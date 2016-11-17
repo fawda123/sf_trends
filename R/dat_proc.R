@@ -419,6 +419,26 @@ save(clams, file = 'M:/docs/manuscripts/sftrends_manu/data/clams.RData', compres
 ######
 # potw loads from Tracy and Stockton
 # see Bresnahan email 6/20
+# note that TN is probably wrong in original data, recalculated here
+
+stockton <- read.csv('ignore/Stockton POTW.csv') %>% 
+  mutate(
+    date = as.Date(X, format = '%d-%b-%y'), 
+    loc = 'stock', 
+    TN = DIN
+    ) %>% 
+  select(-X, -DIN) %>% 
+  gather('var', 'val', NH4:TN) %>% 
+  mutate(var = tolower(var))
+
+stock_load <- stockton
+
+save(stock_load, file = 'data/stock_load.RData', compress = 'xz')
+save(stock_load, file = 'M:/docs/manuscripts/sftrends_manu/data/stock_load.RData', compress = 'xz')
+
+######
+# stockton effluent concentrations
+# see Jabusch email 11/2/16
 
 # import all
 stockton <- read_excel('ignore/COS Receiving Water 1992-09 through 2009-03.xls') %>% 
@@ -434,6 +454,7 @@ colsel <- paste0(c('NH3', 'Nitrite', 'Nitrate')) %>%
   c(1, 2, .)
 
 # subset by rows, columns, fill date, rename variables
+# Thomas said that R1 is upstream of plant
 dat <- stockton[-rowsel, colsel]
 names(dat)[is.na(names(dat))] <- 'date'
 names(dat)[grep('STOCKTON', names(dat))] <- 'dy'
@@ -449,6 +470,7 @@ dat <- mutate(dat,
   mutate(date = as.Date(date)) %>% 
   gather('var', 'val', -date) %>% 
   extract(var, c('site', 'var'), regex = '(^R[0-9].*) (\\n.*\\n.*)') %>% 
+  filter(!grepl('R[1]', site)) %>% 
   mutate(
     var = gsub('.*(NH[3]).*', '\\1', var),
     var = gsub('.*(NO[2]).*', '\\1', var),
@@ -469,14 +491,14 @@ dat <- mutate(dat,
   filter(date >= as.Date('2002-01-01')) %>%
   data.frame
 
-# ggplot(dat, aes(x = date, y = val, colour = var)) + 
-#   geom_line() + 
-#   # geom_line(aes(y = val2), linetype = 'dashed') +
-#   theme_minimal()
+ggplot(dat, aes(x = date, y = val, colour = var)) +
+  geom_line() +
+  # geom_line(aes(y = val2), linetype = 'dashed') +
+  theme_minimal()
 
-stoctkon <- dat
-save(stockton, file = 'data/stockton.RData', compress = 'xz')
-save(stockton, file = 'M:/docs/manuscripts/sftrends_manu/data/stockton.RData', compress = 'xz')
+stock_conc <- dat
+save(stock_conc, file = 'data/stock_conc.RData', compress = 'xz')
+save(stock_conc, file = 'M:/docs/manuscripts/sftrends_manu/data/stock_conc.RData', compress = 'xz')
 
 ######
 # create quantile models for first hypothesis in paper

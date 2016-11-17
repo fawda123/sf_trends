@@ -27,7 +27,9 @@ Content available at [https://github.com/fawda123/sf_trends](https://github.com/
 
 * `sf_bay.RData` SpatialPolygonsDataFrame object of all of SF Bay
 
-* `stockton.RData` summarized effluent data from Stockton wwtp
+* `stock_conc.RData` summarized effluent data from Stockton wwtp, mg/L
+
+* `stock_load.RData` nutrient load data from Stockton, kg/day
 
 * `trnds_ave.RData` trend summary of averages by annual, monthly categories
 
