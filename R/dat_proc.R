@@ -366,6 +366,19 @@ trnds_ave <- mutate(mods,
 save(trnds_ave, file = 'data/trnds_ave.RData')
 save(trnds_ave, file = 'M:/docs/manuscripts/sftrends_manu/data/trnds_ave.RData', compress = 'xz')
 
+# by sk
+trnds_sk <- mutate(mods, 
+  trnd = map(data, function(x){
+    wrtdstrnd_sk(x, mobrks, yrbrks, molabs, yrlabs, aves = T)
+    })
+  ) %>% 
+  select(-data) %>% 
+  unnest %>% 
+  data.frame
+
+save(trnds_sk, file = 'data/trnds_sk.RData')
+save(trnds_sk, file = 'M:/docs/manuscripts/sftrends_manu/data/trnds_sk.RData', compress = 'xz')
+
 ######
 # processing clam data at D7 from Craduer et al. 2016 report
 
@@ -490,11 +503,11 @@ dat <- mutate(dat,
     ) %>% 
   filter(date >= as.Date('2002-01-01')) %>%
   data.frame
-
-ggplot(dat, aes(x = date, y = val, colour = var)) +
-  geom_line() +
-  # geom_line(aes(y = val2), linetype = 'dashed') +
-  theme_minimal()
+# 
+# ggplot(dat, aes(x = date, y = val, colour = var)) +
+#   geom_line() +
+#   # geom_line(aes(y = val2), linetype = 'dashed') +
+#   theme_minimal()
 
 stock_conc <- dat
 save(stock_conc, file = 'data/stock_conc.RData', compress = 'xz')

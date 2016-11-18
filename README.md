@@ -35,6 +35,8 @@ Content available at [https://github.com/fawda123/sf_trends](https://github.com/
 
 * `trnds_chg.RData` trend summary of percent changes by annual, monthly categories
 
+* `trnds_sk.RData` trend summary using seasonal kendall on flow-normalized results
+
 **_R/_** Supporting R scripts
 
 **_text/_** Summary text of analyses
