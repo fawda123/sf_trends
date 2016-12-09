@@ -380,6 +380,60 @@ save(trnds_sk, file = 'data/trnds_sk.RData')
 save(trnds_sk, file = 'M:/docs/manuscripts/sftrends_manu/data/trnds_sk.RData', compress = 'xz')
 
 ######
+# sk trends on predicted and flow-norm, seasonal aggs by year
+
+data(mods)
+
+##
+# seasons within each year group
+seasbyyr <- function(mods, trndvar = 'bt_norm'){
+  
+  mobrks <- list(c(3, 4, 5), c(6, 7, 8), c(9, 10, 11), c(12, 1, 2))
+  yrbrks <- c(-Inf, 1995, Inf)
+  molabs <- c('Spring', 'Summer', 'Fall', 'Winter')
+  yrlabs <- c('1976-1995', '1996-2014')
+  
+  # norm trnds
+  trnds <- mutate(mods, 
+    trnd = map(data, function(x){
+      
+      bef <- x[x$year <= 1995, ] %>% 
+        wrtdstrnd_sk(., mobrks, yrbrks, molabs, yrlabs, trndvar = trndvar) %>% 
+        mutate(ann = 'bef')
+    
+      aft <- x[x$year > 1995, ]  %>% 
+        wrtdstrnd_sk(., mobrks, yrbrks, molabs, yrlabs, trndvar = trndvar) %>% 
+        mutate(ann = 'aft')
+    
+      rbind(bef, aft)
+      
+      })
+    ) %>% 
+    select(-data) %>% 
+    unnest %>% 
+    mutate(
+      trndvar = gsub('bt_', '', trndvar)
+    ) %>% 
+    data.frame
+  
+  return(trnds)
+  
+}
+
+trnds_nrm <- seasbyyr(mods, trndvar = 'bt_norm')
+trnds_fit <- seasbyyr(mods, trndvar = 'bt_fits')
+trnds_obs <- seasbyyr(mods, trndvar = 'res')
+
+# combine all
+trnds_seasyr <- rbind(trnds_nrm, trnds_fit, trnds_obs) %>% 
+  select(Site_Code, resvar, cat, perchg, ann, trndvar) %>% 
+  spread(trndvar, perchg) %>% 
+  mutate(Site_Code = factor(Site_Code, levels = c('D7', 'D6', 'D4', 'D28', 'D26', 'D19', 'P8', 'C10', 'C3')))
+
+save(trnds_seasyr, file = 'data/trnds_seasyr.RData', compress = 'xz')
+save(trnds_seasyr, file = 'M:/docs/manuscripts/sftrends_manu/data/trnds_seasyr.RData', compress = 'xz')
+
+######
 # processing clam data at D7 from Craduer et al. 2016 report
 
 # text files, taken manually from pdf conversion to text

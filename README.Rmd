@@ -45,6 +45,8 @@ Content available at [https://github.com/fawda123/sf_trends](https://github.com/
 
 * `trnds_sk.RData` trend summary using seasonal kendall on flow-normalized results
 
+* `trnds_seasyr.RData` sk trends on predicted and flow-norm WRTDS results, seasonal aggs by year
+
 **_R/_** Supporting R scripts
 
 **_text/_** Summary text of analyses
@@ -440,55 +442,7 @@ trnd_map(res = 'no23', mods = mods)
 Seasonal Kendall tests were used to characterize trends using results from the WRTDS models. Trends were compared on the predicted and flow-normalized values to identify potential effects of flow.  Trends were evaluated for different annual groupings and seasonal groupings within each annual group.
 
 ```{r, cache = T}
-data(mods)
-
-##
-# seasons within each year group
-
-seasbyyr <- function(mods, trndvar = 'bt_norm'){
-  
-  mobrks <- list(c(3, 4, 5), c(6, 7, 8), c(9, 10, 11), c(12, 1, 2))
-  yrbrks <- c(-Inf, 1995, Inf)
-  molabs <- c('Spring', 'Summer', 'Fall', 'Winter')
-  yrlabs <- c('1976-1995', '1996-2014')
-  
-  # norm trnds
-  trnds <- mutate(mods, 
-    trnd = map(data, function(x){
-      
-      bef <- x[x$year <= 1995, ] %>% 
-        wrtdstrnd_sk(., mobrks, yrbrks, molabs, yrlabs, trndvar = trndvar) %>% 
-        mutate(ann = 'bef')
-    
-      aft <- x[x$year > 1995, ]  %>% 
-        wrtdstrnd_sk(., mobrks, yrbrks, molabs, yrlabs, trndvar = trndvar) %>% 
-        mutate(ann = 'aft')
-    
-      rbind(bef, aft)
-      
-      })
-    ) %>% 
-    select(-data) %>% 
-    unnest %>% 
-    mutate(
-      trndvar = gsub('bt_', '', trndvar)
-    ) %>% 
-    data.frame
-  
-  return(trnds)
-  
-}
-
-trnds_nrm <- seasbyyr(mods, trndvar = 'bt_norm')
-trnds_fit <- seasbyyr(mods, trndvar = 'bt_fits')
-trnds_obs <- seasbyyr(mods, trndvar = 'res')
-
-# combine all
-trnds_seasyr <- rbind(trnds_nrm, trnds_fit, trnds_obs) %>% 
-  select(Site_Code, resvar, cat, perchg, ann, trndvar) %>% 
-  spread(trndvar, perchg) %>% 
-  mutate(Site_Code = factor(Site_Code, levels = c('D7', 'D6', 'D4', 'D28', 'D26', 'D19', 'P8', 'C10', 'C3')))
-
+data(trnds_seasyr)
 
 # response labels 
 reslabs <- list(

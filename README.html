@@ -257,6 +257,7 @@ div.tocify {
 <li><p><code>trnds_ave.RData</code> trend summary of averages by annual, monthly categories</p></li>
 <li><p><code>trnds_chg.RData</code> trend summary of percent changes by annual, monthly categories</p></li>
 <li><p><code>trnds_sk.RData</code> trend summary using seasonal kendall on flow-normalized results</p></li>
+<li><p><code>trnds_seasyr.RData</code> sk trends on predicted and flow-norm WRTDS results, seasonal aggs by year</p></li>
 </ul>
 <p><strong><em>R/</em></strong> Supporting R scripts</p>
 <p><strong><em>text/</em></strong> Summary text of analyses</p>
@@ -644,55 +645,7 @@ grid.arrange(
 <div id="comparison-of-trends-and-effects-of-flow" class="section level3 tabset">
 <h3>Comparison of trends and effects of flow</h3>
 <p>Seasonal Kendall tests were used to characterize trends using results from the WRTDS models. Trends were compared on the predicted and flow-normalized values to identify potential effects of flow. Trends were evaluated for different annual groupings and seasonal groupings within each annual group.</p>
-<pre class="r"><code>data(mods)
-
-##
-# seasons within each year group
-
-seasbyyr &lt;- function(mods, trndvar = 'bt_norm'){
-  
-  mobrks &lt;- list(c(3, 4, 5), c(6, 7, 8), c(9, 10, 11), c(12, 1, 2))
-  yrbrks &lt;- c(-Inf, 1995, Inf)
-  molabs &lt;- c('Spring', 'Summer', 'Fall', 'Winter')
-  yrlabs &lt;- c('1976-1995', '1996-2014')
-  
-  # norm trnds
-  trnds &lt;- mutate(mods, 
-    trnd = map(data, function(x){
-      
-      bef &lt;- x[x$year &lt;= 1995, ] %&gt;% 
-        wrtdstrnd_sk(., mobrks, yrbrks, molabs, yrlabs, trndvar = trndvar) %&gt;% 
-        mutate(ann = 'bef')
-    
-      aft &lt;- x[x$year &gt; 1995, ]  %&gt;% 
-        wrtdstrnd_sk(., mobrks, yrbrks, molabs, yrlabs, trndvar = trndvar) %&gt;% 
-        mutate(ann = 'aft')
-    
-      rbind(bef, aft)
-      
-      })
-    ) %&gt;% 
-    select(-data) %&gt;% 
-    unnest %&gt;% 
-    mutate(
-      trndvar = gsub('bt_', '', trndvar)
-    ) %&gt;% 
-    data.frame
-  
-  return(trnds)
-  
-}
-
-trnds_nrm &lt;- seasbyyr(mods, trndvar = 'bt_norm')
-trnds_fit &lt;- seasbyyr(mods, trndvar = 'bt_fits')
-trnds_obs &lt;- seasbyyr(mods, trndvar = 'res')
-
-# combine all
-trnds_seasyr &lt;- rbind(trnds_nrm, trnds_fit, trnds_obs) %&gt;% 
-  select(Site_Code, resvar, cat, perchg, ann, trndvar) %&gt;% 
-  spread(trndvar, perchg) %&gt;% 
-  mutate(Site_Code = factor(Site_Code, levels = c('D7', 'D6', 'D4', 'D28', 'D26', 'D19', 'P8', 'C10', 'C3')))
-
+<pre class="r"><code>data(trnds_seasyr)
 
 # response labels 
 reslabs &lt;- list(
