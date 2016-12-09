@@ -463,3 +463,163 @@ trnd_map(res = 'no23', mods = mods)
 ```
 
 ![](README_files/figure-html/unnamed-chunk-15-1.png)<!-- -->
+
+### Comparison of trends and effects of flow {.tabset}
+
+Seasonal Kendall tests were used to characterize trends using results from the WRTDS models. Trends were compared on the predicted and flow-normalized values to identify potential effects of flow.  Trends were evaluated for different annual groupings and seasonal groupings within each annual group.
+
+
+```r
+data(mods)
+
+##
+# seasons within each year group
+
+seasbyyr <- function(mods, trndvar = 'bt_norm'){
+  
+  mobrks <- list(c(3, 4, 5), c(6, 7, 8), c(9, 10, 11), c(12, 1, 2))
+  yrbrks <- c(-Inf, 1995, Inf)
+  molabs <- c('Spring', 'Summer', 'Fall', 'Winter')
+  yrlabs <- c('1976-1995', '1996-2014')
+  
+  # norm trnds
+  trnds <- mutate(mods, 
+    trnd = map(data, function(x){
+      
+      bef <- x[x$year <= 1995, ] %>% 
+        wrtdstrnd_sk(., mobrks, yrbrks, molabs, yrlabs, trndvar = trndvar) %>% 
+        mutate(ann = 'bef')
+    
+      aft <- x[x$year > 1995, ]  %>% 
+        wrtdstrnd_sk(., mobrks, yrbrks, molabs, yrlabs, trndvar = trndvar) %>% 
+        mutate(ann = 'aft')
+    
+      rbind(bef, aft)
+      
+      })
+    ) %>% 
+    select(-data) %>% 
+    unnest %>% 
+    mutate(
+      trndvar = gsub('bt_', '', trndvar)
+    ) %>% 
+    data.frame
+  
+  return(trnds)
+  
+}
+
+trnds_nrm <- seasbyyr(mods, trndvar = 'bt_norm')
+trnds_fit <- seasbyyr(mods, trndvar = 'bt_fits')
+trnds_obs <- seasbyyr(mods, trndvar = 'res')
+
+# combine all
+trnds_seasyr <- rbind(trnds_nrm, trnds_fit, trnds_obs) %>% 
+  select(Site_Code, resvar, cat, perchg, ann, trndvar) %>% 
+  spread(trndvar, perchg) %>% 
+  mutate(Site_Code = factor(Site_Code, levels = c('D7', 'D6', 'D4', 'D28', 'D26', 'D19', 'P8', 'C10', 'C3')))
+
+
+# response labels 
+reslabs <- list(
+  shrt = c('din', 'nh', 'no23'),
+  expr = c(
+    'DIN', 
+    expression(paste(NH [4] ^ '+')),
+    expression(paste(NO [2] ^ '-', ' / ', NO [3] ^ '2-'))
+  )
+)
+
+# year only
+toplo1 <- filter(trnds_seasyr, cat %in% c('1976-1995', '1996-2014')) %>% 
+  gather('var', 'val', fits:norm) %>% 
+  mutate(
+    resvar = factor(resvar, levels = reslabs$shrt, labels = reslabs$expr), 
+    var = factor(var, levels = c('fits', 'norm'), labels = c('Predicted', 'Flow-normalized'))
+  )
+
+# seasonal, first years
+toplo2 <- filter(trnds_seasyr, !cat %in% c('1976-1995', '1996-2014')& ann == 'bef') %>% 
+  gather('var', 'val', fits:norm) %>% 
+  mutate(
+    resvar = factor(resvar, levels = reslabs$shrt, labels = reslabs$expr), 
+    var = factor(var, levels = c('fits', 'norm'), labels = c('Predicted', 'Flow-normalized'))
+  )
+
+# seasonal, first years
+toplo3 <- filter(trnds_seasyr, !cat %in% c('1976-1995', '1996-2014')& ann == 'aft') %>% 
+  gather('var', 'val', fits:norm) %>% 
+  mutate(
+    resvar = factor(resvar, levels = reslabs$shrt, labels = reslabs$expr), 
+    var = factor(var, levels = c('fits', 'norm'), labels = c('Predicted', 'Flow-normalized'))
+  )
+
+mythm <- theme_minimal() +
+  theme(
+    legend.position = 'top', 
+    legend.title = element_blank(), 
+    axis.title.y = element_blank(),
+    panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+    axis.ticks.x = element_line(),
+    axis.ticks.y = element_line(),
+    axis.ticks.length = unit(.1, "cm")
+  )  
+    
+p1 <- ggplot(toplo1, aes(x = val, y = Site_Code)) + 
+  geom_point(aes(pch = var), size = 3, alpha = 0.8) + 
+  facet_grid(cat~resvar, labeller = label_parsed
+    ) + 
+  geom_vline(xintercept = 0, linetype = 'dashed') + 
+  mythm + 
+  xlab(expression('% chg yr' ^-1)) +
+  scale_shape_manual(values = c(16, 1)) + 
+  ggtitle('Annual groups')
+
+p2 <- ggplot(toplo2, aes(x = val, y = Site_Code)) + 
+  geom_point(aes(pch = var), size = 3, alpha = 0.8) + 
+  facet_grid(cat~resvar, labeller = label_parsed
+    ) + 
+  geom_vline(xintercept = 0, linetype = 'dashed') + 
+  mythm + 
+  xlab(expression('% chg yr' ^-1)) +
+  scale_shape_manual(values = c(16, 1)) + 
+  ggtitle('Seasonal groups, 1976-1995')
+
+p3 <- ggplot(toplo3, aes(x = val, y = Site_Code)) + 
+  geom_point(aes(pch = var), size = 3, alpha = 0.8) + 
+  facet_grid(cat~resvar, labeller = label_parsed
+    ) + 
+  geom_vline(xintercept = 0, linetype = 'dashed') + 
+  mythm + 
+  xlab(expression('% chg yr' ^-1)) +
+  scale_shape_manual(values = c(16, 1)) + 
+  ggtitle('Seasonal groups, 1996-2014')
+```
+
+#### Annual groups
+
+
+```r
+p1
+```
+
+![](README_files/figure-html/unnamed-chunk-17-1.png)<!-- -->
+
+#### Seasonal groups, 1976-1995
+
+
+```r
+p2
+```
+
+![](README_files/figure-html/unnamed-chunk-18-1.png)<!-- -->
+
+#### Seasonal groups, 1996-2014
+
+
+```r
+p3
+```
+
+![](README_files/figure-html/unnamed-chunk-19-1.png)<!-- -->
+

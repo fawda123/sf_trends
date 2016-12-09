@@ -369,7 +369,7 @@ save(trnds_ave, file = 'M:/docs/manuscripts/sftrends_manu/data/trnds_ave.RData',
 # by sk
 trnds_sk <- mutate(mods, 
   trnd = map(data, function(x){
-    wrtdstrnd_sk(x, mobrks, yrbrks, molabs, yrlabs, aves = T)
+    wrtdstrnd_sk(x, mobrks, yrbrks, molabs, yrlabs)
     })
   ) %>% 
   select(-data) %>% 
