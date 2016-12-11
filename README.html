@@ -647,6 +647,12 @@ grid.arrange(
 <p>Seasonal Kendall tests were used to characterize trends using results from the WRTDS models. Trends were compared on the predicted and flow-normalized values to identify potential effects of flow. Trends were evaluated for different annual groupings and seasonal groupings within each annual group.</p>
 <pre class="r"><code>data(trnds_seasyr)
 
+# combine all
+trnds_seasyr &lt;- rbind(trnds_nrm, trnds_fit, trnds_obs) %&gt;% 
+  select(Site_Code, resvar, cat, perchg, ann, trndvar) %&gt;% 
+  spread(trndvar, perchg) %&gt;% 
+  mutate(Site_Code = factor(Site_Code, levels = c('D7', 'D6', 'D4', 'D28', 'D26', 'D19', 'P8', 'C10', 'C3')))
+
 # response labels 
 reslabs &lt;- list(
   shrt = c('din', 'nh', 'no23'),

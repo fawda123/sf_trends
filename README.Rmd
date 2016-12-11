@@ -444,6 +444,12 @@ Seasonal Kendall tests were used to characterize trends using results from the W
 ```{r, cache = T}
 data(trnds_seasyr)
 
+# combine all
+trnds_seasyr <- rbind(trnds_nrm, trnds_fit, trnds_obs) %>% 
+  select(Site_Code, resvar, cat, perchg, ann, trndvar) %>% 
+  spread(trndvar, perchg) %>% 
+  mutate(Site_Code = factor(Site_Code, levels = c('D7', 'D6', 'D4', 'D28', 'D26', 'D19', 'P8', 'C10', 'C3')))
+
 # response labels 
 reslabs <- list(
   shrt = c('din', 'nh', 'no23'),

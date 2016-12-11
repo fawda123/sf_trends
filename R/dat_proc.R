@@ -424,14 +424,8 @@ trnds_nrm <- seasbyyr(mods, trndvar = 'bt_norm')
 trnds_fit <- seasbyyr(mods, trndvar = 'bt_fits')
 trnds_obs <- seasbyyr(mods, trndvar = 'res')
 
-# combine all
-trnds_seasyr <- rbind(trnds_nrm, trnds_fit, trnds_obs) %>% 
-  select(Site_Code, resvar, cat, perchg, ann, trndvar) %>% 
-  spread(trndvar, perchg) %>% 
-  mutate(Site_Code = factor(Site_Code, levels = c('D7', 'D6', 'D4', 'D28', 'D26', 'D19', 'P8', 'C10', 'C3')))
-
-save(trnds_seasyr, file = 'data/trnds_seasyr.RData', compress = 'xz')
-save(trnds_seasyr, file = 'M:/docs/manuscripts/sftrends_manu/data/trnds_seasyr.RData', compress = 'xz')
+save(trnds_nrm, trnds_fit, trnds_obs, file = 'data/trnds_seasyr.RData', compress = 'xz')
+save(trnds_nrm, trnds_fit, trnds_obs, file = 'M:/docs/manuscripts/sftrends_manu/data/trnds_seasyr.RData', compress = 'xz')
 
 ######
 # processing clam data at D7 from Craduer et al. 2016 report
