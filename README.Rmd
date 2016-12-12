@@ -39,13 +39,7 @@ Content available at [https://github.com/fawda123/sf_trends](https://github.com/
 
 * `stock_load.RData` nutrient load data from Stockton, kg/day
 
-* `trnds_ave.RData` trend summary of averages by annual, monthly categories
-
-* `trnds_chg.RData` trend summary of percent changes by annual, monthly categories
-
-* `trnds_sk.RData` trend summary using seasonal kendall on flow-normalized results
-
-* `trnds_seasyr.RData` sk trends on predicted and flow-norm WRTDS results, seasonal aggs by year
+* `trnds_seasyr.RData` collection of three data frames for seasonal kendall on observed, fit, norm data, different annual and seasonal periods
 
 **_R/_** Supporting R scripts
 
@@ -63,6 +57,7 @@ library(ggrepel)
 library(scales)
 library(RColorBrewer)
 library(WRTDStidal)
+library(plotly)
 source('R/funcs.R')
 ```
 
@@ -87,7 +82,7 @@ perfs <- mutate(mods,
   unnest
 
 # the plot
-ggplot(perfs, aes(x = Site_Code, y = rmse)) +
+p <- ggplot(perfs, aes(x = Site_Code, y = rmse)) +
   geom_bar(stat = 'identity') + 
   facet_grid(~resvar) +
   theme_minimal() +
@@ -99,12 +94,13 @@ ggplot(perfs, aes(x = Site_Code, y = rmse)) +
     axis.title.x= element_blank()
     ) + 
   scale_y_continuous('RMSE', limits = ylims)
+ggplotly(p)
 ```
 
 #### NMSE
 ```{r fig.height = 4.5, fig.width = 10, echo = T, warning = F, eval = T}
 # the plot
-ggplot(perfs, aes(x = Site_Code, y = nmse)) +
+p <- ggplot(perfs, aes(x = Site_Code, y = nmse)) +
   geom_bar(stat = 'identity') + 
   facet_grid(~resvar) +
   theme_minimal() +
@@ -116,6 +112,7 @@ ggplot(perfs, aes(x = Site_Code, y = nmse)) +
     axis.title.x= element_blank()
     ) + 
   scale_y_continuous('NMSE', limits = ylims)
+ggplotly(p)
 ```
 
 ### Annually-averaged results {.tabset}

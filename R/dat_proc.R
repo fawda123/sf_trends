@@ -323,64 +323,7 @@ save(mods, file = 'data/mods.RData', compress = 'xz')
 save(mods, file = 'M:/docs/manuscripts/sftrends_manu/data/mods.RData', compress = 'xz')  
 
 ######
-# trend summary for stations
-
-rm(list = ls())
-
-data(mods)
-
-mobrks <- list(c(3, 4, 5), c(6, 7, 8), c(9, 10, 11), c(12, 1, 2))
-yrbrks <- c(-Inf, 1995, Inf)
-molabs <- c('Spring', 'Summer', 'Fall', 'Winter')
-yrlabs <- c('1976-1995', '1996-2014')
-
-# % changes
-trnds_chg <- mutate(mods, 
-  trnd = map(data, function(x){
-    wrtdstrnd(x, mobrks, yrbrks, molabs, yrlabs, aves = T)
-    })
-  ) %>% 
-  select(-data) %>% 
-  unnest %>% 
-  data.frame %>% 
-  select(-flovar, -Location, -ave) %>% 
-  spread(cat, chg) %>% 
-  arrange(resvar)
-
-save(trnds_chg, file = 'data/trnds_chg.RData')
-save(trnds_chg, file = 'M:/docs/manuscripts/sftrends_manu/data/trnds_chg.RData', compress = 'xz')
-
-# by averages
-trnds_ave <- mutate(mods, 
-  trnd = map(data, function(x){
-    wrtdstrnd(x, mobrks, yrbrks, molabs, yrlabs, aves = T)
-    })
-  ) %>% 
-  select(-data) %>% 
-  unnest %>% 
-  data.frame %>% 
-  select(-flovar, -Location, -chg) %>% 
-  spread(cat, ave) %>% 
-  arrange(resvar)
-
-save(trnds_ave, file = 'data/trnds_ave.RData')
-save(trnds_ave, file = 'M:/docs/manuscripts/sftrends_manu/data/trnds_ave.RData', compress = 'xz')
-
-# by sk
-trnds_sk <- mutate(mods, 
-  trnd = map(data, function(x){
-    wrtdstrnd_sk(x, mobrks, yrbrks, molabs, yrlabs)
-    })
-  ) %>% 
-  select(-data) %>% 
-  unnest %>% 
-  data.frame
-
-save(trnds_sk, file = 'data/trnds_sk.RData')
-save(trnds_sk, file = 'M:/docs/manuscripts/sftrends_manu/data/trnds_sk.RData', compress = 'xz')
-
-######
-# sk trends on predicted and flow-norm, seasonal aggs by year
+# sk trends on observed, predicted, and flow-norm, seasonal aggs by year
 
 data(mods)
 
@@ -391,7 +334,7 @@ seasbyyr <- function(mods, trndvar = 'bt_norm'){
   mobrks <- list(c(3, 4, 5), c(6, 7, 8), c(9, 10, 11), c(12, 1, 2))
   yrbrks <- c(-Inf, 1995, Inf)
   molabs <- c('Spring', 'Summer', 'Fall', 'Winter')
-  yrlabs <- c('1976-1995', '1996-2014')
+  yrlabs <- c('1976-1995', '1996-2013')
   
   # norm trnds
   trnds <- mutate(mods, 
