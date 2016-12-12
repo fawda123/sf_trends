@@ -541,3 +541,109 @@ p2
 p3
 ```
 
+### Correlations of flow residuals with flow {.tabset}
+
+The relationship of response variables with flow was further evaluated by comparing the residuals of the flow-normalized and predicted time series from WRTDS with the flow record used at each station.  Correlations between these variables demonstrate the explicit effect of flow as having a dilution (negative correlation), mobilization (positive correlation), or chemostatic effect (minimal correlation). The correlation of flow with the observed time series is shown first to contrast the ability of WRTDS to more clearly represent the flow/response relationship.  
+
+```{r, cache = T, message = F, warning = F}
+# globals
+ylab <- expression(paste('DIN (mg ', L^-1, ')'))
+ptheme <- theme_minimal() + 
+  theme(
+    axis.line.x = element_line(),
+    axis.line.y = element_line(), 
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    axis.ticks.x = element_line(),
+    axis.ticks.y = element_line(),
+    axis.ticks.length = unit(.1, "cm"),
+    panel.border = element_rect(size = 0.5, colour = 'black', fill = NA), 
+    panel.grid.minor = element_blank(), 
+    # legend.position = 'top', 
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 8)
+)
+
+data(mods)
+
+yrbrks <- c(-Inf, 1985, 1994, 2003, Inf)
+yrlabs <- c('1976-1985', '1986-1994', '1995-2003', '2004-2013')
+
+# response labels 
+reslabs <- list(
+  shrt = c('din', 'nh', 'no23'),
+  expr = c(
+    'DIN', 
+    expression(paste(NH [4] ^ '+')),
+    expression(paste(NO [2] ^ '-', ' / ', NO [3] ^ '2-'))
+  )
+)
+
+toplo1 <- mutate(mods, 
+  floeff = map(data, function(x){
+    
+    x <- mutate(x,
+      yrcat = cut(year, breaks = yrbrks, labels = yrlabs)
+    ) %>% 
+    group_by(yrcat) %>% 
+    summarise(Correlation = cor.test(flo, res, method = 'spearman', na.rm = T)$estimate)
+    
+    return(x)
+    
+    })
+  ) %>% 
+  select(-data) %>% 
+  unnest %>% 
+  mutate(
+    Correlation = ifelse(Site_Code %in% c('D4', 'D6', 'D7'), -1 * Correlation, Correlation), 
+    Site_Code = factor(Site_Code, levels = c('D7', 'D6', 'D4', 'D28', 'D26', 'D19', 'P8', 'C10', 'C3')),
+    resvar = factor(resvar, levels = reslabs$shrt, labels = reslabs$expr)
+  )
+
+toplo2 <- mutate(mods, 
+  floeff = map(data, function(x){
+    
+    x <- mutate(x,
+      floeff = fits - norm,
+      yrcat = cut(year, breaks = yrbrks, labels = yrlabs)
+    ) %>% 
+    group_by(yrcat) %>% 
+    summarise(Correlation = cor.test(flo, floeff, method = 'spearman', na.rm = T)$estimate)
+    
+    return(x)
+    
+    })
+  ) %>% 
+  select(-data) %>% 
+  unnest %>% 
+  mutate(
+    Correlation = ifelse(Site_Code %in% c('D4', 'D6', 'D7'), -1 * Correlation, Correlation), 
+    Site_Code = factor(Site_Code, levels = c('D7', 'D6', 'D4', 'D28', 'D26', 'D19', 'P8', 'C10', 'C3')),
+    resvar = factor(resvar, levels = reslabs$shrt, labels = reslabs$expr)
+  )
+
+p1 <- ggplot(toplo1, aes(x = yrcat, y = Correlation, fill = Correlation)) +
+  geom_bar(stat = 'identity', colour = 'grey') + 
+  scale_fill_distiller(palette = 'RdYlBu') + 
+  facet_grid(Site_Code~ resvar, labeller = label_parsed) + 
+  scale_y_continuous('Correlation') +
+  ptheme
+
+p2 <- ggplot(toplo2, aes(x = yrcat, y = Correlation, fill = Correlation)) +
+  geom_bar(stat = 'identity', colour = 'grey') + 
+  scale_fill_distiller(palette = 'RdYlBu') + 
+  facet_grid(Site_Code~ resvar, labeller = label_parsed) + 
+  scale_y_continuous('Correlation') +
+  ptheme
+```
+
+#### Observed data
+
+```{r, fig.height = 9, fig.width = 7, echo = T, message = F, warning = F, eval = T, cache = TRUE}
+p1
+```
+
+#### Flow residuals
+
+```{r, fig.height = 9, fig.width = 7, echo = T, message = F, warning = F, eval = T, cache = TRUE}
+p2
+```
