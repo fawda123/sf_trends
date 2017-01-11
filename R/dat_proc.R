@@ -12,15 +12,15 @@ library(foreach)
 library(doParallel)
 library(purrr)
 
-######
-# import ESRI shapefile, save as RData object
-# shapefile from dissolved/clipped object created in ArcMap
-# source data from http://www.sfei.org/data/california-aquatic-resource-inventory-cari-version-01-gis-data#sthash.ykwo9qLo.dpbs
-
-delt_map <- maptools::readShapeSpatial('M:/GIS/Cali/sf_delta.shp')
-
-save(delt_map, file = 'data/Cali/delt_map.RData', compress = 'xz')
-save(delt_map, file = 'M:/docs/manuscripts/sftrends_manu/data/delt_map.RData', compress = 'xz')
+# ######
+# # import ESRI shapefile, save as RData object
+# # shapefile from dissolved/clipped object created in ArcMap
+# # source data from http://www.sfei.org/data/california-aquatic-resource-inventory-cari-version-01-gis-data#sthash.ykwo9qLo.dpbs
+# 
+# delt_map <- maptools::readShapeSpatial('M:/GIS/Cali/sf_delta.shp')
+# 
+# save(delt_map, file = 'data/Cali/delt_map.RData', compress = 'xz')
+# save(delt_map, file = 'M:/docs/manuscripts/sftrends_manu/data/delt_map.RData', compress = 'xz')
 
 ######
 # wq data
@@ -74,16 +74,16 @@ dat <- filter(dat, Site_Code %in% c('C3', 'C10', 'P8', 'D4', 'D7', 'D6', 'D19', 
 dat$Location[dat$Site_Code %in%  c('D4', 'D7', 'D6')] <- 'Suisun'
 dat$Location[dat$Site_Code %in% c('D19', 'D26', 'D28')] <- 'Middle'
 
-# unit conversions mg/L or ug/L to umol/L
-dat <- mutate(dat, 
-  nh = nh, 
-  no23 = no23, 
-  din = din,
-  tss = tss, 
-  chl = chl,
-  sio2 = sio2, 
-  tp = tp
-)
+# # unit conversions mg/L or ug/L to umol/L
+# dat <- mutate(dat, 
+#   nh = nh, 
+#   no23 = no23, 
+#   din = din,
+#   tss = tss, 
+#   chl = chl,
+#   sio2 = sio2, 
+#   tp = tp
+# )
 
 delt_dat <- dat
 save(delt_dat, file = 'data/delt_dat.RData')
@@ -381,184 +381,184 @@ trnds_obs <- seasbyyr(mods, trndvar = 'res')
 save(trnds_nrm, trnds_fit, trnds_obs, file = 'data/trnds_seasyr.RData', compress = 'xz')
 save(trnds_nrm, trnds_fit, trnds_obs, file = 'M:/docs/manuscripts/sftrends_manu/data/trnds_seasyr.RData', compress = 'xz')
 
-######
-# processing clam data at D7 from Craduer et al. 2016 report
-
-# text files, taken manually from pdf conversion to text
-fls <- c('ignore/CrauderApp9.txt', 'ignore/CrauderApp10.txt')
-
-# function to process data from text files
-#
-# fl is text file name
-# spp is chr string of species in the file
-# mo_strt is the starting month for the year, defaults to October for USGS water year
-form_dat <- function(fl, spp, mo_strt = 10){ 
-  
-  # read file
-  tmp <- readLines(fl) %>% 
-    grep('^$|^\\s*', ., invert = T, value = T)
-  
-  # put in wide format
-  heads <- tmp[1:16]
-  tmp <- tmp[!tmp %in% heads] %>% 
-    data.frame(col = rep(1:8, length.out = length(.)), row = rep(1:(length(.)/8), each = 8), val = .) %>% 
-    spread(col, val) %>% 
-    select(-row)
-  
-  # addl formatting, add species
-  names(tmp) <- c('date', 'clams_smp', 'biomass', 'recruit_area', 'mean_size', 'gr', 'depth', 'no_grabs')
-  tmp <- gather(tmp, 'var', 'val', -date) %>% 
-    mutate(val = as.numeric(val)) %>% 
-    spread(var, val) %>% 
-    mutate(
-      date = as.Date(as.character(date), format = '%m/%d/%Y'),
-      mo = month(date),
-      yr = year(date), 
-      yr = ifelse(mo < mo_strt, yr, yr + 1)
-      ) %>%  
-    arrange(date) %>% 
-    mutate(species = spp) %>% 
-    select(-mo)
-  
-  return(tmp)
-  
-  }
-
-d7_corb <- form_dat(fls[1], 'Corbicula')
-d7_pota <- form_dat(fls[2], 'Potamocorbula')
-
-clams <- rbind(d7_corb, d7_pota)
-save(clams, file = 'data/clams.RData')
-save(clams, file = 'M:/docs/manuscripts/sftrends_manu/data/clams.RData', compress = 'xz')
-
-######
-# potw loads from Tracy and Stockton
-# see Bresnahan email 6/20
-# note that TN is probably wrong in original data, recalculated here
-
-stockton <- read.csv('ignore/Stockton POTW.csv') %>% 
-  mutate(
-    date = as.Date(X, format = '%d-%b-%y'), 
-    loc = 'stock', 
-    TN = DIN
-    ) %>% 
-  select(-X, -DIN) %>% 
-  gather('var', 'val', NH4:TN) %>% 
-  mutate(var = tolower(var))
-
-stock_load <- stockton
-
-save(stock_load, file = 'data/stock_load.RData', compress = 'xz')
-save(stock_load, file = 'M:/docs/manuscripts/sftrends_manu/data/stock_load.RData', compress = 'xz')
-
-######
-# stockton effluent concentrations
-# see Jabusch email 11/2/16
-
-# import all
-stockton <- read_excel('ignore/COS Receiving Water 1992-09 through 2009-03.xls') %>% 
-  as.data.frame(., stringsAsFactors = FALSE)
-
-# rows, columns to keep
-rowsel <- grep('STOCKTON WWTP', stockton[, 2]) %>% 
-  c(., which(is.na(stockton[, 2]))) %>% 
-  sort
-colsel <- paste0(c('NH3', 'Nitrite', 'Nitrate')) %>% 
-  paste(., collapse = '|') %>% 
-  grep(. , names(stockton)) %>% 
-  c(1, 2, .)
-
-# subset by rows, columns, fill date, rename variables
-# Thomas said that R1 is upstream of plant
-dat <- stockton[-rowsel, colsel]
-names(dat)[is.na(names(dat))] <- 'date'
-names(dat)[grep('STOCKTON', names(dat))] <- 'dy'
-dat <- mutate(dat,
-    yr = year(date), 
-    yr = zoo::na.locf(yr, na.rm = F),
-    mo = month(date),
-    mo = zoo::na.locf(mo, na.rm = F),
-    dy = gsub('(^[0-9]*).*', '\\1', dy)
-  ) %>% 
-  select(-date) %>% 
-  unite('date', yr, mo, dy, sep = '-') %>% 
-  mutate(date = as.Date(date)) %>% 
-  gather('var', 'val', -date) %>% 
-  extract(var, c('site', 'var'), regex = '(^R[0-9].*) (\\n.*\\n.*)') %>% 
-  filter(!grepl('R[1]', site)) %>% 
-  mutate(
-    var = gsub('.*(NH[3]).*', '\\1', var),
-    var = gsub('.*(NO[2]).*', '\\1', var),
-    var = gsub('.*(NO[3]).*', '\\1', var),
-    val = as.numeric(val)
-  ) %>% 
-  group_by(var) %>% 
-  mutate(val = zoo::na.approx(val, na.rm = F)) %>% 
-  group_by(date, var) %>% 
-  summarize(val = sum(val)) %>% 
-  ungroup %>% 
-  arrange(var, date) %>% 
-  group_by(var) %>% 
-  mutate(
-    val2 = stats::filter(val, rep(1/20, 20), sides = 2), 
-    val2 = as.numeric(val2)
-    ) %>% 
-  filter(date >= as.Date('2002-01-01')) %>%
-  data.frame
+# ######
+# # processing clam data at D7 from Craduer et al. 2016 report
 # 
-# ggplot(dat, aes(x = date, y = val, colour = var)) +
-#   geom_line() +
-#   # geom_line(aes(y = val2), linetype = 'dashed') +
-#   theme_minimal()
-
-stock_conc <- dat
-save(stock_conc, file = 'data/stock_conc.RData', compress = 'xz')
-save(stock_conc, file = 'M:/docs/manuscripts/sftrends_manu/data/stock_conc.RData', compress = 'xz')
-
-######
-# create quantile models for first hypothesis in paper
-
-rm(list = ls())
-
-data(mods)
-
-# filter c10
-h1dat <- filter(mods, Site_Code %in% 'C10')
-
-# save output
-save(h1dat, file = 'data/h1dat.RData', compress = 'xz')
-save(h1dat, file = 'M:/docs/manuscripts/sftrends_manu/data/h1dat.RData', compress = 'xz')
-
-######
-# create mean models for second hypothesis in paper
-# wrtds mean models for chl, din, nh, no23, and sio2 at P8
-
-rm(list = ls())
-
-# import each file, add to nested dat dataframe
-fls <- list.files('data', pattern = '^P8', full.names = T) %>% 
-  grep('chl|din|no23|nh|sio2', ., value = T)
-moddat <- lapply(fls, load, .GlobalEnv)
-names(moddat) <- unlist(moddat)
-moddat <- lapply(moddat, get)
-
-Location <- 'Delta'
-Site_Code <- 'P8'
-resvar <- c('chl', 'din', 'nh', 'no23', 'sio2')
-flovar <- 'sjr'
-h2dat <- expand.grid(Location, Site_Code, resvar, flovar)
-names(h2dat) <- c('Location', 'Site_Code', 'resvar', 'flovar')
-h2dat$data <- NA
-h2dat <- nest(h2dat, data)
-
-# add model data to nested data frame
-h2dat <- unite(h2dat, 'tmp', Site_Code, resvar, remove = F) %>% 
-  mutate(data = moddat[match(tmp, names(moddat))]) %>% 
-  select(-tmp)
-
-# save output
-save(h2dat, file = 'data/h2dat.RData', compress = 'xz')
-save(h2dat, file = 'M:/docs/manuscripts/sftrends_manu/data/h2dat.RData', compress = 'xz')
+# # text files, taken manually from pdf conversion to text
+# fls <- c('ignore/CrauderApp9.txt', 'ignore/CrauderApp10.txt')
+# 
+# # function to process data from text files
+# #
+# # fl is text file name
+# # spp is chr string of species in the file
+# # mo_strt is the starting month for the year, defaults to October for USGS water year
+# form_dat <- function(fl, spp, mo_strt = 10){ 
+#   
+#   # read file
+#   tmp <- readLines(fl) %>% 
+#     grep('^$|^\\s*', ., invert = T, value = T)
+#   
+#   # put in wide format
+#   heads <- tmp[1:16]
+#   tmp <- tmp[!tmp %in% heads] %>% 
+#     data.frame(col = rep(1:8, length.out = length(.)), row = rep(1:(length(.)/8), each = 8), val = .) %>% 
+#     spread(col, val) %>% 
+#     select(-row)
+#   
+#   # addl formatting, add species
+#   names(tmp) <- c('date', 'clams_smp', 'biomass', 'recruit_area', 'mean_size', 'gr', 'depth', 'no_grabs')
+#   tmp <- gather(tmp, 'var', 'val', -date) %>% 
+#     mutate(val = as.numeric(val)) %>% 
+#     spread(var, val) %>% 
+#     mutate(
+#       date = as.Date(as.character(date), format = '%m/%d/%Y'),
+#       mo = month(date),
+#       yr = year(date), 
+#       yr = ifelse(mo < mo_strt, yr, yr + 1)
+#       ) %>%  
+#     arrange(date) %>% 
+#     mutate(species = spp) %>% 
+#     select(-mo)
+#   
+#   return(tmp)
+#   
+#   }
+# 
+# d7_corb <- form_dat(fls[1], 'Corbicula')
+# d7_pota <- form_dat(fls[2], 'Potamocorbula')
+# 
+# clams <- rbind(d7_corb, d7_pota)
+# save(clams, file = 'data/clams.RData')
+# save(clams, file = 'M:/docs/manuscripts/sftrends_manu/data/clams.RData', compress = 'xz')
+# 
+# ######
+# # potw loads from Tracy and Stockton
+# # see Bresnahan email 6/20
+# # note that TN is probably wrong in original data, recalculated here
+# 
+# stockton <- read.csv('ignore/Stockton POTW.csv') %>% 
+#   mutate(
+#     date = as.Date(X, format = '%d-%b-%y'), 
+#     loc = 'stock', 
+#     TN = DIN
+#     ) %>% 
+#   select(-X, -DIN) %>% 
+#   gather('var', 'val', NH4:TN) %>% 
+#   mutate(var = tolower(var))
+# 
+# stock_load <- stockton
+# 
+# save(stock_load, file = 'data/stock_load.RData', compress = 'xz')
+# save(stock_load, file = 'M:/docs/manuscripts/sftrends_manu/data/stock_load.RData', compress = 'xz')
+# 
+# ######
+# # stockton effluent concentrations
+# # see Jabusch email 11/2/16
+# 
+# # import all
+# stockton <- read_excel('ignore/COS Receiving Water 1992-09 through 2009-03.xls') %>% 
+#   as.data.frame(., stringsAsFactors = FALSE)
+# 
+# # rows, columns to keep
+# rowsel <- grep('STOCKTON WWTP', stockton[, 2]) %>% 
+#   c(., which(is.na(stockton[, 2]))) %>% 
+#   sort
+# colsel <- paste0(c('NH3', 'Nitrite', 'Nitrate')) %>% 
+#   paste(., collapse = '|') %>% 
+#   grep(. , names(stockton)) %>% 
+#   c(1, 2, .)
+# 
+# # subset by rows, columns, fill date, rename variables
+# # Thomas said that R1 is upstream of plant
+# dat <- stockton[-rowsel, colsel]
+# names(dat)[is.na(names(dat))] <- 'date'
+# names(dat)[grep('STOCKTON', names(dat))] <- 'dy'
+# dat <- mutate(dat,
+#     yr = year(date), 
+#     yr = zoo::na.locf(yr, na.rm = F),
+#     mo = month(date),
+#     mo = zoo::na.locf(mo, na.rm = F),
+#     dy = gsub('(^[0-9]*).*', '\\1', dy)
+#   ) %>% 
+#   select(-date) %>% 
+#   unite('date', yr, mo, dy, sep = '-') %>% 
+#   mutate(date = as.Date(date)) %>% 
+#   gather('var', 'val', -date) %>% 
+#   extract(var, c('site', 'var'), regex = '(^R[0-9].*) (\\n.*\\n.*)') %>% 
+#   filter(!grepl('R[1]', site)) %>% 
+#   mutate(
+#     var = gsub('.*(NH[3]).*', '\\1', var),
+#     var = gsub('.*(NO[2]).*', '\\1', var),
+#     var = gsub('.*(NO[3]).*', '\\1', var),
+#     val = as.numeric(val)
+#   ) %>% 
+#   group_by(var) %>% 
+#   mutate(val = zoo::na.approx(val, na.rm = F)) %>% 
+#   group_by(date, var) %>% 
+#   summarize(val = sum(val)) %>% 
+#   ungroup %>% 
+#   arrange(var, date) %>% 
+#   group_by(var) %>% 
+#   mutate(
+#     val2 = stats::filter(val, rep(1/20, 20), sides = 2), 
+#     val2 = as.numeric(val2)
+#     ) %>% 
+#   filter(date >= as.Date('2002-01-01')) %>%
+#   data.frame
+# # 
+# # ggplot(dat, aes(x = date, y = val, colour = var)) +
+# #   geom_line() +
+# #   # geom_line(aes(y = val2), linetype = 'dashed') +
+# #   theme_minimal()
+# 
+# stock_conc <- dat
+# save(stock_conc, file = 'data/stock_conc.RData', compress = 'xz')
+# save(stock_conc, file = 'M:/docs/manuscripts/sftrends_manu/data/stock_conc.RData', compress = 'xz')
+# 
+# ######
+# # create quantile models for first hypothesis in paper
+# 
+# rm(list = ls())
+# 
+# data(mods)
+# 
+# # filter c10
+# h1dat <- filter(mods, Site_Code %in% 'C10')
+# 
+# # save output
+# save(h1dat, file = 'data/h1dat.RData', compress = 'xz')
+# save(h1dat, file = 'M:/docs/manuscripts/sftrends_manu/data/h1dat.RData', compress = 'xz')
+# 
+# ######
+# # create mean models for second hypothesis in paper
+# # wrtds mean models for chl, din, nh, no23, and sio2 at P8
+# 
+# rm(list = ls())
+# 
+# # import each file, add to nested dat dataframe
+# fls <- list.files('data', pattern = '^P8', full.names = T) %>% 
+#   grep('chl|din|no23|nh|sio2', ., value = T)
+# moddat <- lapply(fls, load, .GlobalEnv)
+# names(moddat) <- unlist(moddat)
+# moddat <- lapply(moddat, get)
+# 
+# Location <- 'Delta'
+# Site_Code <- 'P8'
+# resvar <- c('chl', 'din', 'nh', 'no23', 'sio2')
+# flovar <- 'sjr'
+# h2dat <- expand.grid(Location, Site_Code, resvar, flovar)
+# names(h2dat) <- c('Location', 'Site_Code', 'resvar', 'flovar')
+# h2dat$data <- NA
+# h2dat <- nest(h2dat, data)
+# 
+# # add model data to nested data frame
+# h2dat <- unite(h2dat, 'tmp', Site_Code, resvar, remove = F) %>% 
+#   mutate(data = moddat[match(tmp, names(moddat))]) %>% 
+#   select(-tmp)
+# 
+# # save output
+# save(h2dat, file = 'data/h2dat.RData', compress = 'xz')
+# save(h2dat, file = 'M:/docs/manuscripts/sftrends_manu/data/h2dat.RData', compress = 'xz')
 
 ######
 # create mean models for third hypothesis in paper
@@ -566,26 +566,180 @@ save(h2dat, file = 'M:/docs/manuscripts/sftrends_manu/data/h2dat.RData', compres
 
 rm(list = ls())
 
+data(delt_dat)
+data(flow_dat)
+
+# get C10, D7 only from delt_dat
+dat <- dplyr::filter(delt_dat, Site_Code %in% c('C10', 'D7'))
+  
+# add flow from sjr for c10, then prep for combining
+dat <- tidyr::spread(flow_dat, station, q) %>% 
+  select(-east, -sac) %>% 
+  left_join(dat, ., by = 'Date') %>% 
+  select(-Latitude, -Longitude) %>% 
+  tidyr::gather('resvar', 'resval', chl:din) %>% 
+  tidyr::gather('flovar', 'floval', sal:sjr) %>% 
+  mutate(
+    flovar = factor(flovar, levels = c('sal', 'sjr'), labels = c('Salinity', 'San Joaquin')), 
+    year = year(Date), 
+    month = month(Date)
+    ) %>% 
+  select(-Date) %>% 
+  group_by(Site_Code, resvar, flovar) %>% 
+  complete(year, month) %>% 
+  group_by(Site_Code, resvar, flovar, year, month) %>%   
+  summarize(
+    resval = mean(resval, na.rm = TRUE),
+    floval = mean(floval, na.rm = TRUE)
+    ) %>% 
+  mutate(
+    day = 1,
+    Date = paste(year, month, day, sep = '-'), 
+    Date = as.Date(Date)
+    ) %>% 
+  ungroup %>% 
+  select(Site_Code, Date, resvar, resval, flovar, floval)
+
+# add + 1 to salinity for log transform, this is the only flo variable that has zero
+dat[dat$flovar == 'Salinity', 'floval'] <- 1 + dat[dat$flovar == 'Salinity', 'floval']
+
+# log transform flo val, resval
+dat <-  mutate(dat,
+  floval = log(floval), 
+  resval = log(resval), 
+  lim = log(0.01) # limit for sio2 and din
+)
+
+# fix separate limit for chl, floor
+dat[dat$resvar %in% 'chl', 'lim'] <- log(0.05)
+dat$resval <- with(dat, pmax(lim, resval))
+
+# remove salinity records from c10, flow records from d7
+dat <- filter(dat, 
+  Site_Code %in% 'C10' & flovar %in% 'San Joaquin' |
+  Site_Code %in% 'D7' & flovar %in% 'Salinity'
+)
+
+##
+# fit models with default window widths but make interp grids larger
+# get predictions with daily flow records
+
+cl <- makeCluster(7)
+registerDoParallel(cl)
+
+dat <- group_by(dat, Site_Code, resvar, flovar) %>% 
+  nest 
+
+# resvar label lookup
+lablk <- list(
+  shrt = c('chl', 'sio2', 'din'),
+  lngs = c(
+    expression(paste('ln-chlorophyll a (ug ', L^-1, ')')),
+    expression(paste('ln-dissolved inorganic nitrogen (mg ', L^-1, ')')),
+    expression(paste('ln-silicon dioxide (mg ', L^-1, ')'))
+    )
+  )
+
+# flovar label lookup
+stalk <- list(
+  shrt = c('San Joaquin', 'Salinity'),
+  lngs = c(
+    expression(paste('ln-flow (', m^3, s^-1, ')')),
+    'ln-salinity (psu)')
+  )
+
+strt <- Sys.time()
+
+# iterate through stations, res vars to model
+# get predictions from obs time series of salinity or flow
+mods_out <- foreach(i = 1:nrow(dat)) %dopar% {
+  
+  data(delt_dat)
+  data(flow_dat)
+  
+  library(dplyr)
+  library(WRTDStidal)
+  
+  sink('C:/Users/mbeck/Desktop/log.txt')
+  cat(i, 'of', nrow(dat), '\n')
+  print(Sys.time()-strt)
+  sink()
+  
+  # data, respons variable label
+  tomod <- dat[i, ]$data[[1]]
+  resvar <- dat[i, ]$resvar
+  flovar <- dat[i, ]$flovar
+  sta <- dat[i, ]$Site_Code
+  reslab <- with(lablk, lngs[shrt == resvar])
+  flolab <- with(stalk, lngs[shrt == flovar])
+  
+  # prep data as tidal object
+  tomod <- select(tomod, Date, resval, floval, lim) %>% 
+    rename(
+      res = resval, 
+      flo = floval
+    ) %>% 
+    data.frame %>% 
+    tidalmean(., 
+      reslab = reslab, 
+      flolab = flolab
+    )
+  
+  # get flo or salinity variable to predict 
+  if(flovar == 'Salinity'){
+    
+    topred <- filter(delt_dat, Site_Code == sta) %>% 
+      mutate(flo = log(1 + sal)) %>% # salinity is only variable with zeroes
+      rename(date = Date) %>% 
+      select(date, flo) %>% 
+      filter(date >= min(tomod$date) & date <= max(tomod$date)) %>% 
+      na.omit %>% 
+      data.frame
+    
+  } else {
+    
+    stasel <- 'sjr'
+    topred <- filter(flow_dat, station == stasel) %>% 
+      mutate(flo = log(q)) %>% 
+      rename(date = Date) %>% 
+      select(date, flo) %>% 
+      filter(date >= min(tomod$date) & date <= max(tomod$date)) %>% 
+      na.omit %>% 
+      data.frame
+    
+  }
+  
+  # create model and exit
+  mod <- wrtds(tomod, wins = list(0.5, 15, 0.5), flo_div = 30, min_obs = 150)
+  
+  # get predictions, norms from obs flow data
+  out <- mod %>% 
+    respred(dat_pred = topred) %>% 
+    resnorm
+
+  # assign to unique object, save in case of fuckery
+  outnm <- paste0(sta, '_', resvar)
+  assign(outnm, out)
+  save(list = outnm, file = paste0('data/', outnm, '.RData'), compress = 'xz')
+  
+  # out for list
+  out
+  
+}
+
 # import each file, add to nested dat dataframe
-fls <- list.files('data', pattern = '^D7|C10', full.names = T) %>% 
-  grep('chl|din|sio2', ., value = T)
+fls <- list.files('data', pattern = '^D7|^C10', full.names = T)
 moddat <- lapply(fls, load, .GlobalEnv)
 names(moddat) <- unlist(moddat)
 moddat <- lapply(moddat, get)
 
-Location <- 'Delta'
-Site_Code <- c('D7', 'C10')
-resvar <- c('chl', 'din', 'sio2')
-flovar <- 'sjr'
-h3dat <- expand.grid(Location, Site_Code, resvar, flovar)
-names(h3dat) <- c('Location', 'Site_Code', 'resvar', 'flovar')
-h3dat$data <- NA
-h3dat <- nest(h3dat, data)
-
 # add model data to nested data frame
-h3dat <- unite(h3dat, 'tmp', Site_Code, resvar, remove = F) %>% 
-  mutate(data = moddat[match(tmp, names(moddat))]) %>% 
+h3dat <- unite(dat, 'tmp', Site_Code, resvar, remove = F) %>% 
+  mutate(mod = moddat[match(tmp, names(moddat))]) %>% 
   select(-tmp)
+
+# remove the individual files
+file.remove(fls)
 
 # save output
 save(h3dat, file = 'data/h3dat.RData', compress = 'xz')
@@ -596,6 +750,6 @@ save(h3dat, file = 'M:/docs/manuscripts/sftrends_manu/data/h3dat.RData', compres
 # do this last, the above stuff calls these files, they have also been uploaded to S3
 # mods only has nitrogen
 
-fls <- list.files('data', pattern = '^C3|^C10|^P8|^D6|^D4|^D7|^D19|^D26|^D28', full.names = T)
+fls <- list.files('data', pattern = '^C3|^C10|^MD10|^P8|^D6|^D4|^D7|^D19|^D26|^D28', full.names = T)
 file.remove(fls)
 
