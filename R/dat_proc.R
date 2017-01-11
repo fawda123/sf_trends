@@ -17,9 +17,9 @@ library(purrr)
 # shapefile from dissolved/clipped object created in ArcMap
 # source data from http://www.sfei.org/data/california-aquatic-resource-inventory-cari-version-01-gis-data#sthash.ykwo9qLo.dpbs
 
-delt_map <- maptools::readShapeSpatial('M:/GIS/sf_delta.shp')
+delt_map <- maptools::readShapeSpatial('M:/GIS/Cali/sf_delta.shp')
 
-save(delt_map, file = 'data/delt_map.RData', compress = 'xz')
+save(delt_map, file = 'data/Cali/delt_map.RData', compress = 'xz')
 save(delt_map, file = 'M:/docs/manuscripts/sftrends_manu/data/delt_map.RData', compress = 'xz')
 
 ######
@@ -53,7 +53,7 @@ dat <- select(statmeta, Site_Code, Latitude, Longitude) %>%
 
 # finally, subset by selected delta and suisun stations
 # make sure each date is unique
-dat <- filter(dat, Site_Code %in% c('C3', 'C10', 'P8', 'D4', 'D7', 'D6', 'D19', 'D26', 'D28A')) %>% 
+dat <- filter(dat, Site_Code %in% c('C3', 'C10', 'P8', 'D4', 'D7', 'D6', 'D19', 'D26', 'D28A', 'MD10')) %>% 
   mutate(
     year = year(Date), 
     month = month(Date), 
@@ -74,6 +74,17 @@ dat <- filter(dat, Site_Code %in% c('C3', 'C10', 'P8', 'D4', 'D7', 'D6', 'D19', 
 dat$Location[dat$Site_Code %in%  c('D4', 'D7', 'D6')] <- 'Suisun'
 dat$Location[dat$Site_Code %in% c('D19', 'D26', 'D28')] <- 'Middle'
 
+# unit conversions mg/L or ug/L to umol/L
+dat <- mutate(dat, 
+  nh = nh, 
+  no23 = no23, 
+  din = din,
+  tss = tss, 
+  chl = chl,
+  sio2 = sio2, 
+  tp = tp
+)
+
 delt_dat <- dat
 save(delt_dat, file = 'data/delt_dat.RData')
 save(delt_dat, file = 'M:/docs/manuscripts/sftrends_manu/data/delt_dat.RData', compress = 'xz')
@@ -85,26 +96,26 @@ save(delt_dat, file = 'M:/docs/manuscripts/sftrends_manu/data/delt_dat.RData', c
 # data(delt_dat)
 # data(flow_dat)
 # # check for outliers
-# toplo <- tidyr::spread(flow_dat, station, q) %>% 
-#   select(-east) %>% 
-#   left_join(delt_dat, ., by = 'Date') %>% 
-#   select(-Latitude, -Longitude) %>% 
+# toplo <- tidyr::spread(flow_dat, station, q) %>%
+#   select(-east) %>%
+#   left_join(delt_dat, ., by = 'Date') %>%
+#   select(-Latitude, -Longitude) %>%
 #   mutate(
 #     tmps = 1:nrow(.)
-#   ) %>% 
-#   gather('var', 'val', -Site_Code, -Date, -Location, -tmps) %>% 
-#   na.omit %>% 
+#   ) %>%
+#   gather('var', 'val', -Site_Code, -Date, -Location, -tmps) %>%
+#   na.omit %>%
 #   mutate(
 #     val = log(1 + val)
-#     ) %>% 
+#     ) %>%
 #   spread(var, val)
 # 
 # vars <- c('chl', 'din', 'nh', 'no23', 'sac', 'sal', 'sio2', 'sjr', 'tp', 'tss')
 # pdf('C:/Users/mbeck/Desktop/tmp.pdf', height = 9, width = 13, family = 'serif')
 # for(vr in vars){
-#   
-#   p <- ggplot(toplo, aes_string(x = 'Date', y = vr)) + 
-#     geom_point() + 
+# 
+#   p <- ggplot(toplo, aes_string(x = 'Date', y = vr)) +
+#     geom_point() +
 #     facet_wrap(~Site_Code, ncol = 1) +
 #     theme_bw()
 #   print(p)
@@ -151,8 +162,8 @@ data(flow_dat)
 data(delt_dat)
 
 flomtch <- data.frame(
-  Site_Code = c('C10', 'C3', 'P8', 'D4', 'D6', 'D7', 'D19', 'D26', 'D28'), 
-  flovar = c('sjr', 'sac', 'sjr', 'sal', 'sal', 'sal', 'sac', 'sac', 'sac'), 
+  Site_Code = c('C10', 'C3', 'MD10', 'P8', 'D4', 'D6', 'D7', 'D19', 'D26', 'D28'), 
+  flovar = c('sjr', 'sac', 'sac', 'sjr', 'sal', 'sal', 'sal', 'sac', 'sac', 'sac'), 
   stringsAsFactors = FALSE
 )
 
@@ -305,7 +316,7 @@ foreach(i = 1:nrow(mods)) %dopar% {
 }
 
 # import each file, add to nested mods_nolag dataframe
-fls <- list.files('data', pattern = '^C3|^C10|^P8|^D6|^D4|^D7|^D19|^D26|^D28', full.names = T)
+fls <- list.files('data', pattern = '^C3|^C10|^MD10|^P8|^D6|^D4|^D7|^D19|^D26|^D28', full.names = T)
 dat <- lapply(fls, load, .GlobalEnv)
 names(dat) <- unlist(dat)
 dat <- lapply(dat, get)
