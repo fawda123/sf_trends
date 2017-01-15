@@ -115,7 +115,7 @@ shinyServer(function(input, output) {
 
     # create plot
     fitplot(dat(), annuals = annuals, tau = taus, dt_rng = dt_rng, size = size, alpha = 0.8, min_mo = 11, 
-        logspace = logspace) +
+        logspace = logspace, col_vec = 'darkblue') +
       theme_bw() +
       theme(legend.position = 'none',
         axis.title.x = element_blank()
@@ -145,7 +145,7 @@ shinyServer(function(input, output) {
  
     # create plot
     fitplot(dat(), annuals = annuals, predicted = F, tau = taus, dt_rng = dt_rng, size = size, alpha = 0.8, 
-        min_mo = 11, logspace = logspace) + 
+        min_mo = 11, logspace = logspace, col_vec = 'darkblue') + 
       theme_bw() +
       theme(legend.position = 'none', 
         axis.title.x = element_blank()
