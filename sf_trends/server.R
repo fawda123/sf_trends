@@ -114,8 +114,8 @@ shinyServer(function(input, output) {
     if(input$annuals == 'observed') annuals <- FALSE
 
     # create plot
-    fitplot(dat(), annuals = annuals, tau = taus, dt_rng = dt_rng, size = size, alpha = 0.8, min_mo = 11, 
-        logspace = logspace, col_vec = 'darkblue') +
+    fitplot(dat(), annuals = annuals, tau = taus, dt_rng = dt_rng, size = size, alpha = 0.6, min_mo = 11, 
+        logspace = logspace, col_vec = 'blue') +
       theme_bw() +
       theme(legend.position = 'none',
         axis.title.x = element_blank()
@@ -144,8 +144,8 @@ shinyServer(function(input, output) {
     if(input$annuals == 'observed') annuals <- FALSE
  
     # create plot
-    fitplot(dat(), annuals = annuals, predicted = F, tau = taus, dt_rng = dt_rng, size = size, alpha = 0.8, 
-        min_mo = 11, logspace = logspace, col_vec = 'darkblue') + 
+    fitplot(dat(), annuals = annuals, predicted = F, tau = taus, dt_rng = dt_rng, size = size, alpha = 0.6, 
+        min_mo = 11, logspace = logspace, col_vec = 'blue') + 
       theme_bw() +
       theme(legend.position = 'none', 
         axis.title.x = element_blank()
@@ -154,5 +154,4 @@ shinyServer(function(input, output) {
 
     }, height = 245, width = 1200)
 
-  
 })
