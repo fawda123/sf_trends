@@ -562,7 +562,7 @@ save(trnds_nrm, trnds_fit, trnds_obs, file = 'M:/docs/manuscripts/sftrends_manu/
 
 ######
 # create mean models for third hypothesis in paper
-# wrtds mean models for chl, din, sio2 at c10 and d7
+# wrtds mean models for chl, din, sio2 at d7
 
 rm(list = ls())
 
@@ -570,14 +570,14 @@ data(delt_dat)
 data(flow_dat)
 
 # get C10, D7 only from delt_dat
-dat <- dplyr::filter(delt_dat, Site_Code %in% c('C10', 'D7'))
+dat <- dplyr::filter(delt_dat, Site_Code %in% 'D7')
   
 # add flow from sjr for c10, then prep for combining
 dat <- tidyr::spread(flow_dat, station, q) %>% 
   select(-east, -sac) %>% 
   left_join(dat, ., by = 'Date') %>% 
   select(-Latitude, -Longitude) %>% 
-  tidyr::gather('resvar', 'resval', chl:din) %>% 
+  tidyr::gather('resvar', 'resval', nh:tp) %>% 
   tidyr::gather('flovar', 'floval', sal:sjr) %>% 
   mutate(
     flovar = factor(flovar, levels = c('sal', 'sjr'), labels = c('Salinity', 'San Joaquin')), 
@@ -616,7 +616,6 @@ dat$resval <- with(dat, pmax(lim, resval))
 
 # remove salinity records from c10, flow records from d7
 dat <- filter(dat, 
-  Site_Code %in% 'C10' & flovar %in% 'San Joaquin' |
   Site_Code %in% 'D7' & flovar %in% 'Salinity'
 )
 
@@ -627,12 +626,9 @@ dat <- filter(dat,
 cl <- makeCluster(7)
 registerDoParallel(cl)
 
-dat <- group_by(dat, Site_Code, resvar, flovar) %>% 
-  nest 
-
 # resvar label lookup
 lablk <- list(
-  shrt = c('chl', 'sio2', 'din'),
+  shrt = c('chl', 'din', 'sio2'),
   lngs = c(
     expression(paste('ln-chlorophyll a (ug ', L^-1, ')')),
     expression(paste('ln-dissolved inorganic nitrogen (mg ', L^-1, ')')),
@@ -647,6 +643,10 @@ stalk <- list(
     expression(paste('ln-flow (', m^3, s^-1, ')')),
     'ln-salinity (psu)')
   )
+
+dat <- group_by(dat, Site_Code, resvar, flovar) %>% 
+  nest %>% 
+  filter(resvar %in% lablk$shrt)
 
 strt <- Sys.time()
 
@@ -728,7 +728,7 @@ mods_out <- foreach(i = 1:nrow(dat)) %dopar% {
 }
 
 # import each file, add to nested dat dataframe
-fls <- list.files('data', pattern = '^D7|^C10', full.names = T)
+fls <- list.files('data', pattern = '^D7', full.names = T)
 moddat <- lapply(fls, load, .GlobalEnv)
 names(moddat) <- unlist(moddat)
 moddat <- lapply(moddat, get)
