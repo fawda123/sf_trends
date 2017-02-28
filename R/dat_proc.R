@@ -516,20 +516,6 @@ save(trnds_nrm, trnds_fit, trnds_obs, file = 'M:/docs/manuscripts/sftrends_manu/
 # save(stock_conc, file = 'M:/docs/manuscripts/sftrends_manu/data/stock_conc.RData', compress = 'xz')
 # 
 # ######
-# # create quantile models for first hypothesis in paper
-# 
-# rm(list = ls())
-# 
-# data(mods)
-# 
-# # filter c10
-# h1dat <- filter(mods, Site_Code %in% 'C10')
-# 
-# # save output
-# save(h1dat, file = 'data/h1dat.RData', compress = 'xz')
-# save(h1dat, file = 'M:/docs/manuscripts/sftrends_manu/data/h1dat.RData', compress = 'xz')
-# 
-# ######
 # # create mean models for second hypothesis in paper
 # # wrtds mean models for chl, din, nh, no23, and sio2 at P8
 # 
